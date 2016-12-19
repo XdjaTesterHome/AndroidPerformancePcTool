@@ -5,7 +5,7 @@ import java.util.List;
 import org.apache.log4j.Logger;
 
 import com.android.ddmlib.IDevice;
-import com.xdja.android.AdbHelper;
+import com.xdja.adb.AdbHelper;
 import com.xdja.constant.Constants;
 
 public class LaunchController implements InterfaceController{
