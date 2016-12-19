@@ -1,4 +1,4 @@
-package com.xdja.android;
+package com.xdja.adb;
 
 import com.android.ddmlib.IDevice;
 

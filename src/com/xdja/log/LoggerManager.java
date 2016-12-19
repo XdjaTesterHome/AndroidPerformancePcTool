@@ -26,5 +26,31 @@ public class LoggerManager {
 		logger.debug("debug test");
 		logger.error("error test");
 	}
-
+	
+	public static void logInfo(String logTag, String func, String info) {
+		Logger logger = Logger.getLogger(LoggerManager.class);
+		if(!LoggerManager.isInited()) {
+			LoggerManager.initLogger();
+		}
+		
+		logger.info(logTag + "==" + func + "=="+ info);
+	}
+	
+	public static void logError(String logTag, String func, String error) {
+		Logger logger = Logger.getLogger(LoggerManager.class);
+		if(!LoggerManager.isInited()) {
+			LoggerManager.initLogger();
+		}
+		
+		logger.error(logTag + "==" + func + "=="+ error);
+	}
+	
+	public static void logDebug(String logTag, String func, String debug) {
+		Logger logger = Logger.getLogger(LoggerManager.class);
+		if(!LoggerManager.isInited()) {
+			LoggerManager.initLogger();
+		}
+		
+		logger.debug(logTag + "==" + func + "=="+ debug);
+	}
 }

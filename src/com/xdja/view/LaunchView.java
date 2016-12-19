@@ -1,8 +1,6 @@
 package com.xdja.view;
 
-import java.awt.BorderLayout;
 import java.awt.Checkbox;
-import java.awt.Dimension;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -19,10 +17,8 @@ import java.util.List;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
-import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
@@ -31,11 +27,10 @@ import javax.swing.event.DocumentListener;
 
 import org.apache.log4j.Logger;
 import com.android.ddmlib.IDevice;
-import com.sun.org.apache.bcel.internal.generic.NEW;
-import com.xdja.android.AdbHelper;
-import com.xdja.android.AndroidDevice;
-import com.xdja.android.DeviceManager;
-import com.xdja.android.DeviceManager.DeviceStateListener;
+import com.xdja.adb.AdbHelper;
+import com.xdja.adb.AndroidDevice;
+import com.xdja.adb.DeviceManager;
+import com.xdja.adb.DeviceManager.DeviceStateListener;
 import com.xdja.constant.Constants;
 import com.xdja.log.LoggerManager;
 import com.xdja.monitor.ControllerMonitor;
@@ -69,7 +64,7 @@ public class LaunchView extends JFrame{
 	private JComboBox<String> comboDevices, comboProcess;
 	private Checkbox boxUSBPowered;
 	private JTabbedPane jTabbedPane = new JTabbedPane();
-	private String[] tabNames = {"内存", "cpu", "电量", "kpitest", "帧率", "流量"};
+	private String[] tabNames = {"内存", "cpu", "电量", "加载时间", "帧率", "流量"};
 	
 	//保存一份当前连接到pc的设备列表
 	private List<AndroidDevice> devices = new ArrayList<AndroidDevice>(12);
@@ -117,7 +112,7 @@ public class LaunchView extends JFrame{
 	 * tabNames = {"内存", "cpu", "电量", "kpitest", "帧率", "流量"};
 	 */
 	private void layoutTabComponents(){
-		Rectangle rect = new Rectangle(100, 100, 400, 200);
+		Rectangle rect = new Rectangle(100, 100, 800, 200);
 		// 1.内存
 	    //memory chart view
 	    viewMemory = new MemoryView(Constants.MEMORY, Constants.MEMORY, Constants.MEMORY_UNIT);
@@ -298,77 +293,80 @@ public class LaunchView extends JFrame{
 	}
 	
 	private void addPackageListener() {
-		
-		comboPackageList.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				if (!isAdjusting(comboPackageList) && comboPackageList.getSelectedItem() != null) {
-					textPackage.setText(comboPackageList.getSelectedItem().toString());
-				}
-			}
-		});
-		
-		textPackage.addFocusListener(new FocusListener() {
-			@Override
-			public void focusGained(FocusEvent e) {
-				IDevice dev = AdbHelper.getInstance().getDevice((String) comboDevices.getSelectedItem());
-				ControllerMonitor.getInstance().setDevice(dev);
-				List<String> ret = ControllerMonitor.getInstance().getPackageController().getInfo();
-				Iterator<String> iterator = ret.iterator();
-				while(iterator.hasNext()) {
-					logger.info(iterator.next());
-				}
-				packageList = ret;
-				//refresh package list
-				updateList(packageList);
-			}
-
-			@Override
-			public void focusLost(FocusEvent e) {
-				if (comboPackageList.isPopupVisible()) {
-					comboPackageList.setPopupVisible(false);
-				}
-			}
-		});
-		
-		textPackage.getDocument().addDocumentListener(new DocumentListener() {
-			public void insertUpdate(DocumentEvent e) {
-				updateList(packageList);
-			}
-
-			public void removeUpdate(DocumentEvent e) {
-				updateList(packageList);
-			}
-
-			public void changedUpdate(DocumentEvent e) {
-				updateList(packageList);
-			}
-			
-		});
-		
-		textPackage.addKeyListener(new KeyAdapter() {
-			@Override
-			public void keyPressed(KeyEvent event) {
-				setAdjusting(comboPackageList, true);
-				if (event.getKeyCode() == KeyEvent.VK_SPACE && comboPackageList.isPopupVisible()) {
-					event.setKeyCode(KeyEvent.VK_ENTER);
-				}
-				if (event.getKeyCode() == KeyEvent.VK_ENTER
-						|| event.getKeyCode() == KeyEvent.VK_UP
-						|| event.getKeyCode() == KeyEvent.VK_DOWN) {
-					event.setSource(comboPackageList);
-					comboPackageList.dispatchEvent(event);
-					if (event.getKeyCode() == KeyEvent.VK_ENTER) {
+		if (comboPackageList != null) {
+			comboPackageList.addActionListener(new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					if (!isAdjusting(comboPackageList) && comboPackageList.getSelectedItem() != null) {
 						textPackage.setText(comboPackageList.getSelectedItem().toString());
+					}
+				}
+			});
+		}
+		if (textPackage != null) {
+			textPackage.addFocusListener(new FocusListener() {
+				@Override
+				public void focusGained(FocusEvent e) {
+					IDevice dev = AdbHelper.getInstance().getDevice((String) comboDevices.getSelectedItem());
+					ControllerMonitor.getInstance().setDevice(dev);
+					List<String> ret = ControllerMonitor.getInstance().getPackageController().getInfo();
+					Iterator<String> iterator = ret.iterator();
+					while(iterator.hasNext()) {
+						logger.info(iterator.next());
+					}
+					packageList = ret;
+					//refresh package list
+					updateList(packageList);
+				}
+
+				@Override
+				public void focusLost(FocusEvent e) {
+					if (comboPackageList.isPopupVisible()) {
 						comboPackageList.setPopupVisible(false);
 					}
 				}
-				if (event.getKeyCode() == KeyEvent.VK_ESCAPE) {
-					comboPackageList.setPopupVisible(false);
+			});
+			
+			textPackage.getDocument().addDocumentListener(new DocumentListener() {
+				public void insertUpdate(DocumentEvent e) {
+					updateList(packageList);
 				}
-				setAdjusting(comboPackageList, false);
-			}
-		});
+
+				public void removeUpdate(DocumentEvent e) {
+					updateList(packageList);
+				}
+
+				public void changedUpdate(DocumentEvent e) {
+					updateList(packageList);
+				}
+				
+			});
+			
+			textPackage.addKeyListener(new KeyAdapter() {
+				@Override
+				public void keyPressed(KeyEvent event) {
+					setAdjusting(comboPackageList, true);
+					if (event.getKeyCode() == KeyEvent.VK_SPACE && comboPackageList.isPopupVisible()) {
+						event.setKeyCode(KeyEvent.VK_ENTER);
+					}
+					if (event.getKeyCode() == KeyEvent.VK_ENTER
+							|| event.getKeyCode() == KeyEvent.VK_UP
+							|| event.getKeyCode() == KeyEvent.VK_DOWN) {
+						event.setSource(comboPackageList);
+						comboPackageList.dispatchEvent(event);
+						if (event.getKeyCode() == KeyEvent.VK_ENTER) {
+							textPackage.setText(comboPackageList.getSelectedItem().toString());
+							comboPackageList.setPopupVisible(false);
+						}
+					}
+					if (event.getKeyCode() == KeyEvent.VK_ESCAPE) {
+						comboPackageList.setPopupVisible(false);
+					}
+					setAdjusting(comboPackageList, false);
+				}
+			});
+		}
+		
 	}
 	
 	private void addMonkeyListener() {
