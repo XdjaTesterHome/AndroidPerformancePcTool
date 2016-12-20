@@ -3,6 +3,7 @@ package com.xdja.collectdata;
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.List;
 
@@ -12,14 +13,14 @@ import java.util.List;
  * @author zlw
  *
  */
-public class AdbUtil {
+public class CollectDataUtil {
 
 	public static final String COMMAND_SU = "su";
 	public static final String COMMAND_SH = "sh";
 	public static final String COMMAND_EXIT = "exit\n";
 	public static final String COMMAND_LINE_END = "\n";
 
-	private AdbUtil() {
+	private CollectDataUtil() {
 		throw new AssertionError();
 	}
 
@@ -161,14 +162,15 @@ public class AdbUtil {
 				successMsg = new StringBuilder();
 				errorMsg = new StringBuilder();
 				successResult = new BufferedReader(new InputStreamReader(process.getInputStream()));
-				errorResult = new BufferedReader(new InputStreamReader(process.getErrorStream()));
+				// errorResult = new BufferedReader(new
+				// InputStreamReader(process.getErrorStream()));
 				String s;
 				while ((s = successResult.readLine()) != null) {
-					successMsg.append(s).append("#");
+					successMsg.append(s).append("\n");
 				}
-				while ((s = errorResult.readLine()) != null) {
-					errorMsg.append(s).append("#");
-				}
+				// while ((s = errorResult.readLine()) != null) {
+				// errorMsg.append(s).append("\n");
+				// }
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -230,7 +232,6 @@ public class AdbUtil {
 		DataOutputStream os = null;
 		try {
 			process = Runtime.getRuntime().exec("cmd /c " + cmd);
-			result = process.waitFor();
 			// get command result
 			if (isNeedResultMsg) {
 				successMsg = new StringBuilder();
@@ -241,10 +242,13 @@ public class AdbUtil {
 				while ((s = successResult.readLine()) != null) {
 					successMsg.append(s).append("\n");
 				}
-				while ((s = errorResult.readLine()) != null) {
-					errorMsg.append(s).append("\n");
-				}
+				// 读取错误流可能会阻塞流程waitFor（）
+				// while ((s = errorResult.readLine()) != null) {
+				// errorMsg.append(s).append("\n");
+				// }
 			}
+
+			result = process.waitFor();
 		} catch (IOException e) {
 			e.printStackTrace();
 		} catch (Exception e) {
@@ -268,7 +272,76 @@ public class AdbUtil {
 				process.destroy();
 			}
 		}
+
 		return new CommandResult(result, successMsg == null ? null : successMsg.toString(),
 				errorMsg == null ? null : errorMsg.toString());
 	}
+
+	/**
+	 * 能够实时的获取cmd的输出信息
+	 * 
+	 * @param cmd
+	 * @param getDataListener
+	 *            获取数据的getDataListener
+	 */
+	public static void execCmdCommand(String cmd, GetDataInterface getDataListener) {
+
+		BufferedReader br = null;
+		try {
+
+			Process proc = Runtime.getRuntime().exec(cmd);
+
+			InputStream in = proc.getInputStream();
+
+			br = new BufferedReader(new InputStreamReader(in, "GBK"));
+			String line = null;
+
+			while ((line = br.readLine()) != null) {
+				if (getDataListener != null) {
+					getDataListener.getString(line);
+				}
+			}
+
+		} catch (IOException e) {
+			e.printStackTrace();
+		} finally {
+			if (br != null) {
+				try {
+					br.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+	}
+
+	/**
+	 * 能够实时的获取cmd的输出信息
+	 * 
+	 * @param cmd
+	 * @param getDataListener
+	 *            获取数据的getDataListener
+	 */
+	public static void execCmdCommand(String cmd) {
+
+		try {
+
+			Process proc = Runtime.getRuntime().exec(cmd);
+		} catch (IOException e) {
+			e.printStackTrace();
+		} finally {
+		}
+	}
+}
+
+/**
+ * 获取数据的监听
+ * 
+ * @author zlw
+ *
+ */
+interface GetDataInterface {
+	public void getString(String content);
+
+	public void getErrorString(String error);
 }
