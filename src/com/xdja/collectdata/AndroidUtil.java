@@ -1,5 +1,8 @@
 package com.xdja.collectdata;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import com.xdja.constant.Constants;
@@ -51,14 +54,63 @@ public class AndroidUtil {
 	 * @param packageName
 	 * @return
 	 */
-	public static FpsData getFpsData(String packageName) {
-		
-	}
+//	public static FpsData getFpsData(String packageName) {
+//		
+//	}
+//	
+//	public static KpiData getKpiData(String packageName){
+//		
+//	}
 	
-	public static KpiData getKpiData(String packageName){
+	/**
+	 * 根据deviceNo获取当前正在运行的进程
+	 * @param deviceNo
+	 * @return
+	 */
+	public static List<String> getRunningProcess(String deviceNo){
+		String systemcmd = "adb -s " + deviceNo + " shell ps | findStr \"^system\"";
+		String u0cmd = "adb -s " + deviceNo + " shell ps | findStr \"^u0\"";
+		CommandResult runningCmdResult = AdbUtil.execCmdCommand(systemcmd, false, true);
+		List<String> runningProcess = new ArrayList<>(20);
+		if (runningCmdResult == null || !"".equals(runningCmdResult.errorMsg)) {
+			LoggerManager.logError(LOGTAG, "getRunningProcess", runningCmdResult.errorMsg);
+			return runningProcess;
+		}
 		
+		if (!"".equals(runningCmdResult.successMsg)) {
+			String[] processes = runningCmdResult.successMsg.split("\n");
+			String[] processArray = null;
+			for (int i = 0; i < processes.length; i++) {
+				String process = CommonUtil.formatBlanksToBlank(processes[i]);
+				processArray = process.split(" ");
+				process = processArray[processArray.length - 1];
+				if (!"".equals(process) && !process.startsWith("/")) {
+					runningProcess.add(process);
+				}
+			}
+		}
+		
+		CommandResult runningU0Result = AdbUtil.execCmdCommand(u0cmd, false, true);
+		if (runningU0Result == null || !"".equals(runningU0Result.errorMsg)) {
+			LoggerManager.logError(LOGTAG, "getRunningProcess", runningU0Result.errorMsg);
+			return runningProcess;
+		}
+		
+		if (!"".equals(runningU0Result.successMsg)) {
+			String[] processes = runningU0Result.successMsg.split("\n");
+			String[] processArray = null;
+			for (int i = 0; i < processes.length; i++) {
+				String process = CommonUtil.formatBlanksToBlank(processes[i]);
+				processArray = process.split(" ");
+				process = processArray[processArray.length - 1];
+				if (!"".equals(process) && !process.startsWith("/")) {
+					runningProcess.add(process);
+				}
+			}
+		}
+		
+		return runningProcess;
 	}
-	
 	
 	/**
 	 * 获取当前包名消耗了多少流量
@@ -272,7 +324,8 @@ public class AndroidUtil {
 	}
 	
 	public static void main(String[] args) {
-		FlowData flowData = AndroidUtil.getFlowData("com.xdja.HDSafeEMailClient");
-		System.out.println(flowData);
+		List myList = AndroidUtil.getRunningProcess("ab6e5736");
+		System.out.println(myList);
+		System.out.println(myList.size());
 	}
 }
