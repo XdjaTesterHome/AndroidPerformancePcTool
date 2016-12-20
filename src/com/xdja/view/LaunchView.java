@@ -33,7 +33,7 @@ import com.android.ddmlib.IDevice;
 import com.xdja.adb.AdbHelper;
 import com.xdja.adb.AndroidDevice;
 import com.xdja.adb.DeviceManager;
-import com.xdja.collectdata.AndroidUtil;
+import com.xdja.collectdata.CollectDataImpl;
 import com.xdja.adb.DeviceManager.DeviceStateListener;
 import com.xdja.constant.Constants;
 import com.xdja.log.LoggerManager;
@@ -108,8 +108,8 @@ public class LaunchView extends JFrame{
 //			  comboProcess.removeAllItems();
 			  Object selected = getdevice();
 			  if (selected!=null){
-				    String devicesid = AndroidUtil.devicesdo(selected);
-					List<String> respack = AndroidUtil.getRunningProcess(devicesid);
+				    String devicesid = CollectDataImpl.devicesdo(selected);
+					List<String> respack = CollectDataImpl.getRunningProcess(devicesid);
 					for (String sn : respack) {
 						comboProcess.addItem(sn);
 					}
@@ -224,8 +224,8 @@ public class LaunchView extends JFrame{
 		System.out.println(getdevice());
 		if (getdevice()!=null){
 			Object selected = getdevice();
-			String devicesid = AndroidUtil.devicesdo(selected);
-			List<String> respack = AndroidUtil.getRunningProcess(devicesid);
+			String devicesid = CollectDataImpl.devicesdo(selected);
+			List<String> respack = CollectDataImpl.getRunningProcess(devicesid);
 			for (String sn : respack) {
 				comboProcess.addItem(sn);
 			}
