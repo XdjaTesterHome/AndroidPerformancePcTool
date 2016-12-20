@@ -265,11 +265,13 @@ public class AdbHelper {
 			logger.error("AndroidDebugBridge is null!");
 		}
 		AndroidDevice device;
+//		System.out.println(devices);//ต๗สิ
 		for (int i = 0; i < devices.length; i++) {
 			device = new AndroidDevice(devices[i]);
 			snList.add(DeviceManager.getInstance().getDeviceName(device));
 		}
 		logger.info("Device List :" + snList.toString());
+//		System.out.println(snList);//ต๗สิ
 
 		return snList;
 	}

@@ -50,6 +50,7 @@ public class LaunchView extends JFrame{
 	private JButton btnLaunchCost;
 	private JButton btnFps;
 	private JButton btnStartTest;
+	private JButton jb1, jb2;
 	private MemoryView viewMemory;
 	private FlowView viewFlow;
 	private CPUView viewCpu;
@@ -94,8 +95,8 @@ public class LaunchView extends JFrame{
 		// combo box to select device sn
 		comboDevices = new JComboBox<String>();
 		frame.add(comboDevices);
-		Rectangle rect = new Rectangle(0, 0, 300, 30);
-		comboDevices.setBounds(rect);
+		Rectangle rect = new Rectangle(0, 0, 300, 30);//设定绝对位置
+		comboDevices.setBounds(rect);//添加位置
 		
 		// 用于展示设备的进程
 		comboProcess = new JComboBox<String>();
@@ -103,8 +104,39 @@ public class LaunchView extends JFrame{
 		Rectangle rectProcess = new Rectangle(320, 0, 420, 30);
 		comboProcess.setBounds(rectProcess);
 		
-		layoutTabComponents();
+		jb1 = new JButton("开始监控");
+		Rectangle rectjb1 = new Rectangle(860, 0, 100, 30);
+		frame.add(jb1);
+		jb1.setBounds(rectjb1);
 		
+		jb1.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				JOptionPane.showMessageDialog(null,"start run performance!");
+				jb2.setEnabled(true);
+				jb1.setEnabled(false);
+				
+			}
+				
+		});
+		
+		jb2 = new JButton("停止监控");
+		Rectangle rectjb2 = new Rectangle(980, 0, 100, 30);
+		frame.add(jb2);
+		jb2.setBounds(rectjb2);
+		jb2.setEnabled(false);
+		
+		jb2.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				JOptionPane.showMessageDialog(null,"stop run performance!");
+				jb1.setEnabled(true);
+				jb2.setEnabled(false);
+				System.out.println("Hello World");//用于在控制台调试代码
+			}
+		});
+		
+		layoutTabComponents();
 	}
 	
 	/**
@@ -163,6 +195,8 @@ public class LaunchView extends JFrame{
 		
 		//initial android debug bridge
 		List<String> snList = AdbHelper.getInstance().getDevices();
+		System.out.println("选择设备的地方");//
+//		System.out.println(snList);//
 
 		for (String sn : snList) {
 			comboDevices.addItem(sn);
@@ -183,6 +217,7 @@ public class LaunchView extends JFrame{
 		addMonkeyListener();
 		addLaunchListener();
 		addFpsListener();
+//		addstartrunlistener();
 	}
 	
 	/**
@@ -196,6 +231,7 @@ public class LaunchView extends JFrame{
 				// TODO Auto-generated method stub
 				devices = DeviceManager.getInstance().getAndroidDevice();
 				String comboDevicesName = DeviceManager.getInstance().getDeviceName(idevice);
+				System.out.println("点击选择设备");//
 				
 				if (devices.size() > 0 && !devices.contains(idevice)) {
 					devices.add(idevice);
@@ -271,6 +307,7 @@ public class LaunchView extends JFrame{
 
 	private void setAdjusting(JComboBox<String> cbInput, boolean adjusting) {
 		cbInput.putClientProperty(Constants.ADJUSTING, adjusting);
+		
 	}
 	
 	private void updateList(List<String> list) {
@@ -378,6 +415,18 @@ public class LaunchView extends JFrame{
 			}
 		});
 	}
+		
+//	private void addstartrunlistener() {
+//		jb1.addActionListener(new ActionListener() {
+//			@Override
+//			public void actionPerformed(ActionEvent e) {
+//				JOptionPane.showMessageDialog(null,"Wath a fucking day!");
+//				
+//				
+//			}
+//		});
+//		
+//	}
 	
 	private void addLaunchListener() {
 		IDevice dev = AdbHelper.getInstance().getDevice((String) comboDevices.getSelectedItem());
