@@ -8,7 +8,8 @@ import java.util.regex.Pattern;
 import com.xdja.constant.Constants;
 import com.xdja.log.LoggerManager;
 import com.xdja.util.CommonUtil;
-
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 /**
  *  获取和Android相关的一些信息
  * @author zlw
@@ -16,6 +17,7 @@ import com.xdja.util.CommonUtil;
  */
 public class AndroidUtil {
 	private final static String LOGTAG = AndroidUtil.class.getSimpleName();
+	private static final String String = null;
 	private static CommandResult commandMemoryResult,  commandFpsResult, commandFlowResult, commandKpiResult, commandCpuResult= null;
 	private static CommandResult commandPidResult, commandUidResult;
 	private static FlowData flowData = null;
@@ -61,6 +63,26 @@ public class AndroidUtil {
 //	public static KpiData getKpiData(String packageName){
 //		
 //	}
+	
+	/**
+	 * 设备ID编号处理，处理为进程保活方法所需参数，可以使用的设备号
+	 * @param devicedo
+	 * @return lzz
+	 */
+	public static String devicesdo(Object selected){
+		String str = (String) selected;
+		String pattern = "_(.*)_(.*)";
+		Pattern r = Pattern.compile(pattern);
+		Matcher m = r.matcher(str);
+		if (m.find( )) {
+			selected = m.group(2);
+		}
+		 else {
+	         System.out.println("NO MATCH");
+	      }
+		return (String) selected;
+	}
+	
 	
 	/**
 	 * 根据deviceNo获取当前正在运行的进程

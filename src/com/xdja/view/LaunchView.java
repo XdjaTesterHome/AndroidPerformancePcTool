@@ -6,6 +6,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
+import java.awt.event.ItemEvent;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
@@ -32,6 +33,7 @@ import com.android.ddmlib.IDevice;
 import com.xdja.adb.AdbHelper;
 import com.xdja.adb.AndroidDevice;
 import com.xdja.adb.DeviceManager;
+import com.xdja.collectdata.AndroidUtil;
 import com.xdja.adb.DeviceManager.DeviceStateListener;
 import com.xdja.constant.Constants;
 import com.xdja.log.LoggerManager;
@@ -64,7 +66,8 @@ public class LaunchView extends JFrame{
 	private JComboBox<String> comboPackageList;
 	private List<String> packageList = new ArrayList<String>();
 	private DefaultComboBoxModel<String> model;
-	private JComboBox<String> comboDevices, comboProcess;
+	private static JComboBox<String> comboDevices;
+	private JComboBox<String> comboProcess;
 	private Checkbox boxUSBPowered;
 	private JTabbedPane jTabbedPane = new JTabbedPane();
 	private String[] tabNames = {"内存", "cpu", "电量", "加载时间", "帧率", "流量"};
@@ -100,6 +103,20 @@ public class LaunchView extends JFrame{
 		Rectangle rect = new Rectangle(0, 0, 300, 30);//设定绝对位置
 		comboDevices.setBounds(rect);//添加位置
 		
+		comboDevices.addActionListener(new ActionListener(){
+		  public void actionPerformed(ActionEvent e) {
+//			  comboProcess.removeAllItems();
+			  Object selected = getdevice();
+			  if (selected!=null){
+				    String devicesid = AndroidUtil.devicesdo(selected);
+					List<String> respack = AndroidUtil.getRunningProcess(devicesid);
+					for (String sn : respack) {
+						comboProcess.addItem(sn);
+					}
+				}
+			}
+			});
+		
 		// 用于展示设备的进程
 		comboProcess = new JComboBox<String>();
 		frame.add(comboProcess);
@@ -117,6 +134,7 @@ public class LaunchView extends JFrame{
 				JOptionPane.showMessageDialog(null,"start run performance!");
 				jb2.setEnabled(true);
 				jb1.setEnabled(false);
+				comboDevices.setEnabled (false);
 				
 			}
 				
@@ -134,7 +152,7 @@ public class LaunchView extends JFrame{
 				JOptionPane.showMessageDialog(null,"stop run performance!");
 				jb1.setEnabled(true);
 				jb2.setEnabled(false);
-				System.out.println("Hello World");//用于在控制台调试代码
+				comboDevices.setEnabled (true);
 			}
 		});
 		
@@ -203,6 +221,18 @@ public class LaunchView extends JFrame{
 		for (String sn : snList) {
 			comboDevices.addItem(sn);
 		}
+		System.out.println(getdevice());
+		if (getdevice()!=null){
+			Object selected = getdevice();
+			String devicesid = AndroidUtil.devicesdo(selected);
+			List<String> respack = AndroidUtil.getRunningProcess(devicesid);
+			for (String sn : respack) {
+				comboProcess.addItem(sn);
+			}
+		}
+		
+		
+		
 		
 		//主窗口添加关闭监听器
 		addWindowListener(new WindowAdapter() {
@@ -222,6 +252,8 @@ public class LaunchView extends JFrame{
 //		addstartrunlistener();
 	}
 	
+	
+
 	/**
 	 * 添加设备变化的监听
 	 */
@@ -430,6 +462,13 @@ public class LaunchView extends JFrame{
 //		
 //	}
 	
+	public static  String getdevice()
+    {
+        String devicename = (String) comboDevices.getSelectedItem();
+		return devicename;
+         
+    }
+	
 	private void addLaunchListener() {
 		IDevice dev = AdbHelper.getInstance().getDevice((String) comboDevices.getSelectedItem());
 		ControllerMonitor.getInstance().setDevice(dev);
@@ -479,5 +518,6 @@ public class LaunchView extends JFrame{
 		launch.createParts();
 		launch.addActionListener();
 		launch.setVisible(true);
+		
 	}
 }
