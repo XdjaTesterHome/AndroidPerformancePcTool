@@ -276,9 +276,10 @@ public class CollectDataImpl {
 	public static float getCpuUsage(String packageName) {
 		int startProcTotal = getCpuTotal();
 		int startProcPid = getProcData(packageName);
-
+		
+		//每隔1s取一次数据。
 		try {
-			Thread.sleep(Constants.collectInterval * 1000);
+			Thread.sleep(1000);
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

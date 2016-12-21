@@ -46,6 +46,7 @@ public class Constants {
 	public static final String ADJUSTING = "is_adjusting";
 	
 	public static final String MEMORY = "Memory";
+	public static final String MEMORYContent = "内存值变化";
 	public static final String MEMORY_UNIT = "kb";
 	
 	public static final String FLOW = "Flow";
@@ -63,13 +64,4 @@ public class Constants {
 	
 	public static final String FPS = "FPS";
 	public static final String FPS_UNIT = "fps";
-	
-	// 采集数据的次数
-	public static final int collectDataCount = 20;
-	
-	// 采集数据的时长
-	public static final int collectDataTime  = 20;
-	
-	// 采集数据的时间间隔
-	public static final int collectInterval  = collectDataCount / collectDataTime;
 }

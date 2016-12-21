@@ -135,7 +135,7 @@ public class LaunchView extends JFrame{
 				jb2.setEnabled(true);
 				jb1.setEnabled(false);
 				comboDevices.setEnabled (false);
-				
+				startTest();
 			}
 				
 		});
@@ -153,6 +153,7 @@ public class LaunchView extends JFrame{
 				jb1.setEnabled(true);
 				jb2.setEnabled(false);
 				comboDevices.setEnabled (true);
+				stopTest();
 			}
 		});
 		
@@ -167,7 +168,7 @@ public class LaunchView extends JFrame{
 		Rectangle rect = new Rectangle(100, 100, 800, 200);
 		// 1.内存
 	    //memory chart view
-	    viewMemory = new MemoryView(Constants.MEMORY, Constants.MEMORY, Constants.MEMORY_UNIT);
+	    viewMemory = new MemoryView(Constants.MEMORY, Constants.MEMORYContent, Constants.MEMORY_UNIT);
 	    viewMemory.setBounds(rect);
 	    jTabbedPane.addTab(tabNames[0], viewMemory);
 	    
@@ -513,6 +514,25 @@ public class LaunchView extends JFrame{
 		});
 	}
 
+	/**
+	 *  开始测试
+	 */
+	private void startTest(){
+		if(viewMemory != null){
+			viewMemory.refreshData();
+		}
+	}
+	
+	/**
+	 *  结束测试
+	 */
+	private void stopTest(){
+		if (viewMemory != null) {
+			viewMemory.stopRefresh();
+		}
+	}
+	
+	
 	public static void main(String[] args) {
 		LaunchView launch = new LaunchView(Constants.PRODUCT_NAME);
 		launch.createParts();
