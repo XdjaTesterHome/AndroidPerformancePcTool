@@ -15,6 +15,6 @@ public class GlobalConfig {
 	// 采集数据的时间间隔
 	public static final int collectInterval  = collectDataCount / collectDataTime;
 
-	public static final String PACKAGENAME = "com.xdja.HDSafeEMailClient";
+	public static String PackageName = "";
 	
 }

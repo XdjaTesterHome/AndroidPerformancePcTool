@@ -65,18 +65,16 @@ public class CollectDataImpl {
 	};
 
 	/**
-	 *  用于获取kpi数据
+	 *  用于获取kpi数据,仅仅用于启动收集kpi数据
 	 * @param packageName
 	 * @return
 	 */
-	public static KpiData getKpiData(String packageName){
+	public static void startCollectKpiData(String packageName){
 		kpiList.clear();
 		String cmd = "adb logcat -v time -s ActivityManager | findStr " + packageName;
 		String clearcmd = "adb logcat -c";
 		CollectDataUtil.execCmdCommand(clearcmd);
 		CollectDataUtil.execCmdCommand(cmd, mGetDataListener);
-		
-		return null;
 	}
 	
 	/***
@@ -187,12 +185,12 @@ public class CollectDataImpl {
 			flowData = new FlowData(0, 0, 0);
 			return flowData;
 		}
-		String cmd = "cat /proc/net/xt_qtaguid/stats";
+		String cmd = "adb shell cat /proc/net/xt_qtaguid/stats";
 		commandFlowResult = CollectDataUtil.execCmdCommand(cmd, false, true);
 		int flowSend = 0, flowRecv = 0;
 		if (commandFlowResult == null || commandFlowResult.errorMsg != null && !"".equals(commandFlowResult.errorMsg)) {
-			String cmdSnd = "cat /proc/uid_stat/" + uid + "/tcp_snd";
-			String cmdRec = "cat /proc/uid_stat/" + uid + "+/tcp_rcv";
+			String cmdSnd = "adb shell cat /proc/uid_stat/" + uid + "/tcp_snd";
+			String cmdRec = "adb shell cat /proc/uid_stat/" + uid + "+/tcp_rcv";
 			commandFlowResult = CollectDataUtil.execCmdCommand(cmdSnd, false, true);
 
 			if (commandFlowResult != null && !commandFlowResult.errorMsg.contains("No such file or directory")) {
@@ -210,15 +208,18 @@ public class CollectDataImpl {
 			return flowData;
 		}
 
-		if (commandFlowResult.successMsg != null && "".equals(commandFlowResult.successMsg)) {
-			String cmdproc = "cat /proc/net/xt_qtaguid/stats | grep " + uid;
+		if (commandFlowResult.successMsg != null && !"".equals(commandFlowResult.successMsg)) {
+			String cmdproc = "adb shell cat /proc/net/xt_qtaguid/stats | grep " + uid;
 			commandFlowResult = CollectDataUtil.execCmdCommand(cmdproc, false, true);
 			String netStats = commandFlowResult.successMsg;
 			int totalRecv = 0;
 			int totalSend = 0;
 			for (String line : netStats.split("\n")) {
-				int recv_bytes = Integer.parseInt(line.split("")[5]);
-				int send_bytes = Integer.parseInt(line.split("")[7]);
+				if (line == null || "".equals(line)) {
+					continue;
+				}
+				int recv_bytes = Integer.parseInt(line.split(" ")[5]);
+				int send_bytes = Integer.parseInt(line.split(" ")[7]);
 				totalRecv += recv_bytes;
 				totalSend += send_bytes;
 			}
@@ -526,11 +527,14 @@ public class CollectDataImpl {
 	
 	
 	public static void main(String[] args) {
-		CollectDataImpl.getKpiData("com.xdja.HDSafeEMailClient");
+		FlowData flowData = CollectDataImpl.getFlowData("com.xdja.HDSafeEMailClient");
 		for(int i = 0; i< 20; i++){
-			List<KpiData> kpiMap = getKpiData();
-			for(KpiData data: kpiMap){
-				System.out.println(data);
+			System.out.println(flowData);
+			try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
 		}
 	}

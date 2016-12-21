@@ -1,6 +1,8 @@
 package com.xdja.view;
 
+import java.awt.BorderLayout;
 import java.awt.Checkbox;
+import java.awt.Color;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -15,6 +17,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import javax.swing.BorderFactory;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -36,6 +39,7 @@ import com.xdja.adb.DeviceManager;
 import com.xdja.collectdata.CollectDataImpl;
 import com.xdja.adb.DeviceManager.DeviceStateListener;
 import com.xdja.constant.Constants;
+import com.xdja.constant.GlobalConfig;
 import com.xdja.log.LoggerManager;
 import com.xdja.monitor.ControllerMonitor;
 import com.xdja.util.DialogUtil;
@@ -70,7 +74,7 @@ public class LaunchView extends JFrame{
 	private JComboBox<String> comboProcess;
 	private Checkbox boxUSBPowered;
 	private JTabbedPane jTabbedPane = new JTabbedPane();
-	private String[] tabNames = {"内存", "cpu", "电量", "加载时间", "帧率", "流量"};
+	private String[] tabNames = {"   内    存   ", "     cpu    ", "   电   量   ", "    加载时间     ", "   帧   率   ", "   流   量   "};
 	
 	//保存一份当前连接到pc的设备列表
 	private List<AndroidDevice> devices = new ArrayList<AndroidDevice>(12);
@@ -122,6 +126,17 @@ public class LaunchView extends JFrame{
 		frame.add(comboProcess);
 		Rectangle rectProcess = new Rectangle(320, 0, 420, 30);
 		comboProcess.setBounds(rectProcess);
+		comboProcess.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// TODO Auto-generated method stub
+				String packageName = (String) comboProcess.getSelectedItem();
+				if (packageName != null) {
+					GlobalConfig.PackageName = packageName;
+				}
+			}
+		});
 		
 		jb1 = new JButton("开始监控");
 		Rectangle rectjb1 = new Rectangle(860, 0, 100, 30);
@@ -183,7 +198,7 @@ public class LaunchView extends JFrame{
 	    jTabbedPane.addTab(tabNames[2], viewBattery);
 	    
 	    // 4.kpiTest
-	    kpiTestView = new KpiTestView();
+	    kpiTestView = new KpiTestView(Constants.KPITITLE, Constants.KPI);
 	    viewBattery.setBounds(rect);
 	    jTabbedPane.addTab(tabNames[3], kpiTestView);
 	    
@@ -247,9 +262,6 @@ public class LaunchView extends JFrame{
 		addDeviceChangeListener();
 //		addStartListener();
 		addPackageListener();
-		addMonkeyListener();
-		addLaunchListener();
-		addFpsListener();
 //		addstartrunlistener();
 	}
 	
@@ -441,28 +453,6 @@ public class LaunchView extends JFrame{
 		
 	}
 	
-	private void addMonkeyListener() {
-		btnMonkey.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				// TODO Auto-generated method stub
-				
-			}
-		});
-	}
-		
-//	private void addstartrunlistener() {
-//		jb1.addActionListener(new ActionListener() {
-//			@Override
-//			public void actionPerformed(ActionEvent e) {
-//				JOptionPane.showMessageDialog(null,"Wath a fucking day!");
-//				
-//				
-//			}
-//		});
-//		
-//	}
-	
 	public static  String getdevice()
     {
         String devicename = (String) comboDevices.getSelectedItem();
@@ -470,31 +460,6 @@ public class LaunchView extends JFrame{
          
     }
 	
-	private void addLaunchListener() {
-		IDevice dev = AdbHelper.getInstance().getDevice((String) comboDevices.getSelectedItem());
-		ControllerMonitor.getInstance().setDevice(dev);
-		btnLaunchCost.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				LaunchCostView viewLaunchCost = new LaunchCostView(Constants.LAUNCH_COST_TEST);
-				viewLaunchCost.createParts();
-				viewLaunchCost.setVisible(true);
-			}
-		});
-	}
-	
-	private void addFpsListener() {
-		IDevice dev = AdbHelper.getInstance().getDevice((String) comboDevices.getSelectedItem());
-		ControllerMonitor.getInstance().setDevice(dev);
-		btnFps.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				FpsView viewFps = new FpsView(Constants.FPS_VIEW);
-				viewFps.createParts();
-				viewFps.setVisible(true);
-			}
-		});
-	}
 	
 	private void showExitDialog(){
 		DialogUtil.getInstance().showOkAndCancelDialog(this, "提示", "真想退出吗？", "确定", "取消", new ClickDialogBtnListener() {
@@ -519,7 +484,16 @@ public class LaunchView extends JFrame{
 	 */
 	private void startTest(){
 		if(viewMemory != null){
-			viewMemory.refreshData();
+			new Thread(){
+				@Override
+				public void run() {
+					// TODO Auto-generated method stub
+//					kpiTestView.startTest();
+					viewMemory.refreshData();
+					viewFlow.refreshData();
+				}
+			}.start();
+			
 		}
 	}
 	
@@ -529,6 +503,8 @@ public class LaunchView extends JFrame{
 	private void stopTest(){
 		if (viewMemory != null) {
 			viewMemory.stopRefresh();
+			viewFlow.stopRefresh();
+//			kpiTestView.stopTest();
 		}
 	}
 	

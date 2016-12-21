@@ -6,9 +6,11 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.concurrent.ExecutionException;
 
 import javax.swing.BorderFactory;
 import javax.swing.JPanel;
+import javax.swing.SwingWorker;
 import javax.swing.Timer;
 
 import org.jfree.chart.ChartPanel;
@@ -26,7 +28,7 @@ import org.jfree.ui.RectangleInsets;
 import com.xdja.collectdata.CollectDataImpl;
 import com.xdja.constant.GlobalConfig;
 
-public class MemoryView extends JPanel{
+public class MemoryView extends BaseChartView{
 	
 	/**
 	 * serial UID auto generated
@@ -37,8 +39,8 @@ public class MemoryView extends JPanel{
 	
 	public MemoryView(String chartContent,String title,String yaxisName)  
     {  
-        super(new BorderLayout());  
-        this.totalAlloc = new TimeSeries("已经分配的内存", Millisecond.class);
+        super();  
+        this.totalAlloc = new TimeSeries("已经分配的内存");
         TimeSeriesCollection dataset = new TimeSeriesCollection();
         dataset.addSeries(this.totalAlloc);
         
@@ -52,9 +54,8 @@ public class MemoryView extends JPanel{
         XYItemRenderer renderer = new XYLineAndShapeRenderer(true, false);
         renderer.setSeriesPaint(0, Color.red);
 //        renderer.setSeriesPaint(1, Color.green);
-        renderer.setStroke(
-            new BasicStroke(3f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL)
-        );
+        renderer.setSeriesStroke(0, new BasicStroke(3F));
+        
         XYPlot plot = new XYPlot(dataset, domain, range, renderer);
         plot.setBackgroundPaint(Color.lightGray);
         plot.setDomainGridlinePaint(Color.white);
@@ -80,6 +81,7 @@ public class MemoryView extends JPanel{
             BorderFactory.createLineBorder(Color.black))
         );
         add(chartPanel);
+        setActionListener(actionListener);
     }
 	
 	ActionListener actionListener = new ActionListener() {
@@ -87,21 +89,34 @@ public class MemoryView extends JPanel{
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			// TODO Auto-generated method stub
-			float memory = CollectDataImpl.getMemoryData(GlobalConfig.PACKAGENAME);
-			addTotalObservation(memory);
+			
+			
+			final SwingWorker<Float, Void> worker = new SwingWorker<Float, Void>() {
+
+				@Override
+				protected Float doInBackground() throws Exception {
+					// TODO Auto-generated method stub
+					float memory = CollectDataImpl.getMemoryData(GlobalConfig.PackageName);
+					return memory;
+				}
+				
+				protected void done() {
+					float memory = 0;
+					try {
+						memory = get();
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (ExecutionException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					addTotalObservation(memory);
+				};
+		    };
+		    worker.run(); 
 		}
 	};
-	
-	public void refreshData(){
-		mTaskTimer = new Timer(GlobalConfig.collectInterval, actionListener);
-		mTaskTimer.start();
-	}
-	
-	public void stopRefresh(){
-		if (mTaskTimer != null) {
-			mTaskTimer.stop();
-		}
-	}
 	
     /**
      * Adds an observation to the 'total memory' time series.

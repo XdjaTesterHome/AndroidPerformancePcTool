@@ -5,6 +5,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -242,13 +243,17 @@ public class CollectDataUtil {
 				while ((s = successResult.readLine()) != null) {
 					successMsg.append(s).append("\n");
 				}
-				// 读取错误流可能会阻塞流程waitFor（）
-				// while ((s = errorResult.readLine()) != null) {
-				// errorMsg.append(s).append("\n");
-				// }
+//				 读取错误流可能会阻塞流程waitFor（）
+				 while ((s = errorResult.readLine()) != null) {
+				 errorMsg.append(s).append("\n");
+				 }
 			}
-
+			WatchThread wt = new WatchThread(process);  
+			wt.start();  
 			result = process.waitFor();
+			
+//			ArrayList<String> commandStream = wt.getStream();
+			wt.setOver(true); 
 		} catch (IOException e) {
 			e.printStackTrace();
 		} catch (Exception e) {

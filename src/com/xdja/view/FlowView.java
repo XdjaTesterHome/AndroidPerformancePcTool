@@ -1,83 +1,102 @@
 package com.xdja.view;
 
+import java.awt.BasicStroke;
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+import javax.swing.BorderFactory;
+
 import org.apache.log4j.Logger;
-import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
-import org.jfree.chart.axis.ValueAxis;
+import org.jfree.chart.axis.DateAxis;
+import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.plot.XYPlot;
+import org.jfree.chart.renderer.xy.XYItemRenderer;
+import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.data.time.Millisecond;
 import org.jfree.data.time.TimeSeries;
 import org.jfree.data.time.TimeSeriesCollection;
+import org.jfree.ui.RectangleInsets;
 
-import com.xdja.constant.Constants;
-import com.xdja.monitor.ControllerMonitor;
+import com.xdja.collectdata.CollectDataImpl;
+import com.xdja.collectdata.FlowData;
+import com.xdja.constant.GlobalConfig;
 
-public class FlowView extends ChartPanel {
+public class FlowView extends BaseChartView {
 
 	/**
 	 * serial UID is auto generated
 	 */
-	private Logger logger = Logger.getLogger(FlowView.class);
 	private static final long serialVersionUID = 1719925024734975743L;
-	private static TimeSeries timeSeries; 
-	private Thread flowThread;
-	private boolean stopFlag = false;
+	private TimeSeries flowCost;
+	private FlowData mFlowData;
+	private float mLastFlow = -1 ;
+	
+	public FlowView(String chartContent, String title, String yaxisName) {
+		super();
+		this.flowCost = new TimeSeries(chartContent);
+		TimeSeriesCollection dataset = new TimeSeriesCollection();
+		dataset.addSeries(this.flowCost);
 
-	public FlowView(String chartContent,String title,String yaxisName)  
-    {  
-        this(createChart(chartContent,title,yaxisName));  
-    }
-	
-	public FlowView(JFreeChart chart) {
-		super(chart);
+		DateAxis domain = new DateAxis("Time");
+		NumberAxis range = new NumberAxis("流量消耗(KB)");
+		domain.setTickLabelFont(new Font("SansSerif", Font.PLAIN, 12));
+		range.setTickLabelFont(new Font("SansSerif", Font.PLAIN, 12));
+		domain.setLabelFont(new Font("SansSerif", Font.PLAIN, 14));
+		range.setLabelFont(new Font("SansSerif", Font.PLAIN, 14));
+
+		XYItemRenderer renderer = new XYLineAndShapeRenderer(true, false);
+		renderer.setSeriesPaint(0, Color.red);
+		renderer.setSeriesStroke(0, new BasicStroke(3F));
+
+		XYPlot plot = new XYPlot(dataset, domain, range, renderer);
+		plot.setBackgroundPaint(Color.lightGray);
+		plot.setDomainGridlinePaint(Color.white);
+		plot.setRangeGridlinePaint(Color.white);
+		plot.setAxisOffset(new RectangleInsets(5.0, 5.0, 5.0, 5.0));
+		domain.setAutoRange(true);
+		domain.setLowerMargin(0.0);
+		domain.setUpperMargin(0.0);
+		domain.setTickLabelsVisible(true);
+
+		range.setStandardTickUnits(NumberAxis.createIntegerTickUnits());
+		JFreeChart chart = new JFreeChart(title, new Font("SansSerif", Font.BOLD, 24), plot, true);
+		chart.setBackgroundPaint(Color.white);
+		ChartPanel chartPanel = new ChartPanel(chart);
+		chartPanel.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4),
+				BorderFactory.createLineBorder(Color.black)));
+		add(chartPanel);
+		setActionListener(actionListener);
 	}
-	
-	public void start(final String packageName) {
-		flowThread = new Thread(new Runnable() {
-			@Override
-			public void run() {
-				stopFlag = false;
-				while(true) {
-					if (!stopFlag) {
-						try {
-							double info = ControllerMonitor.getInstance().getFlowController().getInfo(packageName);
-							timeSeries.add(new Millisecond(), info);
-							logger.info(String.format("Package \"%s\" Flow: %f kb", packageName, info));
-							Thread.sleep(500);
-						} catch (InterruptedException e) {
-							logger.error(e.getMessage(), e.getCause());
-							e.printStackTrace();
-						}
-					} else {
-						logger.info("Flow View test is stoped!");
-						break;
-					}
+
+	ActionListener actionListener = new ActionListener() {
+
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			// TODO Auto-generated method stub
+			mFlowData = CollectDataImpl.getFlowData(GlobalConfig.PackageName);
+
+			if (mFlowData != null) {
+				if (mLastFlow == -1) {
+					addFlowObservation(0);
 				}
+				addFlowObservation(mFlowData.flowTotal - mLastFlow);
+				mLastFlow = mFlowData.flowTotal;
 			}
-		});
-		flowThread.start();
-	}
-	
-	public void stop() {
-		stopFlag = true;
+		}
+	};
+
+	/**
+	 * Adds an observation to the 'total memory' time series.
+	 *
+	 * @param y
+	 *            the total memory used.
+	 */
+	private void addFlowObservation(double y) {
+		this.flowCost.add(new Millisecond(), y);
 	}
 
-	private static JFreeChart createChart(String chartContent, String title, String yaxisName) {
-		// 创建时序图对象
-		timeSeries = new TimeSeries(chartContent, Millisecond.class);
-		TimeSeriesCollection timeseriescollection = new TimeSeriesCollection(timeSeries);
-		JFreeChart jfreechart = ChartFactory.createTimeSeriesChart(title, Constants.TIME_UNIT, yaxisName, timeseriescollection, true, true, false);
-		XYPlot xyplot = jfreechart.getXYPlot();
-		// 纵坐标设定
-		ValueAxis valueaxis = xyplot.getDomainAxis();
-		// 自动设置数据轴数据范围
-		valueaxis.setAutoRange(true);
-		// 数据轴固定数据范围 30s
-		valueaxis.setFixedAutoRange(60000D);
-		valueaxis = xyplot.getRangeAxis();
-		
-		return jfreechart;
-	}
-	
 }
