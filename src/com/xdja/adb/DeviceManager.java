@@ -1,7 +1,6 @@
 package com.xdja.adb;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import org.apache.log4j.Logger;
 
@@ -9,7 +8,6 @@ import com.android.ddmlib.AndroidDebugBridge;
 import com.android.ddmlib.IDevice;
 import com.android.ddmlib.AndroidDebugBridge.IDeviceChangeListener;
 import com.android.ddmlib.IDevice.DeviceState;
-import com.sun.corba.se.impl.orbutil.closure.Constant;
 import com.xdja.constant.Constants;
 
 /***
@@ -59,7 +57,7 @@ public class DeviceManager {
 
 		public void deviceConnected(AndroidDevice idevice);
 	}
-
+	
 	/**
 	 * 用于外部调用者设置设备的监听
 	 * 
@@ -68,7 +66,7 @@ public class DeviceManager {
 	public void setDeviceStateListener(DeviceStateListener listener) {
 		mDeviceStateChange = listener;
 	}
-
+	
 	/**
 	 * 返回当前的设备列表
 	 * 
@@ -127,7 +125,7 @@ public class DeviceManager {
 			}
 		});
 	}
-
+	
 	/***
 	 * 用于返回设备的标识
 	 * @param device 设备封装

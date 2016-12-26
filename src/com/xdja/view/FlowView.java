@@ -34,6 +34,8 @@ public class FlowView extends BaseChartView {
 	private TimeSeries flowCost;
 	private FlowData mFlowData;
 	private float mLastFlow = -1 ;
+	private Thread flowThread ;
+	private boolean stopFlag = false;
 	
 	public FlowView(String chartContent, String title, String yaxisName) {
 		super();
@@ -69,25 +71,7 @@ public class FlowView extends BaseChartView {
 		chartPanel.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4),
 				BorderFactory.createLineBorder(Color.black)));
 		add(chartPanel);
-		setActionListener(actionListener);
 	}
-
-	ActionListener actionListener = new ActionListener() {
-
-		@Override
-		public void actionPerformed(ActionEvent e) {
-			// TODO Auto-generated method stub
-			mFlowData = CollectDataImpl.getFlowData(GlobalConfig.PackageName);
-
-			if (mFlowData != null) {
-				if (mLastFlow == -1) {
-					addFlowObservation(0);
-				}
-				addFlowObservation(mFlowData.flowTotal - mLastFlow);
-				mLastFlow = mFlowData.flowTotal;
-			}
-		}
-	};
 
 	/**
 	 * Adds an observation to the 'total memory' time series.
@@ -98,5 +82,39 @@ public class FlowView extends BaseChartView {
 	private void addFlowObservation(double y) {
 		this.flowCost.add(new Millisecond(), y);
 	}
-
+	
+	/**
+	 * ¿ªÊ¼²âÊÔ
+	 * @param packageName
+	 */
+	public void start(String packageName) {
+		flowThread = new Thread(new Runnable() {
+			
+			@Override
+			public void run() {
+				// TODO Auto-generated method stub
+				stopFlag = false;
+				while (true) {
+					if (stopFlag) {
+						break;
+					}
+					
+					mFlowData = CollectDataImpl.getFlowData(packageName);
+					if (mFlowData != null) {
+						if (mLastFlow == -1) {
+							addFlowObservation(0);
+						}
+						addFlowObservation(mFlowData.flowTotal - mLastFlow);
+						mLastFlow = mFlowData.flowTotal;
+					}
+				}
+			}
+		});
+		
+		flowThread.start();
+	}
+	
+	public void stop() {
+		stopFlag = true;
+	}
 }

@@ -93,7 +93,6 @@ public class FpsView extends BaseChartView{
             BorderFactory.createLineBorder(Color.black))
         );
         add(chartPanel);
-        setActionListener(actionListener);
     }
 	
 	ActionListener actionListener = new ActionListener() {

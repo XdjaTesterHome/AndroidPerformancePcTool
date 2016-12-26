@@ -9,5 +9,6 @@
 	<classpathentry kind="lib" path="lib/jfreechart-1.0.19.jar"/>
 	<classpathentry kind="lib" path="lib/ddmlib-22.0-sources.jar"/>
 	<classpathentry kind="lib" path="lib/ddmlib-22.2.0.jar"/>
+	<classpathentry kind="lib" path="D:/projectworkplace/AndroidPerformancePcTool/lib/device-api-0.9.3.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

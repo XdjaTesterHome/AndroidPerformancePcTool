@@ -1,14 +1,10 @@
 package com.xdja.view;
 
-import java.awt.BorderLayout;
-import java.awt.Checkbox;
-import java.awt.Color;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
-import java.awt.event.ItemEvent;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
@@ -16,23 +12,21 @@ import java.awt.event.WindowEvent;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.TreeSet;
 
-import javax.swing.BorderFactory;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
-
 import org.apache.log4j.Logger;
 import com.android.ddmlib.IDevice;
+import com.github.cosysoft.device.android.impl.AndroidDeviceStore;
 import com.xdja.adb.AdbHelper;
 import com.xdja.adb.AndroidDevice;
 import com.xdja.adb.DeviceManager;
@@ -45,8 +39,8 @@ import com.xdja.monitor.ControllerMonitor;
 import com.xdja.util.DialogUtil;
 import com.xdja.util.DialogUtil.ClickDialogBtnListener;
 
-public class LaunchView extends JFrame{
-	
+public class LaunchView extends JFrame {
+
 	/**
 	 * serial Version UID is auto generated
 	 */
@@ -54,10 +48,6 @@ public class LaunchView extends JFrame{
 	private Logger logger = Logger.getLogger(LaunchView.class);
 	private String author;
 	private JPanel frame;
-	private JButton btnMonkey;
-	private JButton btnLaunchCost;
-	private JButton btnFps;
-	private JButton btnStartTest;
 	private JButton jb1, jb2;
 	private MemoryView viewMemory;
 	private FlowView viewFlow;
@@ -66,24 +56,26 @@ public class LaunchView extends JFrame{
 	private BatteryView viewBattery;
 	private KpiTestView kpiTestView;
 	private FpsChartPanel chartFps;
-	private JLabel labelPackage;
 	private JTextField textPackage;
 	private JComboBox<String> comboPackageList;
 	private List<String> packageList = new ArrayList<String>();
 	private DefaultComboBoxModel<String> model;
 	private static JComboBox<String> comboDevices;
 	private JComboBox<String> comboProcess;
-	private Checkbox boxUSBPowered;
 	private JTabbedPane jTabbedPane = new JTabbedPane();
-	private String[] tabNames = {"   内    存   ", "     cpu    ", "   电   量   ", "    加载时间     ", "   帧   率   ", "   流   量   "};
-	
-	//保存一份当前连接到pc的设备列表
+	private String[] tabNames = { "   内    存   ", "     cpu    ", "   电   量   ", "    加载时间     ", "   帧   率   ",
+			"   流   量   " };
+
+	// 保存一份当前连接到pc的设备列表
 	private List<AndroidDevice> devices = new ArrayList<AndroidDevice>(12);
+
 	/**
-	 * constructor to init a LaunchView instance
-	 * create a JPanel instance to put other controller parts
-	 * @param name: author name
-	 * */
+	 * constructor to init a LaunchView instance create a JPanel instance to put
+	 * other controller parts
+	 * 
+	 * @param name:
+	 *            author name
+	 */
 	public LaunchView(String name) {
 		this.author = name;
 		this.frame = new JPanel();
@@ -92,43 +84,42 @@ public class LaunchView extends JFrame{
 		add(frame);
 		setVisible(true);
 	}
-	
+
 	/**
-	 * constructor to init a LaunchView instance
-	 * create a JPanel instance to put other controller parts
-	 * 用于创建一个父控件来摆放其他的控件，这里是用来显示其他的测试项
-	 * */
+	 * constructor to init a LaunchView instance create a JPanel instance to put
+	 * other controller parts 用于创建一个父控件来摆放其他的控件，这里是用来显示其他的测试项
+	 */
 	@SuppressWarnings({ "rawtypes", "unchecked", "serial" })
 	public void createParts() {
-		//必须显式设置布局格式为空，否则不会按照我们设置好的格式布局
+		// 必须显式设置布局格式为空，否则不会按照我们设置好的格式布局
 		frame.setLayout(null);
 		// combo box to select device sn
 		comboDevices = new JComboBox<String>();
 		frame.add(comboDevices);
-		Rectangle rect = new Rectangle(0, 0, 300, 30);//设定绝对位置
-		comboDevices.setBounds(rect);//添加位置
-		
-		comboDevices.addActionListener(new ActionListener(){
-		  public void actionPerformed(ActionEvent e) {
-//			  comboProcess.removeAllItems();
-			  Object selected = getdevice();
-			  if (selected!=null){
-				    String devicesid = CollectDataImpl.devicesdo(selected);
+		Rectangle rect = new Rectangle(0, 0, 300, 30);// 设定绝对位置
+		comboDevices.setBounds(rect);// 添加位置
+
+		comboDevices.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				// comboProcess.removeAllItems();
+				Object selected = getdevice();
+				if (selected != null) {
+					String devicesid = CollectDataImpl.devicesdo(selected);
 					List<String> respack = CollectDataImpl.getRunningProcess(devicesid);
 					for (String sn : respack) {
 						comboProcess.addItem(sn);
 					}
 				}
 			}
-			});
-		
+		});
+
 		// 用于展示设备的进程
 		comboProcess = new JComboBox<String>();
 		frame.add(comboProcess);
 		Rectangle rectProcess = new Rectangle(320, 0, 420, 30);
 		comboProcess.setBounds(rectProcess);
 		comboProcess.addActionListener(new ActionListener() {
-			
+
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				// TODO Auto-generated method stub
@@ -138,108 +129,138 @@ public class LaunchView extends JFrame{
 				}
 			}
 		});
-		
+
+		// 开始监控按钮
 		jb1 = new JButton("开始监控");
 		Rectangle rectjb1 = new Rectangle(860, 0, 100, 30);
 		frame.add(jb1);
 		jb1.setBounds(rectjb1);
-		
+
 		jb1.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				JOptionPane.showMessageDialog(null,"start run performance!");
-				jb2.setEnabled(true);
-				jb1.setEnabled(false);
-				comboDevices.setEnabled (false);
-				startTest();
+				Thread thread = new Thread(new Runnable() {
+
+					@Override
+					public void run() {
+						// TODO Auto-generated method stub
+						jb2.setEnabled(true);
+						jb1.setEnabled(false);
+						comboDevices.setEnabled(false);
+						startTest();
+					}
+				});
+
+				thread.start();
 			}
-				
+
 		});
-		
+
+		// 停止监控按钮
 		jb2 = new JButton("停止监控");
 		Rectangle rectjb2 = new Rectangle(980, 0, 100, 30);
 		frame.add(jb2);
 		jb2.setBounds(rectjb2);
 		jb2.setEnabled(false);
-		
+
 		jb2.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				JOptionPane.showMessageDialog(null,"stop run performance!");
-				jb1.setEnabled(true);
-				jb2.setEnabled(false);
-				comboDevices.setEnabled (true);
-				stopTest();
+				Thread thread = new Thread(new Runnable() {
+
+					@Override
+					public void run() {
+						// TODO Auto-generated method stub
+						jb1.setEnabled(true);
+						jb2.setEnabled(false);
+						comboDevices.setEnabled(true);
+						stopTest();
+					}
+				});
+
+				thread.start();
 			}
 		});
-		
+
 		layoutTabComponents();
 	}
-	
+
 	/**
-	 * 用来摆放tab的组件
-	 * tabNames = {"内存", "cpu", "电量", "kpitest", "帧率", "流量"};
+	 * 用来摆放tab的组件 tabNames = {"内存", "cpu", "电量", "kpitest", "帧率", "流量"};
 	 */
-	private void layoutTabComponents(){
+	private void layoutTabComponents() {
 		Rectangle rect = new Rectangle(100, 100, 800, 200);
 		// 1.内存
-	    //memory chart view
-	    viewMemory = new MemoryView(Constants.MEMORY, Constants.MEMORYContent, Constants.MEMORY_UNIT);
-	    viewMemory.setBounds(rect);
-	    jTabbedPane.addTab(tabNames[0], viewMemory);
-	    
-	    // 2.cpu
-	    viewCpu = new CPUView(Constants.CPU, Constants.CPU, Constants.CPU_UNIT);
-	    viewCpu.setBounds(rect);
-	    jTabbedPane.addTab(tabNames[1], viewCpu);
-	    
-	    // 3.电量
-	    viewBattery = new BatteryView(Constants.BATTERY, Constants.BATTERY, Constants.BATTERY_UNIT);
-	    viewBattery.setBounds(rect);
-	    jTabbedPane.addTab(tabNames[2], viewBattery);
-	    
-	    // 4.kpiTest
-	    kpiTestView = new KpiTestView(Constants.KPITITLE, Constants.KPI);
-	    viewBattery.setBounds(rect);
-	    jTabbedPane.addTab(tabNames[3], kpiTestView);
-	    
-	    // 5.帧率
-	    
-	    chartFps = new FpsChartPanel(Constants.FPS, Constants.FPS, Constants.FPS_UNIT);
-	    chartFps.setBounds(rect);
-	    jTabbedPane.addTab(tabNames[4], chartFps);
-	    
-	    // 6.流量
-	    viewFlow = new FlowView(Constants.FLOW , Constants.FLOW, Constants.FLOW_UNIT);
-	    viewFlow.setBounds(rect);
-	    jTabbedPane.addTab(tabNames[5], viewFlow);
-	    
-	    frame.add(jTabbedPane);
-	    rect = new Rectangle(20, 100, 1100, 600);
-	    jTabbedPane.setBounds(rect);
+		// memory chart view
+		viewMemory = new MemoryView(Constants.MEMORY, Constants.MEMORYContent, Constants.MEMORY_UNIT);
+		viewMemory.setBounds(rect);
+		jTabbedPane.addTab(tabNames[0], viewMemory);
+
+		// 2.cpu
+		viewCpu = new CPUView(Constants.CPU, Constants.CPU, Constants.CPU_UNIT);
+		viewCpu.setBounds(rect);
+		jTabbedPane.addTab(tabNames[1], viewCpu);
+
+		// 3.电量
+		viewBattery = new BatteryView(Constants.BATTERY, Constants.BATTERY, Constants.BATTERY_UNIT);
+		viewBattery.setBounds(rect);
+		jTabbedPane.addTab(tabNames[2], viewBattery);
+
+		// 4.kpiTest
+		kpiTestView = new KpiTestView(Constants.KPITITLE, Constants.KPI);
+		viewBattery.setBounds(rect);
+		jTabbedPane.addTab(tabNames[3], kpiTestView);
+
+		// 5.帧率
+
+		chartFps = new FpsChartPanel(Constants.FPS, Constants.FPS, Constants.FPS_UNIT);
+		chartFps.setBounds(rect);
+		jTabbedPane.addTab(tabNames[4], chartFps);
+
+		// 6.流量
+		viewFlow = new FlowView(Constants.FLOW, Constants.FLOW, Constants.FLOW_UNIT);
+		viewFlow.setBounds(rect);
+		jTabbedPane.addTab(tabNames[5], viewFlow);
+
+		frame.add(jTabbedPane);
+		rect = new Rectangle(20, 100, 1100, 600);
+		jTabbedPane.setBounds(rect);
 	}
-	
-	
+
 	/**
 	 * add action listener for all the controller parts
-	 * */
+	 */
 	public void addActionListener() {
-		//initial Logger Manager to use log4j
-		if (!LoggerManager.isInited()) {
-			LoggerManager.initLogger();
+
+		// 主窗口添加关闭监听器
+		addWindowListener(new WindowAdapter() {
+			@Override
+			public void windowClosing(WindowEvent e) {
+				showExitDialog();
+			}
+		});
+
+		addPackageListener();
+	}
+
+	/**
+	 * 初始化DeviceList
+	 */
+	private void initDeviceList() {
+		// initial android debug bridge
+		// testDevices();
+		TreeSet<com.github.cosysoft.device.android.AndroidDevice> devices = AndroidDeviceStore.getInstance()
+				.getDevices();
+		List<String> snList = new ArrayList<>(2);
+		for (com.github.cosysoft.device.android.AndroidDevice device : devices) {
+			snList.add(device.getName());
 		}
-		logger.info("LoggerManager is inited successfully!");
-		
-		//initial android debug bridge
-		List<String> snList = AdbHelper.getInstance().getDevices();
-		System.out.println("选择设备的地方");//
-//		System.out.println(snList);//
 
 		for (String sn : snList) {
 			comboDevices.addItem(sn);
 		}
 		System.out.println(getdevice());
-		if (getdevice()!=null){
+		if (getdevice() != null) {
 			Object selected = getdevice();
 			String devicesid = CollectDataImpl.devicesdo(selected);
 			List<String> respack = CollectDataImpl.getRunningProcess(devicesid);
@@ -247,105 +268,56 @@ public class LaunchView extends JFrame{
 				comboProcess.addItem(sn);
 			}
 		}
-		
-		
-		
-		
-		//主窗口添加关闭监听器
-		addWindowListener(new WindowAdapter() {
-			@Override
-			public void windowClosing(WindowEvent e) {
-				showExitDialog();
-			}
-		});
-		
-		//为几个可操作的控件添加监听器
+
+		// 为几个可操作的控件添加监听器
 		addDeviceChangeListener();
-//		addStartListener();
-		addPackageListener();
-//		addstartrunlistener();
 	}
-	
-	
+
+	/**
+	 * 初始化logger
+	 */
+	private void initLogger() {
+		// initial Logger Manager to use log4j
+		if (!LoggerManager.isInited()) {
+			LoggerManager.initLogger();
+		}
+		logger.info("LoggerManager is inited successfully!");
+	}
 
 	/**
 	 * 添加设备变化的监听
 	 */
-	private void addDeviceChangeListener(){
+	private void addDeviceChangeListener() {
 		DeviceManager.getInstance().setDeviceStateListener(new DeviceStateListener() {
-			
+
 			@Override
 			public void deviceDisconnected(AndroidDevice idevice) {
 				// TODO Auto-generated method stub
 				devices = DeviceManager.getInstance().getAndroidDevice();
 				String comboDevicesName = DeviceManager.getInstance().getDeviceName(idevice);
-				System.out.println("点击选择设备");//
-				
+
 				if (devices.size() > 0 && !devices.contains(idevice)) {
 					devices.add(idevice);
 					comboDevices.addItem(comboDevicesName);
 				} else {
 					comboDevices.removeAllItems();
 					devices.add(idevice);
-					//名称构成：设备名称_设备序列号
+					// 名称构成：设备名称_设备序列号
 					comboDevices.addItem(comboDevicesName);
 				}
 			}
-			
+
 			@Override
 			public void deviceConnected(AndroidDevice idevice) {
 				// TODO Auto-generated method stub
 				String comboDevicesName = DeviceManager.getInstance().getDeviceName(idevice);
-				
+
 				comboDevices.removeItem(comboDevicesName);
 				devices.remove(idevice);
 			}
 		});
 	}
-	
-//	private void addStartListener() {
-//		btnStartTest.addActionListener(new ActionListener() {
-//			@Override
-//			public void actionPerformed(ActionEvent e) {
-//				
-//				Thread thread = new Thread(new Runnable() {
-//					@Override
-//					public void run() {
-//						if (btnStartTest.getText().equals(Constants.START_TEST)) {
-//							logger.info("click start test!");
-//							String packageName = textPackage.getText();
-//							if (packageName.equals(Constants.BLANK)) {
-//								logger.info(Constants.PACKAGE_NAME_NULL);
-//								JOptionPane.showMessageDialog(new JFrame(), Constants.PACKAGE_NAME_NULL);
-//							} else {
-//								if (null == comboDevices.getSelectedItem()) {
-//									logger.info(Constants.DEVICE_NULL);
-//									JOptionPane.showMessageDialog(new JFrame(), Constants.DEVICE_NULL);
-//								} else {
-//									IDevice dev = AdbHelper.getInstance().getDevice((String) comboDevices.getSelectedItem());
-//									ControllerMonitor.getInstance().setDevice(dev);
-//									ControllerMonitor.getInstance().getBatteryController().setUsbPowered(boxUSBPowered.getState());
-//									viewMemory.start(packageName);
-//									viewFlow.start(packageName);
-//									viewCpu.start(packageName);
-//									viewBattery.start(packageName);
-//									btnStartTest.setText(Constants.STOP_TEST);
-//								}
-//							}
-//						} else {
-//							viewMemory.stop();
-//							viewFlow.stop();
-//							viewCpu.stop();
-//							viewBattery.stop();
-//							btnStartTest.setText(Constants.START_TEST);
-//						}
-//					}
-//				});
-//				thread.start();
-//			}
-//		});
-//	}
-	
+
 	private boolean isAdjusting(JComboBox<String> cbInput) {
 		if (cbInput.getClientProperty(Constants.ADJUSTING) instanceof Boolean) {
 			return (Boolean) cbInput.getClientProperty(Constants.ADJUSTING);
@@ -355,9 +327,9 @@ public class LaunchView extends JFrame{
 
 	private void setAdjusting(JComboBox<String> cbInput, boolean adjusting) {
 		cbInput.putClientProperty(Constants.ADJUSTING, adjusting);
-		
+
 	}
-	
+
 	private void updateList(List<String> list) {
 		setAdjusting(comboPackageList, true);
 		model.removeAllElements();
@@ -376,7 +348,7 @@ public class LaunchView extends JFrame{
 		comboPackageList.setPopupVisible(model.getSize() > 0);
 		setAdjusting(comboPackageList, false);
 	}
-	
+
 	private void addPackageListener() {
 		if (comboPackageList != null) {
 			comboPackageList.addActionListener(new ActionListener() {
@@ -396,11 +368,11 @@ public class LaunchView extends JFrame{
 					ControllerMonitor.getInstance().setDevice(dev);
 					List<String> ret = ControllerMonitor.getInstance().getPackageController().getInfo();
 					Iterator<String> iterator = ret.iterator();
-					while(iterator.hasNext()) {
+					while (iterator.hasNext()) {
 						logger.info(iterator.next());
 					}
 					packageList = ret;
-					//refresh package list
+					// refresh package list
 					updateList(packageList);
 				}
 
@@ -411,7 +383,7 @@ public class LaunchView extends JFrame{
 					}
 				}
 			});
-			
+
 			textPackage.getDocument().addDocumentListener(new DocumentListener() {
 				public void insertUpdate(DocumentEvent e) {
 					updateList(packageList);
@@ -424,9 +396,9 @@ public class LaunchView extends JFrame{
 				public void changedUpdate(DocumentEvent e) {
 					updateList(packageList);
 				}
-				
+
 			});
-			
+
 			textPackage.addKeyListener(new KeyAdapter() {
 				@Override
 				public void keyPressed(KeyEvent event) {
@@ -434,8 +406,7 @@ public class LaunchView extends JFrame{
 					if (event.getKeyCode() == KeyEvent.VK_SPACE && comboPackageList.isPopupVisible()) {
 						event.setKeyCode(KeyEvent.VK_ENTER);
 					}
-					if (event.getKeyCode() == KeyEvent.VK_ENTER
-							|| event.getKeyCode() == KeyEvent.VK_UP
+					if (event.getKeyCode() == KeyEvent.VK_ENTER || event.getKeyCode() == KeyEvent.VK_UP
 							|| event.getKeyCode() == KeyEvent.VK_DOWN) {
 						event.setSource(comboPackageList);
 						comboPackageList.dispatchEvent(event);
@@ -451,27 +422,34 @@ public class LaunchView extends JFrame{
 				}
 			});
 		}
-		
+
 	}
-	
-	public static  String getdevice()
-    {
-        String devicename = (String) comboDevices.getSelectedItem();
+
+	/**
+	 * 获取选中的device
+	 * 
+	 * @return
+	 */
+	public static String getdevice() {
+		String devicename = "";
+		if (comboDevices != null) {
+			devicename = (String) comboDevices.getSelectedItem();
+		}
+
 		return devicename;
-         
-    }
-	
-	
-	private void showExitDialog(){
+
+	}
+
+	private void showExitDialog() {
 		DialogUtil.getInstance().showOkAndCancelDialog(this, "提示", "真想退出吗？", "确定", "取消", new ClickDialogBtnListener() {
-			
+
 			@Override
 			public void clickOkBtn() {
 				// TODO Auto-generated method stub
 				logger.info("program is exited!");
 				setDefaultCloseOperation(EXIT_ON_CLOSE);
 			}
-			
+
 			@Override
 			public void clickCancelBtn() {
 				// TODO Auto-generated method stub
@@ -479,46 +457,46 @@ public class LaunchView extends JFrame{
 			}
 		});
 	}
+	
+	
+	private void startTest() {
+		if (viewMemory != null) {
+			viewMemory.start(GlobalConfig.PackageName);
+		}
+
+		if (viewCpu != null) {
+			viewCpu.start(GlobalConfig.PackageName);
+		}
+
+		if (viewFlow != null) {
+			viewFlow.start(GlobalConfig.PackageName);
+		}
+	}
 
 	/**
-	 *  开始测试
+	 * 结束测试
 	 */
-	private void startTest(){
-		if(viewMemory != null){
-			new Thread(){
-				@Override
-				public void run() {
-					// TODO Auto-generated method stub
-//					kpiTestView.startTest();
-					viewMemory.refreshData();
-					viewFlow.refreshData();
-					viewCpu.refreshData();
-					viewFps.refreshData();
-				}
-			}.start();
-			
-		}
-	}
-	
-	/**
-	 *  结束测试
-	 */
-	private void stopTest(){
+	private void stopTest() {
 		if (viewMemory != null) {
-			viewMemory.stopRefresh();
-			viewFlow.stopRefresh();
-			viewCpu.stopRefresh();
-			viewFps.stopRefresh();
-//			kpiTestView.stopTest();
+			viewMemory.stop();
+		}
+
+		if (viewCpu != null) {
+			viewCpu.stop();
+		}
+
+		if (viewFlow != null) {
+			viewFlow.stop();
 		}
 	}
-	
-	
+
 	public static void main(String[] args) {
 		LaunchView launch = new LaunchView(Constants.PRODUCT_NAME);
 		launch.createParts();
+		launch.initLogger();
+		launch.initDeviceList();
 		launch.addActionListener();
 		launch.setVisible(true);
-		
+
 	}
 }

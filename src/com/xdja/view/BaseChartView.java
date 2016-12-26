@@ -56,19 +56,4 @@ public abstract class BaseChartView extends JPanel{
 		
 		ChartFactory.setChartTheme(chartTheme);
 	}
-	
-	protected void  setActionListener(ActionListener listener) {
-		mActionListener = listener;
-	}
-	
-	public void refreshData(){
-		mTaskTimer = new Timer(GlobalConfig.collectInterval, mActionListener);
-		mTaskTimer.start();
-	}
-	
-	public void stopRefresh(){
-		if (mTaskTimer != null) {
-			mTaskTimer.stop();
-		}
-	}
 }
