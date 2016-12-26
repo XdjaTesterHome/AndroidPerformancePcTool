@@ -1,12 +1,10 @@
 package com.xdja.collectdata;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.xdja.constant.Constants;
 import com.xdja.log.LoggerManager;
 import com.xdja.util.CommonUtil;
 
@@ -18,17 +16,15 @@ import com.xdja.util.CommonUtil;
  */
 public class CollectDataImpl {
 	private final static String LOGTAG = CollectDataImpl.class.getSimpleName();
-	private static final String String = null;
-	private static CommandResult commandMemoryResult, commandFpsResult, commandFlowResult,
-			commandCpuResult = null;
+	private static CommandResult commandMemoryResult, commandFpsResult, commandFlowResult, commandCpuResult = null;
 	private static CommandResult commandPidResult, commandUidResult;
 	private static FlowData flowData = null;
 	private static KpiData kpiData = null;
 	private static List<KpiData> kpiList = new ArrayList<>(28);
-	private static String fpsdata =null;
-	
+	private static String fpsdata = null;
+
 	private static GetDataInterface mGetDataListener = new GetDataInterface() {
-		
+
 		@Override
 		public void getString(String content) {
 			// TODO Auto-generated method stub
@@ -42,13 +38,13 @@ public class CollectDataImpl {
 					if (nowPageName.startsWith(".")) {
 						nowPageName = nowPageName.substring(1);
 					}
-					
+
 					String costtimeStr = kpiStr.split(":")[1].trim();
 					int costTime = formatStrToms(costtimeStr);
 					if (nowPageName == null || "".equals(nowPageName)) {
 						nowPageName = "unkonwn";
 					}
-					
+
 					kpiData = new KpiData(nowPageName, costTime);
 					if (kpiList.contains(kpiData)) {
 						int lastCostTime = kpiList.get(kpiList.indexOf(kpiData)).loadTime;
@@ -59,20 +55,21 @@ public class CollectDataImpl {
 				}
 			}
 		}
-		
+
 		@Override
 		public void getErrorString(String error) {
 			// TODO Auto-generated method stub
-			
+
 		}
 	};
 
 	/**
-	 *  用于获取kpi数据,仅仅用于启动收集kpi数据
+	 * 用于获取kpi数据,仅仅用于启动收集kpi数据
+	 * 
 	 * @param packageName
 	 * @return
 	 */
-	public static void startCollectKpiData(String packageName){
+	public static void startCollectKpiData(String packageName) {
 		kpiList.clear();
 		String cmd = "adb logcat -v time -s ActivityManager | findStr " + packageName;
 		System.out.println(cmd);
@@ -81,14 +78,16 @@ public class CollectDataImpl {
 		System.out.println(clearcmd);
 		CollectDataUtil.execCmdCommand(cmd, mGetDataListener);
 	}
-	
+
 	/***
 	 * 获取kpi的数据
+	 * 
 	 * @return
 	 */
 	public static List<KpiData> getKpiData() {
 		return kpiList;
 	}
+
 	/***
 	 * 用于获取帧率相关数据
 	 * 
@@ -102,9 +101,9 @@ public class CollectDataImpl {
 			LoggerManager.logDebug(LOGTAG, "getFpsData", "get fps is wrong");
 			return null;
 		}
-        fpsdata = commandFpsResult.successMsg;
+		fpsdata = commandFpsResult.successMsg;
 		return handleFpsData(commandFpsResult.successMsg);
-        
+
 	}
 
 	// public static KpiData getKpiData(String packageName){
@@ -112,22 +111,23 @@ public class CollectDataImpl {
 	// }
 	/**
 	 * 设备ID编号处理，处理为进程保活方法所需参数，可以使用的设备号
+	 * 
 	 * @param devicedo
 	 * @return lzz
 	 */
-	public static String devicesdo(Object selected){
+	public static String devicesdo(Object selected) {
 		String str = (String) selected;
 		String pattern = "-(.*)-(.*)";
 		Pattern r = Pattern.compile(pattern);
 		Matcher m = r.matcher(str);
-		if (m.find( )) {
+		if (m.find()) {
 			selected = m.group(2);
+		} else {
+			System.out.println("NO MATCH");
 		}
-		 else {
-	         System.out.println("NO MATCH");
-	      }
 		return (String) selected;
 	}
+
 	/**
 	 * 根据deviceNo获取当前正在运行的进程
 	 * 
@@ -284,7 +284,7 @@ public class CollectDataImpl {
 	public static float getCpuUsage(String packageName) {
 		int startProcTotal = getCpuTotal();
 		int startProcPid = getProcData(packageName);
-		//每隔1s取一次数据。
+		// 每隔1s取一次数据。
 		try {
 			Thread.sleep(1000);
 		} catch (InterruptedException e) {
@@ -298,33 +298,36 @@ public class CollectDataImpl {
 		float cpuData = 0;
 		// 防止分母为0的情况存在
 		if (startProcTotal - endProcTotal != 0) {
-			cpuData = (float)(endProcPid - startProcPid) / (endProcTotal - startProcTotal ) * 100;
+			cpuData = (float) (endProcPid - startProcPid) / (endProcTotal - startProcTotal) * 100;
 		}
-		
+
 		return CommonUtil.getTwoDots(cpuData);
 	}
-	
+
 	/***
-	 *  获取当前的页面
+	 * 获取当前的页面
+	 * 
 	 * @return
 	 */
 	public static String getCurActivity() {
 		String cmd = "adb shell dumpsys activity top | findStr ACTIVITY";
 		CommandResult activityResult = CollectDataUtil.execCmdCommand(cmd, false, true);
-		
+
 		if (activityResult != null && !"".equals(activityResult.successMsg)) {
 			String activityName = CommonUtil.formatBlanksToBlank(activityResult.successMsg);
+			activityName = activityName.trim();
 			activityName = activityName.split(" ")[1];
 			activityName = activityName.split("/")[1];
 			if (activityName.startsWith(".")) {
 				activityName = activityName.substring(1);
 			}
-			
+
 			return activityName;
 		}
-		
+
 		return "";
 	}
+
 	/***
 	 * 通过/proc/pid/stat来查看进程相关的信息 14659 (a.android.rimet) S 311 310 0 0 -1
 	 * 4194624 1445971 495 3 0 14873 1054 0 2 14 -6 118 0 10247632 1173536768
@@ -419,8 +422,8 @@ public class CollectDataImpl {
 
 		return "";
 	}
-    
-	private static String rehandle(String getfpsdata){
+
+	private static String handleFps(String getfpsdata) {
 		String line = getfpsdata;
 		String resu = null;
 		String pattern = "Execute[\\s\\S]*View hierarchy";
@@ -428,17 +431,15 @@ public class CollectDataImpl {
 		Pattern r = Pattern.compile(pattern);
 		// 现在创建 matcher 对象
 		Matcher m = r.matcher(line);
-		if (m.find( )) {
-		resu = (String) m.group(0);
+		if (m.find()) {
+			resu = (String) m.group(0);
+		} else {
+			System.out.println("NO MATCH");
 		}
-		else {
-		System.out.println("NO MATCH");
-		}
-	return resu ;
-		
+		return resu;
+
 	}
-	
-	
+
 	/**
 	 * 处理Fps的数据，抓取自己关心的数据
 	 * 
@@ -450,55 +451,65 @@ public class CollectDataImpl {
 			return null;
 		}
 		FpsData fpsData = null;
+		content = handleFps(content);
 		
-		// content = CommonUtil.formatBlanksToBlank(content);
-//		System.out.println(content);
-		String[] firstSpilt = content.split("Draw	Prepare	Process	Execute");
-//		System.out.println(Arrays.toString(firstSpilt));
-//		System.out.println(firstSpilt[2]);
-		if (firstSpilt.length >2 ){
-        String[] secondSpilt = firstSpilt[2].split("View hierarchy:");
-        String[] thirdSpilt = secondSpilt[0].trim().split("\n\n\t");
-		if (thirdSpilt == null || thirdSpilt.length < 1) {
-			LoggerManager.logDebug(LOGTAG, "handleFpsData", "no operation mobilephone");
-			return new FpsData(0, 0, 0);
-		}
-         
-		String[] fpsSplit;
-		int frameCount = thirdSpilt.length;
-		int jank_count = 0;
-		int vsync_count = 0;
-		
-		for (int i = 0; i < thirdSpilt.length; i++) {
-			fpsSplit = thirdSpilt[i].split("\t");
-			// 判断是否是4列数字，不是4列数字，直接跳过
-			if (fpsSplit.length % 4 != 0) {
-				LoggerManager.logDebug(LOGTAG, "handleFpsData", "fps count is wrong");
-				continue;
-			}
-			// 计算一帧的渲染时间
-			float totaltime = 0;
-			for (int j = 0; j < fpsSplit.length; j++) {
-				totaltime += Float.parseFloat(fpsSplit[j]);
-			}
-
-			// 大于16ms的帧会丢帧
-			if (totaltime > 16) {
-				jank_count += 1;
-				if (totaltime % 16.67 == 0) {
-					vsync_count += totaltime / 16.67 - 1;
-				} else {
-					vsync_count += totaltime / 16.67;
+//		// content = CommonUtil.formatBlanksToBlank(content);
+//		// System.out.println(content);
+		String[] firstSpilt = content.split("Execute");
+//		
+//		// System.out.println(Arrays.toString(firstSpilt));
+//		// System.out.println(firstSpilt[2]);
+		String activityName = CollectDataImpl.getCurActivity();
+		if (firstSpilt.length > 0) {
+			String[] secondSpilt = firstSpilt[1].trim().split("View hierarchy");
+			if (secondSpilt.length > 0) { //表示是否有帧率数据
+				String[] thirdSpilt = secondSpilt[0].trim().split("\n\n\t");
+				if (thirdSpilt == null || thirdSpilt.length < 1) {
+					LoggerManager.logDebug(LOGTAG, "handleFpsData", "no operation mobilephone");
+					return new FpsData(0, 0, 0, activityName);
 				}
-			}
-		}
-		int fps = frameCount * 60 / (frameCount + vsync_count);
 
-		fpsData = new FpsData(fps, jank_count, frameCount);}
-		
+				String[] fpsSplit;
+				int frameCount = thirdSpilt.length;
+				int jank_count = 0;
+				int vsync_count = 0;
+
+				for (int i = 0; i < thirdSpilt.length; i++) {
+					fpsSplit = thirdSpilt[i].split("\t");
+					// 判断是否是4列数字，不是4列数字，直接跳过
+					if (fpsSplit.length % 4 != 0) {
+						LoggerManager.logDebug(LOGTAG, "handleFpsData", "fps count is wrong");
+						continue;
+					}
+					// 计算一帧的渲染时间
+					float totaltime = 0;
+					for (int j = 0; j < fpsSplit.length; j++) {
+						totaltime += Float.parseFloat(fpsSplit[j]);
+					}
+
+					// 大于16ms的帧会丢帧
+					if (totaltime > 16) {
+						jank_count += 1;
+						if (totaltime % 16.67 == 0) {
+							vsync_count += totaltime / 16.67 - 1;
+						} else {
+							vsync_count += totaltime / 16.67;
+						}
+					}
+				}
+				int fps = frameCount * 60 / (frameCount + vsync_count);
+
+				fpsData = new FpsData(fps, jank_count, frameCount, activityName);
+			}else {
+				fpsData =  new FpsData(0, 0, 0, activityName);
+			}
+			
+		}
+
 		return fpsData;
-		
+
 	}
+
 	/**
 	 * 获取对应包名的pid
 	 * 
@@ -528,21 +539,22 @@ public class CollectDataImpl {
 		}
 		return 0;
 	}
-	
+
 	/**
-	 *  将timeStr转成毫秒
+	 * 将timeStr转成毫秒
+	 * 
 	 * @param timeStr
 	 * @return
 	 */
-	private static int formatStrToms(String timeStr){
+	private static int formatStrToms(String timeStr) {
 		if (timeStr == null || "".equals(timeStr)) {
 			return 0;
 		}
-		
+
 		if (timeStr.startsWith("+")) {
 			timeStr = timeStr.substring(1);
 		}
-		
+
 		Pattern pattern = Pattern.compile("\\d+s");
 		Matcher matcher = pattern.matcher(timeStr);
 		int totalTime = 0;
@@ -551,7 +563,7 @@ public class CollectDataImpl {
 			sString = sString.split("s")[0];
 			totalTime = Integer.parseInt(sString) * 1000;
 		}
-		
+
 		Pattern pattern2 = Pattern.compile("\\d+ms");
 		Matcher matcher2 = pattern2.matcher(timeStr);
 		if (matcher2.find()) {
@@ -559,11 +571,10 @@ public class CollectDataImpl {
 			sString = sString.split("ms")[0];
 			totalTime = Integer.parseInt(sString);
 		}
-		
+
 		return totalTime;
 	}
-	
-	
+
 	public static void main(String[] args) {
 		for (int i = 0; i < 20; i++) {
 			try {
@@ -572,12 +583,12 @@ public class CollectDataImpl {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			
-			float cu = CollectDataImpl.getCpuUsage("com.xdja.HDSafeEMailClient");
-			System.out.println(cu);
+
+			FpsData fpsData11 = CollectDataImpl.getFpsData("com.xdja.HDSafeEMailClient");
+			System.out.println(fpsData11);
 		}
-		
-//		CollectDataImpl.rehandle(getfpsdata);
-		
+
+		// CollectDataImpl.rehandle(getfpsdata);
+
 	}
 }

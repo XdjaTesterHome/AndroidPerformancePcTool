@@ -3,12 +3,9 @@ package com.xdja.view;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Font;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
 import javax.swing.BorderFactory;
 
-import org.apache.log4j.Logger;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.DateAxis;
@@ -23,7 +20,6 @@ import org.jfree.ui.RectangleInsets;
 
 import com.xdja.collectdata.CollectDataImpl;
 import com.xdja.collectdata.FlowData;
-import com.xdja.constant.GlobalConfig;
 
 public class FlowView extends BaseChartView {
 

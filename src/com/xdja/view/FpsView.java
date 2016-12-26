@@ -1,193 +1,135 @@
 package com.xdja.view;
 
-import java.awt.BasicStroke;
-import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Font;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.util.concurrent.ExecutionException;
-
 import javax.swing.BorderFactory;
-import javax.swing.JPanel;
-import javax.swing.SwingWorker;
-import javax.swing.Timer;
 
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
-import org.jfree.chart.axis.DateAxis;
-import org.jfree.chart.axis.NumberAxis;
+import org.jfree.chart.axis.CategoryAxis;
+import org.jfree.chart.axis.ValueAxis;
+import org.jfree.chart.labels.StandardCategoryItemLabelGenerator;
 import org.jfree.chart.plot.CategoryPlot;
 import org.jfree.chart.plot.PlotOrientation;
-import org.jfree.chart.plot.XYPlot;
-import org.jfree.chart.renderer.xy.XYItemRenderer;
-import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
+import org.jfree.chart.renderer.category.BarRenderer;
+import org.jfree.chart.title.LegendTitle;
+import org.jfree.chart.title.TextTitle;
 import org.jfree.data.category.CategoryDataset;
 import org.jfree.data.category.DefaultCategoryDataset;
-import org.jfree.data.general.DatasetUtilities;
-import org.jfree.data.time.Millisecond;
-import org.jfree.data.time.TimeSeries;
-import org.jfree.data.time.TimeSeriesCollection;
-import org.jfree.ui.RectangleInsets;
 
 import com.xdja.collectdata.CollectDataImpl;
 import com.xdja.collectdata.FpsData;
-import com.xdja.constant.GlobalConfig;
 
-public class FpsView extends BaseChartView{
-	
+public class FpsView extends BaseChartView {
+
 	/**
 	 * serial UID auto generated
 	 */
 	private static final long serialVersionUID = -9002331611054515951L;
-	private TimeSeries totalFps;
-	private Timer mTaskTimer;
-	public static int count1 = 0;
-	public static Object dataset  ;
-	DefaultCategoryDataset dsda = new DefaultCategoryDataset();
-	public static JFreeChart  chart ;
+	private boolean stopFlag = false;
+	private Thread fpsThread;
+	private FpsData fpsdata = null;
+	private CategoryPlot mPlot;
+	private DefaultCategoryDataset mDataset  = null;
 	
-	public FpsView(String chartContent,String title,String yaxisName)  
-    {  
-        super();  
-        this.totalFps = new TimeSeries("当前应用帧率");
-        TimeSeriesCollection dataset = new TimeSeriesCollection();
-        dataset.addSeries(this.totalFps);
-        
-        DateAxis domain = new DateAxis("Time");
-        NumberAxis range = new NumberAxis("Fps");
-        domain.setTickLabelFont(new Font("SansSerif", Font.PLAIN, 12));
-        range.setTickLabelFont(new Font("SansSerif", Font.PLAIN, 12));
-        domain.setLabelFont(new Font("SansSerif", Font.PLAIN, 14));
-        range.setLabelFont(new Font("SansSerif", Font.PLAIN, 14));
-        
-        XYItemRenderer renderer = new XYLineAndShapeRenderer(true, false);
-        renderer.setSeriesPaint(0, Color.red);
-//        renderer.setSeriesPaint(1, Color.green);
-        renderer.setSeriesStroke(0, new BasicStroke(3F));
-        
-        XYPlot plot = new XYPlot(dataset, domain, range, renderer);
-        plot.setBackgroundPaint(Color.lightGray);
-        plot.setDomainGridlinePaint(Color.white);
-        plot.setRangeGridlinePaint(Color.white);
-        plot.setAxisOffset(new RectangleInsets(5.0, 5.0, 5.0, 5.0));
-        domain.setAutoRange(true);
-        domain.setLowerMargin(0.0);
-        domain.setUpperMargin(0.0);
-        domain.setTickLabelsVisible(true);
+	public FpsView(String chartContent, String title, String yaxisName) {
+		super();
+		mDataset = new DefaultCategoryDataset();
+		JFreeChart mBarchart = ChartFactory.createBarChart(title, chartContent, yaxisName, mDataset,
+				PlotOrientation.VERTICAL, // 图表方向
+				true, // 是否生成图例
+				true, // 是否生成提示工具
+				false // 是否生成url连接
+		);
+		// 图表标题设置
+		TextTitle mTextTitle = mBarchart.getTitle();
+		mTextTitle.setFont(new Font("黑体", Font.BOLD, 20));
+		// 图表图例设置
+		LegendTitle mLegend = mBarchart.getLegend();
+		if (mLegend != null) {
+			mLegend.setItemFont(new Font("宋体", Font.CENTER_BASELINE, 15));
+		}
 
-        range.setStandardTickUnits(NumberAxis.createIntegerTickUnits());
+		// 设置柱状图轴
+		CategoryPlot mPlot = mBarchart.getCategoryPlot();
+		// x轴
+		CategoryAxis mDomainAxis = mPlot.getDomainAxis();
+		mDomainAxis.setLabelFont(new Font("宋体", Font.PLAIN, 15));
+		// 设置x轴坐标字体
+		mDomainAxis.setTickLabelFont(new Font("宋体", Font.PLAIN, 15));
 
-//        JFreeChart chart = new JFreeChart(
-//            "应用Fps情况", 
-//            new Font("SansSerif", Font.BOLD, 24),
-//            plot, 
-//            true
-//        );
-        chart = ChartFactory.createStackedBarChart("FPS监控", "fps", "帧率数值", (CategoryDataset) dataset);
-        chart.setBackgroundPaint(Color.white);
-        ChartPanel chartPanel = new ChartPanel(chart);
-        chartPanel.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createEmptyBorder(4, 4, 4, 4),
-            BorderFactory.createLineBorder(Color.black))
-        );
-        add(chartPanel);
-    }
-	
-	ActionListener actionListener = new ActionListener() {
+		// y轴
+		ValueAxis mValueAxis = mPlot.getRangeAxis();
+		mValueAxis.setLabelFont(new Font("宋体", Font.PLAIN, 15));
+		mValueAxis.setTickLabelFont(new Font("宋体", Font.PLAIN, 15));
+
+		// 柱体显示数值
+		BarRenderer mRenderer = new BarRenderer();
+		mRenderer.setBaseItemLabelGenerator(new StandardCategoryItemLabelGenerator());
+		mRenderer.setBaseItemLabelsVisible(true);
+		mPlot.setRenderer(mRenderer);
 		
-		@Override
-		public void actionPerformed(ActionEvent e) {
-			// TODO Auto-generated method stub
-			
-			
-			final SwingWorker<FpsData, Void> worker = new SwingWorker<FpsData, Void>() {
+		//将freechart添加到面板中
+		ChartPanel chartPanel = new ChartPanel(mBarchart);
+		chartPanel.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4),
+				BorderFactory.createLineBorder(Color.black)));
+		add(chartPanel);
+	}
 
-				@Override
-				protected FpsData doInBackground() throws Exception {
-					// TODO Auto-generated method stub
-					FpsData fpsdata = CollectDataImpl.getFpsData(GlobalConfig.PackageName);
-					if (fpsdata!=null){
-						count1++;
-						dataset = createDataset(dsda,fpsdata,count1);
-						CategoryPlot plot = (CategoryPlot)chart.getPlot(); 
-						plot.setDataset((CategoryDataset) dataset); 
-					} 
-					
-					return fpsdata;
-				}
-				
-				protected void done() {
-					FpsData Fpsdata =null;
-					try {
-						Fpsdata = get();
-					} catch (InterruptedException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					} catch (ExecutionException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-				
-//					addTotalObservation(Fpsdata);
-				};
-		    };
-		    worker.run(); 
-         }
-	
-	
-	};
+	/**
+	 * Adds an observation to the 'total memory' time series.
+	 *
+	 * @param fpsdata
+	 *            the total memory used.FpsData
+	 */
+	// private void addTotalObservation(FpsData fpsdata) {
+	// this.totalFps.add(new Millisecond(), fpsdata);
+	// }
 
-    /**
-     * Adds an observation to the 'total memory' time series.
-     *
-     * @param fpsdata  the total memory used.FpsData
-     */
-//    private void addTotalObservation(FpsData fpsdata)  {
-//        this.totalFps.add(new Millisecond(), fpsdata);
-//    }
-	
-	
-	public static CategoryDataset createDataset(DefaultCategoryDataset ds,FpsData str,int i) //创建柱状图数据集
+	public static CategoryDataset createDataset(DefaultCategoryDataset ds, FpsData str, int i) // 创建柱状图数据集
 	{
-		ds.addValue(str.fps, "帧率", "第"+i+"次");  
-	    ds.addValue(str.dropcount, "卡顿", "第"+i+"次");  
-	    ds.addValue(str.framecount, "丢帧", "第"+i+"次");  
-	    return ds;
+		ds.addValue(str.fps, "帧率", "第" + i + "次");
+		ds.addValue(str.dropcount, "卡顿", "第" + i + "次");
+		ds.addValue(str.framecount, "丢帧", "第" + i + "次");
+		return ds;
+	}
+
+	/**
+	 * 开始测试
+	 * 
+	 * @param packageName
+	 */
+	public void start(String packageName) {
+		fpsThread = new Thread(new Runnable() {
+			@Override
+			public void run() {
+				// TODO Auto-generated method stub
+				stopFlag = false;
+				while (true) {
+					if (stopFlag) {
+						break;
+					}
+
+					fpsdata = CollectDataImpl.getFpsData(packageName);
+					System.out.println(fpsdata);
+					if (fpsdata != null) {
+//						mDataset = new DefaultCategoryDataset();
+						mDataset.addValue(fpsdata.fps, "帧率", fpsdata.activityName);
+						mDataset.addValue(fpsdata.dropcount, "丢帧数", fpsdata.activityName);
+						mDataset.addValue(fpsdata.framecount, "总帧数", fpsdata.activityName);
+						if (mPlot != null) {
+							mPlot.setDataset(mDataset);
+						}
+					}
+				}
+			}
+		});
+
+		fpsThread.start();
+	}
+
+	public void stop() {
+		stopFlag = true;
 	}
 }
-
-
-
-//import java.util.Arrays;
-//	class tFpsView
-//	{
-//		public static void main(String[] args)
-//		{
-//		FpsData[] fpsdata ={};
-//		for( int i=0;i<3 ; i++){
-//			FpsData getfpsdata = CollectDataImpl.getFpsData("com.xdja.safekeyservice");
-//			if (getfpsdata!=null  ){
-//			  fpsdata =insertfps(fpsdata,getfpsdata);
-//        }
-//		}
-//		System.out.println(Arrays.deepToString(fpsdata));
-//		System.out.println(fpsdata[2]);
-//		
-//		}
-
-
-
-
-
-//
-//     private static FpsData[] insertfps(FpsData[] arr, FpsData str)
-//     {
-//		int size = arr.length;
-//		FpsData[] tmp = new FpsData[size + 1];
-//		System.arraycopy(arr, 0, tmp, 0, size);
-//		tmp[size] = str;
-//		return tmp;
-//		}
-//		}

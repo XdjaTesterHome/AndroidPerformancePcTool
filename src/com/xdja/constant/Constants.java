@@ -64,7 +64,7 @@ public class Constants {
 	
 	public static final String FPSTITLE = "帧率测试结果";
 	public static final String FPS = "FPS";
-	public static final String FPS_UNIT = "fps";
+	public static final String FPS_UNIT = "数量";
 	
 	public static final String KPITITLE = "kpi测试结果";
 	public static final String KPI = "页面加载时间";

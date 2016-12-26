@@ -20,7 +20,7 @@ import org.jfree.ui.RectangleInsets;
 
 import com.xdja.collectdata.CollectDataImpl;
 
-public class CPUView extends BaseChartView{
+public class CpuView extends BaseChartView{
 	
 	/**
 	 * serial UID auto generated
@@ -30,7 +30,7 @@ public class CPUView extends BaseChartView{
 	private Thread cpuThread;
 	private boolean stopFlag = false;
 	
-	public CPUView(String chartContent,String title,String yaxisName)  
+	public CpuView(String chartContent,String title,String yaxisName)  
     {  
         super();  
         this.totalcpu = new TimeSeries("应用CPU占用率");

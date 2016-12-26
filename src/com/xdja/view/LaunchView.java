@@ -51,11 +51,10 @@ public class LaunchView extends JFrame {
 	private JButton jb1, jb2;
 	private MemoryView viewMemory;
 	private FlowView viewFlow;
-	private CPUView viewCpu;
-	private CPUView viewFps;
+	private CpuView viewCpu;
 	private BatteryView viewBattery;
 	private KpiTestView kpiTestView;
-	private FpsChartPanel chartFps;
+	private FpsView viewFps;
 	private JTextField textPackage;
 	private JComboBox<String> comboPackageList;
 	private List<String> packageList = new ArrayList<String>();
@@ -197,7 +196,7 @@ public class LaunchView extends JFrame {
 		jTabbedPane.addTab(tabNames[0], viewMemory);
 
 		// 2.cpu
-		viewCpu = new CPUView(Constants.CPU, Constants.CPU, Constants.CPU_UNIT);
+		viewCpu = new CpuView(Constants.CPU, Constants.CPU, Constants.CPU_UNIT);
 		viewCpu.setBounds(rect);
 		jTabbedPane.addTab(tabNames[1], viewCpu);
 
@@ -213,9 +212,9 @@ public class LaunchView extends JFrame {
 
 		// 5.Ö¡ÂÊ
 
-		chartFps = new FpsChartPanel(Constants.FPS, Constants.FPS, Constants.FPS_UNIT);
-		chartFps.setBounds(rect);
-		jTabbedPane.addTab(tabNames[4], chartFps);
+		viewFps = new FpsView(Constants.FPS, Constants.FPSTITLE, Constants.FPS_UNIT);
+		viewFps.setBounds(rect);
+		jTabbedPane.addTab(tabNames[4], viewFps);
 
 		// 6.Á÷Á¿
 		viewFlow = new FlowView(Constants.FLOW, Constants.FLOW, Constants.FLOW_UNIT);
@@ -471,6 +470,10 @@ public class LaunchView extends JFrame {
 		if (viewFlow != null) {
 			viewFlow.start(GlobalConfig.PackageName);
 		}
+		
+		if (viewFps != null) {
+			viewFps.start(GlobalConfig.PackageName);
+		}
 	}
 
 	/**
@@ -487,6 +490,10 @@ public class LaunchView extends JFrame {
 
 		if (viewFlow != null) {
 			viewFlow.stop();
+		}
+		
+		if (viewFps != null) {
+			viewFps.stop();
 		}
 	}
 
