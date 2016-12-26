@@ -62,6 +62,7 @@ public class LaunchView extends JFrame{
 	private MemoryView viewMemory;
 	private FlowView viewFlow;
 	private CPUView viewCpu;
+	private CPUView viewFps;
 	private BatteryView viewBattery;
 	private KpiTestView kpiTestView;
 	private FpsChartPanel chartFps;
@@ -492,6 +493,7 @@ public class LaunchView extends JFrame{
 					viewMemory.refreshData();
 					viewFlow.refreshData();
 					viewCpu.refreshData();
+					viewFps.refreshData();
 				}
 			}.start();
 			
@@ -506,6 +508,7 @@ public class LaunchView extends JFrame{
 			viewMemory.stopRefresh();
 			viewFlow.stopRefresh();
 			viewCpu.stopRefresh();
+			viewFps.stopRefresh();
 //			kpiTestView.stopTest();
 		}
 	}

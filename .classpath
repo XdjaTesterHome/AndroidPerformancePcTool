@@ -4,9 +4,10 @@
 	<classpathentry exported="true" kind="lib" path="lib/jcommon-1.0.16.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/log4j-1.2.13.jar"/>
 	<classpathentry kind="lib" path="lib/chimpchat.jar"/>
-	<classpathentry kind="lib" path="E:/AppPerformance/AndroidPerformancePcTool/lib/ddmlib-22.2.0.jar" sourcepath="D:/Android/source-lib/ddmlib-22.0-sources.jar/ddmlib-22.0-sources.jar"/>
 	<classpathentry kind="lib" path="lib/json_simple-1.1.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="lib" path="E:/AppPerformance/AndroidPerformancePcTool/lib/jfreechart-1.0.19.jar" sourcepath="E:/opensource/jfreechart-1.0.19/source"/>
+	<classpathentry kind="lib" path="lib/jfreechart-1.0.19.jar"/>
+	<classpathentry kind="lib" path="lib/ddmlib-22.0-sources.jar"/>
+	<classpathentry kind="lib" path="lib/ddmlib-22.2.0.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

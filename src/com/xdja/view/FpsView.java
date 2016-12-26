@@ -13,13 +13,19 @@ import javax.swing.JPanel;
 import javax.swing.SwingWorker;
 import javax.swing.Timer;
 
+import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.DateAxis;
 import org.jfree.chart.axis.NumberAxis;
+import org.jfree.chart.plot.CategoryPlot;
+import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.XYItemRenderer;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
+import org.jfree.data.category.CategoryDataset;
+import org.jfree.data.category.DefaultCategoryDataset;
+import org.jfree.data.general.DatasetUtilities;
 import org.jfree.data.time.Millisecond;
 import org.jfree.data.time.TimeSeries;
 import org.jfree.data.time.TimeSeriesCollection;
@@ -37,6 +43,10 @@ public class FpsView extends BaseChartView{
 	private static final long serialVersionUID = -9002331611054515951L;
 	private TimeSeries totalFps;
 	private Timer mTaskTimer;
+	public static int count1 = 0;
+	public static Object dataset  ;
+	DefaultCategoryDataset dsda = new DefaultCategoryDataset();
+	public static JFreeChart  chart ;
 	
 	public FpsView(String chartContent,String title,String yaxisName)  
     {  
@@ -69,12 +79,13 @@ public class FpsView extends BaseChartView{
 
         range.setStandardTickUnits(NumberAxis.createIntegerTickUnits());
 
-        JFreeChart chart = new JFreeChart(
-            "应用Fps情况", 
-            new Font("SansSerif", Font.BOLD, 24),
-            plot, 
-            true
-        );
+//        JFreeChart chart = new JFreeChart(
+//            "应用Fps情况", 
+//            new Font("SansSerif", Font.BOLD, 24),
+//            plot, 
+//            true
+//        );
+        chart = ChartFactory.createStackedBarChart("FPS监控", "fps", "帧率数值", (CategoryDataset) dataset);
         chart.setBackgroundPaint(Color.white);
         ChartPanel chartPanel = new ChartPanel(chart);
         chartPanel.setBorder(BorderFactory.createCompoundBorder(
@@ -98,6 +109,13 @@ public class FpsView extends BaseChartView{
 				protected FpsData doInBackground() throws Exception {
 					// TODO Auto-generated method stub
 					FpsData fpsdata = CollectDataImpl.getFpsData(GlobalConfig.PackageName);
+					if (fpsdata!=null){
+						count1++;
+						dataset = createDataset(dsda,fpsdata,count1);
+						CategoryPlot plot = (CategoryPlot)chart.getPlot(); 
+						plot.setDataset((CategoryDataset) dataset); 
+					} 
+					
 					return fpsdata;
 				}
 				
@@ -113,24 +131,34 @@ public class FpsView extends BaseChartView{
 						e.printStackTrace();
 					}
 				
-					addTotalObservation(Fpsdata);
+//					addTotalObservation(Fpsdata);
 				};
 		    };
 		    worker.run(); 
-		}
+         }
 	
 	
 	};
-	
+
     /**
      * Adds an observation to the 'total memory' time series.
      *
-     * @param fpsdata  the total memory used.
+     * @param fpsdata  the total memory used.FpsData
      */
-    private void addTotalObservation(double fpsdata)  {
-        this.totalFps.add(new Millisecond(), fpsdata);
-    }
+//    private void addTotalObservation(FpsData fpsdata)  {
+//        this.totalFps.add(new Millisecond(), fpsdata);
+//    }
+	
+	
+	public static CategoryDataset createDataset(DefaultCategoryDataset ds,FpsData str,int i) //创建柱状图数据集
+	{
+		ds.addValue(str.fps, "帧率", "第"+i+"次");  
+	    ds.addValue(str.dropcount, "卡顿", "第"+i+"次");  
+	    ds.addValue(str.framecount, "丢帧", "第"+i+"次");  
+	    return ds;
+	}
 }
+
 
 
 //import java.util.Arrays;
@@ -149,6 +177,11 @@ public class FpsView extends BaseChartView{
 //		System.out.println(fpsdata[2]);
 //		
 //		}
+
+
+
+
+
 //
 //     private static FpsData[] insertfps(FpsData[] arr, FpsData str)
 //     {

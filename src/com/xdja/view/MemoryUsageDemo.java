@@ -24,6 +24,7 @@ import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.DateAxis;
 import org.jfree.chart.axis.NumberAxis;
+import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.XYItemRenderer;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
@@ -92,10 +93,11 @@ public class MemoryUsageDemo extends JPanel {
         range.setStandardTickUnits(NumberAxis.createIntegerTickUnits());
 
         JFreeChart chart = new JFreeChart(
-            "JVM Memory Usage", 
-            new Font("SansSerif", Font.BOLD, 24),
-            plot, 
-            true
+            "JVM Memory Usage", //title
+            new Font("SansSerif", Font.BOLD, 24),//title字体
+            plot,             //图标类型
+//            PlotOrientation.VERTICAL,
+            true              //可见视图
         );
         chart.setBackgroundPaint(Color.white);
         ChartPanel chartPanel = new ChartPanel(chart);
@@ -121,8 +123,8 @@ public class MemoryUsageDemo extends JPanel {
      *
      * @param y  the free memory.
      */
-    private void addFreeObservation(double y) {
-        this.free.add(new Millisecond(), y);
+    private void addFreeObservation(float x) {
+        this.free.add(new Millisecond(), x);
     }
 
     /**
@@ -146,7 +148,7 @@ public class MemoryUsageDemo extends JPanel {
          * @param event  the action event.
          */
         public void actionPerformed(ActionEvent event) {
-            long f = Runtime.getRuntime().freeMemory();
+            long f = Runtime.getRuntime().freeMemory();//生成数据
             long t = Runtime.getRuntime().totalMemory();
             addTotalObservation(t);
             addFreeObservation(f);
