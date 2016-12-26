@@ -491,6 +491,7 @@ public class LaunchView extends JFrame{
 //					kpiTestView.startTest();
 					viewMemory.refreshData();
 					viewFlow.refreshData();
+					viewCpu.refreshData();
 				}
 			}.start();
 			
@@ -504,6 +505,7 @@ public class LaunchView extends JFrame{
 		if (viewMemory != null) {
 			viewMemory.stopRefresh();
 			viewFlow.stopRefresh();
+			viewCpu.stopRefresh();
 //			kpiTestView.stopTest();
 		}
 	}

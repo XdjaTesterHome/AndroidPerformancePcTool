@@ -116,6 +116,8 @@ public class MemoryView extends BaseChartView{
 		    };
 		    worker.run(); 
 		}
+	
+	
 	};
 	
     /**

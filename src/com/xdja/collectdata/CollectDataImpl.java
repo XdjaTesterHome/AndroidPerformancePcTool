@@ -1,6 +1,7 @@
 package com.xdja.collectdata;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -17,12 +18,14 @@ import com.xdja.util.CommonUtil;
  */
 public class CollectDataImpl {
 	private final static String LOGTAG = CollectDataImpl.class.getSimpleName();
+	private static final String String = null;
 	private static CommandResult commandMemoryResult, commandFpsResult, commandFlowResult,
 			commandCpuResult = null;
 	private static CommandResult commandPidResult, commandUidResult;
 	private static FlowData flowData = null;
 	private static KpiData kpiData = null;
-	private static List<KpiData>kpiList = new ArrayList<>(28);
+	private static List<KpiData> kpiList = new ArrayList<>(28);
+	private static String fpsdata =null;
 	
 	private static GetDataInterface mGetDataListener = new GetDataInterface() {
 		
@@ -72,8 +75,10 @@ public class CollectDataImpl {
 	public static void startCollectKpiData(String packageName){
 		kpiList.clear();
 		String cmd = "adb logcat -v time -s ActivityManager | findStr " + packageName;
+		System.out.println(cmd);
 		String clearcmd = "adb logcat -c";
 		CollectDataUtil.execCmdCommand(clearcmd);
+		System.out.println(clearcmd);
 		CollectDataUtil.execCmdCommand(cmd, mGetDataListener);
 	}
 	
@@ -97,7 +102,9 @@ public class CollectDataImpl {
 			LoggerManager.logDebug(LOGTAG, "getFpsData", "get fps is wrong");
 			return null;
 		}
+        fpsdata = commandFpsResult.successMsg;
 		return handleFpsData(commandFpsResult.successMsg);
+        
 	}
 
 	// public static KpiData getKpiData(String packageName){
@@ -409,7 +416,26 @@ public class CollectDataImpl {
 
 		return "";
 	}
-
+    
+	private static String rehandle(String getfpsdata){
+		String line = getfpsdata;
+		String resu = null;
+		String pattern = "Execute[\\s\\S]*View hierarchy";
+		// 创建 Pattern 对象
+		Pattern r = Pattern.compile(pattern);
+		// 现在创建 matcher 对象
+		Matcher m = r.matcher(line);
+		if (m.find( )) {
+		resu = (String) m.group(0);
+		}
+		else {
+		System.out.println("NO MATCH");
+		}
+	return resu ;
+		
+	}
+	
+	
 	/**
 	 * 处理Fps的数据，抓取自己关心的数据
 	 * 
@@ -420,15 +446,21 @@ public class CollectDataImpl {
 		if (content == null || "".equals(content)) {
 			return null;
 		}
-
+		FpsData fpsData = null;
+		
 		// content = CommonUtil.formatBlanksToBlank(content);
+//		System.out.println(content);
 		String[] firstSpilt = content.split("Draw	Prepare	Process	Execute");
-		String[] secondSpilt = firstSpilt[2].split("View hierarchy:");
-		String[] thirdSpilt = secondSpilt[0].trim().split("\n\n\t");
+//		System.out.println(Arrays.toString(firstSpilt));
+//		System.out.println(firstSpilt[2]);
+		if (firstSpilt.length >2 ){
+        String[] secondSpilt = firstSpilt[2].split("View hierarchy:");
+        String[] thirdSpilt = secondSpilt[0].trim().split("\n\n\t");
 		if (thirdSpilt == null || thirdSpilt.length < 1) {
 			LoggerManager.logDebug(LOGTAG, "handleFpsData", "no operation mobilephone");
 			return new FpsData(0, 0, 0);
 		}
+         
 		String[] fpsSplit;
 		int frameCount = thirdSpilt.length;
 		int jank_count = 0;
@@ -458,8 +490,11 @@ public class CollectDataImpl {
 			}
 		}
 		int fps = frameCount * 60 / (frameCount + vsync_count);
-		FpsData fpsData = new FpsData(fps, jank_count, frameCount);
+
+		fpsData = new FpsData(fps, jank_count, frameCount);}
+		
 		return fpsData;
+		
 	}
 	/**
 	 * 获取对应包名的pid
@@ -527,16 +562,9 @@ public class CollectDataImpl {
 	
 	
 	public static void main(String[] args) {
-		FlowData flowData = CollectDataImpl.getFlowData("com.xdja.HDSafeEMailClient");
-		for(int i = 0; i< 20; i++){
-			System.out.println(flowData);
-			try {
-				Thread.sleep(1000);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
+		FpsData getfpsdata = CollectDataImpl.getFpsData("com.xdja.safekeyservice");
+		System.out.println(getfpsdata);
+//		CollectDataImpl.rehandle(getfpsdata);
+		
 	}
-
 }
