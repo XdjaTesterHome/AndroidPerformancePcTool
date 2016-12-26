@@ -18,7 +18,6 @@ import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
@@ -130,6 +129,7 @@ public class LaunchView extends JFrame {
 			}
 		});
 
+		// 开始监控按钮
 		jb1 = new JButton("开始监控");
 		Rectangle rectjb1 = new Rectangle(860, 0, 100, 30);
 		frame.add(jb1);
@@ -138,15 +138,24 @@ public class LaunchView extends JFrame {
 		jb1.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				JOptionPane.showMessageDialog(null, "start run performance!");
-				jb2.setEnabled(true);
-				jb1.setEnabled(false);
-				comboDevices.setEnabled(false);
-				startTest();
+				Thread thread = new Thread(new Runnable() {
+
+					@Override
+					public void run() {
+						// TODO Auto-generated method stub
+						jb2.setEnabled(true);
+						jb1.setEnabled(false);
+						comboDevices.setEnabled(false);
+						startTest();
+					}
+				});
+
+				thread.start();
 			}
 
 		});
 
+		// 停止监控按钮
 		jb2 = new JButton("停止监控");
 		Rectangle rectjb2 = new Rectangle(980, 0, 100, 30);
 		frame.add(jb2);
@@ -156,11 +165,19 @@ public class LaunchView extends JFrame {
 		jb2.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				JOptionPane.showMessageDialog(null, "stop run performance!");
-				jb1.setEnabled(true);
-				jb2.setEnabled(false);
-				comboDevices.setEnabled(true);
-				stopTest();
+				Thread thread = new Thread(new Runnable() {
+
+					@Override
+					public void run() {
+						// TODO Auto-generated method stub
+						jb1.setEnabled(true);
+						jb2.setEnabled(false);
+						comboDevices.setEnabled(true);
+						stopTest();
+					}
+				});
+
+				thread.start();
 			}
 		});
 
@@ -230,10 +247,11 @@ public class LaunchView extends JFrame {
 	 */
 	private void initDeviceList() {
 		// initial android debug bridge
-//		testDevices();
-		TreeSet< com.github.cosysoft.device.android.AndroidDevice> devices = AndroidDeviceStore.getInstance().getDevices();
+		// testDevices();
+		TreeSet<com.github.cosysoft.device.android.AndroidDevice> devices = AndroidDeviceStore.getInstance()
+				.getDevices();
 		List<String> snList = new ArrayList<>(2);
-		for(com.github.cosysoft.device.android.AndroidDevice device : devices){
+		for (com.github.cosysoft.device.android.AndroidDevice device : devices) {
 			snList.add(device.getName());
 		}
 
@@ -249,7 +267,7 @@ public class LaunchView extends JFrame {
 				comboProcess.addItem(sn);
 			}
 		}
-		
+
 		// 为几个可操作的控件添加监听器
 		addDeviceChangeListener();
 	}
@@ -405,9 +423,10 @@ public class LaunchView extends JFrame {
 		}
 
 	}
-	
+
 	/**
 	 * 获取选中的device
+	 * 
 	 * @return
 	 */
 	public static String getdevice() {
@@ -415,7 +434,7 @@ public class LaunchView extends JFrame {
 		if (comboDevices != null) {
 			devicename = (String) comboDevices.getSelectedItem();
 		}
-		
+
 		return devicename;
 
 	}
@@ -443,17 +462,15 @@ public class LaunchView extends JFrame {
 	 */
 	private void startTest() {
 		if (viewMemory != null) {
-			new Thread() {
-				@Override
-				public void run() {
-					// TODO Auto-generated method stub
-					// kpiTestView.startTest();
-					viewMemory.refreshData();
-					viewFlow.refreshData();
-					viewCpu.refreshData();
-				}
-			}.start();
+			viewMemory.start(GlobalConfig.PackageName);
+		}
 
+		if (viewCpu != null) {
+			viewCpu.start(GlobalConfig.PackageName);
+		}
+
+		if (viewFlow != null) {
+			viewFlow.start(GlobalConfig.PackageName);
 		}
 	}
 
@@ -462,10 +479,15 @@ public class LaunchView extends JFrame {
 	 */
 	private void stopTest() {
 		if (viewMemory != null) {
-			viewMemory.stopRefresh();
-			viewFlow.stopRefresh();
-			viewCpu.stopRefresh();
-			// kpiTestView.stopTest();
+			viewMemory.stop();
+		}
+
+		if (viewCpu != null) {
+			viewCpu.stop();
+		}
+
+		if (viewFlow != null) {
+			viewFlow.stop();
 		}
 	}
 

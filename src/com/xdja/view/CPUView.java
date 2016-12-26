@@ -1,17 +1,10 @@
 package com.xdja.view;
 
 import java.awt.BasicStroke;
-import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Font;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.util.concurrent.ExecutionException;
 
 import javax.swing.BorderFactory;
-import javax.swing.JPanel;
-import javax.swing.SwingWorker;
-import javax.swing.Timer;
 
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
@@ -26,7 +19,6 @@ import org.jfree.data.time.TimeSeriesCollection;
 import org.jfree.ui.RectangleInsets;
 
 import com.xdja.collectdata.CollectDataImpl;
-import com.xdja.constant.GlobalConfig;
 
 public class CPUView extends BaseChartView{
 	
@@ -35,7 +27,8 @@ public class CPUView extends BaseChartView{
 	 */
 	private static final long serialVersionUID = -9002331611054515951L;
 	private TimeSeries totalcpu;
-	private Timer mTaskTimer;
+	private Thread cpuThread;
+	private boolean stopFlag = false;
 	
 	public CPUView(String chartContent,String title,String yaxisName)  
     {  
@@ -81,42 +74,7 @@ public class CPUView extends BaseChartView{
             BorderFactory.createLineBorder(Color.black))
         );
         add(chartPanel);
-        setActionListener(actionListener);
     }
-	
-	ActionListener actionListener = new ActionListener() {
-		
-		@Override
-		public void actionPerformed(ActionEvent e) {
-			// TODO Auto-generated method stub
-			
-			
-			final SwingWorker<Float, Void> worker = new SwingWorker<Float, Void>() {
-
-				@Override
-				protected Float doInBackground() throws Exception {
-					// TODO Auto-generated method stub
-					float cpu = CollectDataImpl.getCpuUsage(GlobalConfig.PackageName);
-					return cpu;
-				}
-				
-				protected void done() {
-					float cpu = 0;
-					try {
-						cpu = get();
-					} catch (InterruptedException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					} catch (ExecutionException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-					addTotalObservation(cpu);
-				};
-		    };
-		    worker.run(); 
-		}
-	};
 	
     /**
      * Adds an observation to the 'total memory' time series.
@@ -126,4 +84,37 @@ public class CPUView extends BaseChartView{
     private void addTotalObservation(double y) {
         this.totalcpu.add(new Millisecond(), y);
     }
+    
+    /**
+     *  开启任务
+     * @param packageName
+     */
+    public void start(String packageName) {
+    	cpuThread = new Thread(new Runnable() {
+			
+			@Override
+			public void run() {
+				// TODO Auto-generated method stub
+				stopFlag = false;
+				while (true) {
+					if (stopFlag) {
+						break;
+					}
+					
+					float cpu = CollectDataImpl.getCpuUsage(packageName);
+					addTotalObservation(cpu);
+				}
+			}
+		});
+    	
+    	cpuThread.start();
+	}
+    
+    /**
+     * 停止任务
+     */
+    public void stop() {
+		
+	}
+    
 }

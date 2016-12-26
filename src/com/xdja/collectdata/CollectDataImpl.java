@@ -284,7 +284,6 @@ public class CollectDataImpl {
 	public static float getCpuUsage(String packageName) {
 		int startProcTotal = getCpuTotal();
 		int startProcPid = getProcData(packageName);
-		
 		//每隔1s取一次数据。
 		try {
 			Thread.sleep(1000);
@@ -295,12 +294,11 @@ public class CollectDataImpl {
 
 		int endProcTotal = getCpuTotal();
 		int endProcPid = getProcData(packageName);
-
 		// 保留2位小数
 		float cpuData = 0;
 		// 防止分母为0的情况存在
 		if (startProcTotal - endProcTotal != 0) {
-			cpuData = (endProcPid - startProcPid) / (startProcTotal - endProcTotal) * 100;
+			cpuData = (float)(endProcPid - startProcPid) / (endProcTotal - startProcTotal ) * 100;
 		}
 		
 		return CommonUtil.getTwoDots(cpuData);
@@ -567,8 +565,18 @@ public class CollectDataImpl {
 	
 	
 	public static void main(String[] args) {
-		FpsData getfpsdata = CollectDataImpl.getFpsData("com.xdja.safekeyservice");
-		System.out.println(getfpsdata);
+		for (int i = 0; i < 20; i++) {
+			try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+			float cu = CollectDataImpl.getCpuUsage("com.xdja.HDSafeEMailClient");
+			System.out.println(cu);
+		}
+		
 //		CollectDataImpl.rehandle(getfpsdata);
 		
 	}

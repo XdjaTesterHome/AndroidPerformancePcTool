@@ -1,17 +1,10 @@
 package com.xdja.view;
 
 import java.awt.BasicStroke;
-import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Font;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.util.concurrent.ExecutionException;
 
 import javax.swing.BorderFactory;
-import javax.swing.JPanel;
-import javax.swing.SwingWorker;
-import javax.swing.Timer;
 
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
@@ -26,7 +19,6 @@ import org.jfree.data.time.TimeSeriesCollection;
 import org.jfree.ui.RectangleInsets;
 
 import com.xdja.collectdata.CollectDataImpl;
-import com.xdja.constant.GlobalConfig;
 
 public class MemoryView extends BaseChartView{
 	
@@ -35,7 +27,8 @@ public class MemoryView extends BaseChartView{
 	 */
 	private static final long serialVersionUID = -9002331611054515951L;
 	private TimeSeries totalAlloc;
-	private Timer mTaskTimer;
+	private boolean stopFlag = false;
+	private Thread memoryThread;
 	
 	public MemoryView(String chartContent,String title,String yaxisName)  
     {  
@@ -81,44 +74,7 @@ public class MemoryView extends BaseChartView{
             BorderFactory.createLineBorder(Color.black))
         );
         add(chartPanel);
-        setActionListener(actionListener);
     }
-	
-	ActionListener actionListener = new ActionListener() {
-		
-		@Override
-		public void actionPerformed(ActionEvent e) {
-			// TODO Auto-generated method stub
-			
-			
-			final SwingWorker<Float, Void> worker = new SwingWorker<Float, Void>() {
-
-				@Override
-				protected Float doInBackground() throws Exception {
-					// TODO Auto-generated method stub
-					float memory = CollectDataImpl.getMemoryData(GlobalConfig.PackageName);
-					return memory;
-				}
-				
-				protected void done() {
-					float memory = 0;
-					try {
-						memory = get();
-					} catch (InterruptedException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					} catch (ExecutionException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-					addTotalObservation(memory);
-				};
-		    };
-		    worker.run(); 
-		}
-	
-	
-	};
 	
     /**
      * Adds an observation to the 'total memory' time series.
@@ -128,4 +84,31 @@ public class MemoryView extends BaseChartView{
     private void addTotalObservation(double y) {
         this.totalAlloc.add(new Millisecond(), y);
     }
+    
+    /**
+     *  ¿ªÆô½øÐÐ²âÊÔ
+     * @param packageName
+     */
+    public void start(String packageName) {
+    	memoryThread = new Thread(new Runnable() {
+			
+			@Override
+			public void run() {
+				// TODO Auto-generated method stub
+				stopFlag = false;
+				while(true){
+					if (stopFlag) {
+						break;
+					}
+					float memory = CollectDataImpl.getMemoryData(packageName);
+					addTotalObservation(memory);
+				}
+			}
+		});
+    	memoryThread.start();
+	}
+    
+    public void stop() {
+		stopFlag = true;
+	}
 }
