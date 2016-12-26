@@ -113,7 +113,7 @@ public class FpsView extends BaseChartView{
 						e.printStackTrace();
 					}
 				
-					addTotalObservation(Fpsdata);
+//					addTotalObservation(Fpsdata);
 				};
 		    };
 		    worker.run(); 

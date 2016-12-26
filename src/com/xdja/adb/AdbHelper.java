@@ -81,25 +81,6 @@ public class AdbHelper {
 		return false;
 	}
 
-	public static void main(String args[]) {
-		try {
-			AdbHelper.getInstance().addIconOnImage("D:\\temp\\test.jpg", "D:\\temp\\small1.jpg", "D:\\temp\\dest.jpg");
-			AdbHelper.getInstance().addTextOnImage("D:\\temp\\test.jpg", "添加文字", "楷体", "D:\\temp\\dest1.jpg");
-		} catch (ImageFormatException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		// AdbHelper.getInstance().getScreenShot("e3cabcd+COM11+COM9",
-		// "D:\\temp\\test1.jpg");
-		// System.out.println(AdbHelper.getInstance().getBattries("e3cabcd+COM11+COM9"));
-		// System.out.println(AdbHelper.getInstance().getProperties("e3cabcd+COM11+COM9"));
-		// System.out.println(AdbHelper.getInstance().getProperty("e3cabcd+COM11+COM9",
-		// "ro.build.version.release"));
-		// System.out.println(AdbHelper.getInstance().isOnLine("e3cabcd+COM11+COM9"));
-		// System.out.println(AdbHelper.getInstance().isOffLine("e3cabcd+COM11+COM9"));
-	}
-
 	public static void setAdbPath(String adbPath) {
 		AdbHelper.ADB_PATH = adbPath;
 	}
@@ -192,7 +173,7 @@ public class AdbHelper {
 	private void connectBridge() {
 		// 如果是连接远端的服务,则进行远端连接
 		AndroidDebugBridge.init(false);
-		this.bridge = AndroidDebugBridge.createBridge(ADB_PATH, false);
+		this.bridge = AndroidDebugBridge.createBridge(ADB_PATH, true);
 	}
 
 	public List<String> executeShellCommandWithOutput(IDevice device, String cmd) {
@@ -395,15 +376,5 @@ public class AdbHelper {
 		if (bridge.hasInitialDeviceList()) {
 			logger.info("Adb Helper initial successfully!");
 		}
-	}
-	
-	/***
-	 * 获取当前设备正在运行的进程信息
-	 * @param sn 设备的序列号
-	 * @return
-	 */
-	public List<String> getRunningProcess(String sn){
-		IDevice device = AdbHelper.getInstance().getDevice(sn);
-		return null;
 	}
 }

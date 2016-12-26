@@ -117,7 +117,7 @@ public class CollectDataImpl {
 	 */
 	public static String devicesdo(Object selected){
 		String str = (String) selected;
-		String pattern = "_(.*)_(.*)";
+		String pattern = "-(.*)-(.*)";
 		Pattern r = Pattern.compile(pattern);
 		Matcher m = r.matcher(str);
 		if (m.find( )) {
@@ -297,7 +297,12 @@ public class CollectDataImpl {
 		int endProcPid = getProcData(packageName);
 
 		// 保留2位小数
-		float cpuData = (endProcPid - startProcPid) / (startProcTotal - endProcTotal) * 100;
+		float cpuData = 0;
+		// 防止分母为0的情况存在
+		if (startProcTotal - endProcTotal != 0) {
+			cpuData = (endProcPid - startProcPid) / (startProcTotal - endProcTotal) * 100;
+		}
+		
 		return CommonUtil.getTwoDots(cpuData);
 	}
 	
