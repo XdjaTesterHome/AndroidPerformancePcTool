@@ -1,83 +1,116 @@
 package com.xdja.view;
 
-import org.apache.log4j.Logger;
-import org.jfree.chart.ChartFactory;
+import java.awt.BasicStroke;
+import java.awt.Color;
+import java.awt.Font;
+
+import javax.swing.BorderFactory;
+
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
-import org.jfree.chart.axis.ValueAxis;
+import org.jfree.chart.axis.DateAxis;
+import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.plot.XYPlot;
-import org.jfree.data.time.TimeSeries;
+import org.jfree.chart.renderer.xy.XYItemRenderer;
+import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.data.time.Millisecond;
+import org.jfree.data.time.TimeSeries;
 import org.jfree.data.time.TimeSeriesCollection;
+import org.jfree.ui.RectangleInsets;
 
-import com.xdja.constant.Constants;
-import com.xdja.monitor.ControllerMonitor;
+import com.xdja.collectdata.CollectDataImpl;
+import com.xdja.collectdata.FlowData;
 
-public class BatteryView extends ChartPanel {
+public class BatteryView extends BaseChartView {
 
 	/**
 	 * serial UID is auto generated
 	 */
-	private static final long serialVersionUID = 6214606803165478469L;
-	private Logger logger = Logger.getLogger(BatteryView.class);
-	private Thread batteryThread;
-	private static TimeSeries timeSeries;
+	private static final long serialVersionUID = 1719925024734975743L;
+	private TimeSeries flowCost;
+	private FlowData mFlowData;
+	private float mLastFlow = -1 ;
+	private Thread flowThread ;
 	private boolean stopFlag = false;
 	
 	public BatteryView(String chartContent, String title, String yaxisName) {
-		this(createChart(chartContent, title, yaxisName));
+		super();
+		this.flowCost = new TimeSeries(chartContent);
+		TimeSeriesCollection dataset = new TimeSeriesCollection();
+		dataset.addSeries(this.flowCost);
+
+		DateAxis domain = new DateAxis("Time");
+		NumberAxis range = new NumberAxis("流量消耗(KB)");
+		domain.setTickLabelFont(new Font("SansSerif", Font.PLAIN, 12));
+		range.setTickLabelFont(new Font("SansSerif", Font.PLAIN, 12));
+		domain.setLabelFont(new Font("SansSerif", Font.PLAIN, 14));
+		range.setLabelFont(new Font("SansSerif", Font.PLAIN, 14));
+
+		XYItemRenderer renderer = new XYLineAndShapeRenderer(true, false);
+		renderer.setSeriesPaint(0, Color.red);
+		renderer.setSeriesStroke(0, new BasicStroke(3F));
+
+		XYPlot plot = new XYPlot(dataset, domain, range, renderer);
+		plot.setBackgroundPaint(Color.lightGray);
+		plot.setDomainGridlinePaint(Color.white);
+		plot.setRangeGridlinePaint(Color.white);
+		plot.setAxisOffset(new RectangleInsets(5.0, 5.0, 5.0, 5.0));
+		domain.setAutoRange(true);
+		domain.setLowerMargin(0.0);
+		domain.setUpperMargin(0.0);
+		domain.setTickLabelsVisible(true);
+
+		range.setStandardTickUnits(NumberAxis.createIntegerTickUnits());
+		JFreeChart chart = new JFreeChart(title, new Font("SansSerif", Font.BOLD, 24), plot, true);
+		chart.setBackgroundPaint(Color.white);
+		ChartPanel chartPanel = new ChartPanel(chart);
+		chartPanel.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4),
+				BorderFactory.createLineBorder(Color.black)));
+		add(chartPanel);
 	}
 
-	public BatteryView(JFreeChart chart) {
-		super(chart);
+	/**
+	 * Adds an observation to the 'total memory' time series.
+	 *
+	 * @param y
+	 *            the total memory used.
+	 */
+	private void addFlowObservation(double y) {
+		this.flowCost.add(new Millisecond(), y);
 	}
 	
-	public void start(final String packageName) {
-		batteryThread = new Thread(new Runnable() {
+	/**
+	 * 开始测试
+	 * @param packageName
+	 */
+	public void start(String packageName) {
+		flowThread = new Thread(new Runnable() {
+			
 			@Override
 			public void run() {
+				// TODO Auto-generated method stub
 				stopFlag = false;
-				while(true) {
-					if (!stopFlag) {
-						try {
-							double info = ControllerMonitor.getInstance().getBatteryController().getInfo(packageName);
-							timeSeries.add(new Millisecond(), info);
-							logger.info(String.format("Package \"%s\" Battery: %f%%", packageName, info));
-							Thread.sleep(500);
-						} catch (InterruptedException e) {
-							logger.error(e.getMessage(), e.getCause());
-							e.printStackTrace();
-						}
-					} else {
-						logger.info("Battery View test is stoped!");
+				while (true) {
+					if (stopFlag) {
 						break;
+					}
+					
+					mFlowData = CollectDataImpl.getFlowData(packageName);
+					if (mFlowData != null) {
+						if (mLastFlow == -1) {
+							addFlowObservation(0);
+						}
+						addFlowObservation(mFlowData.flowTotal - mLastFlow);
+						mLastFlow = mFlowData.flowTotal;
 					}
 				}
 			}
 		});
-		batteryThread.start();
+		
+		flowThread.start();
 	}
 	
 	public void stop() {
 		stopFlag = true;
 	}
-	
-	public static JFreeChart createChart(String chartContent, String title, String yaxisName) {
-		timeSeries = new TimeSeries(chartContent, Millisecond.class);
-		TimeSeriesCollection dataset = new TimeSeriesCollection(timeSeries); 
-		//params:图表标题，图表x轴，图标y轴，数据集，显示图例，采用标准生成器，是否生成超链接
-		JFreeChart timeSeriesChart = ChartFactory.createTimeSeriesChart(title, Constants.TIME_UNIT, yaxisName, dataset, true, true, false);
-		// 获取plot对象
-		XYPlot xyplot = timeSeriesChart.getXYPlot();
-		// 获取x轴对象
-		ValueAxis valueaxis = xyplot.getDomainAxis();
-		// 自动设置数据轴数据范围
-		valueaxis.setAutoRange(true);
-		// 数据轴固定数据范围 30s
-		valueaxis.setFixedAutoRange(60000D);
-		// 获取y轴对象
-		valueaxis = xyplot.getRangeAxis();
-		return timeSeriesChart;
-	}
-
 }

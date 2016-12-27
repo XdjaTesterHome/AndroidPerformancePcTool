@@ -15,7 +15,6 @@ import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.renderer.category.BarRenderer;
 import org.jfree.chart.title.LegendTitle;
 import org.jfree.chart.title.TextTitle;
-import org.jfree.data.category.CategoryDataset;
 import org.jfree.data.category.DefaultCategoryDataset;
 
 import com.xdja.collectdata.CollectDataImpl;
@@ -78,24 +77,6 @@ public class FpsView extends BaseChartView {
 	}
 
 	/**
-	 * Adds an observation to the 'total memory' time series.
-	 *
-	 * @param fpsdata
-	 *            the total memory used.FpsData
-	 */
-	// private void addTotalObservation(FpsData fpsdata) {
-	// this.totalFps.add(new Millisecond(), fpsdata);
-	// }
-
-	public static CategoryDataset createDataset(DefaultCategoryDataset ds, FpsData str, int i) // 创建柱状图数据集
-	{
-		ds.addValue(str.fps, "帧率", "第" + i + "次");
-		ds.addValue(str.dropcount, "卡顿", "第" + i + "次");
-		ds.addValue(str.framecount, "丢帧", "第" + i + "次");
-		return ds;
-	}
-
-	/**
 	 * 开始测试
 	 * 
 	 * @param packageName
@@ -112,7 +93,6 @@ public class FpsView extends BaseChartView {
 					}
 
 					fpsdata = CollectDataImpl.getFpsData(packageName);
-					System.out.println(fpsdata);
 					if (fpsdata != null) {
 //						mDataset = new DefaultCategoryDataset();
 						mDataset.addValue(fpsdata.fps, "帧率", fpsdata.activityName);

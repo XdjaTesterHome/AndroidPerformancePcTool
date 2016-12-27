@@ -5,6 +5,9 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.android.ddmlib.AndroidDebugBridge;
+import com.android.ddmlib.AndroidDebugBridge.IClientChangeListener;
+import com.android.ddmlib.Client;
 import com.xdja.log.LoggerManager;
 import com.xdja.util.CommonUtil;
 
@@ -21,7 +24,6 @@ public class CollectDataImpl {
 	private static FlowData flowData = null;
 	private static KpiData kpiData = null;
 	private static List<KpiData> kpiList = new ArrayList<>(28);
-	private static String fpsdata = null;
 
 	private static GetDataInterface mGetDataListener = new GetDataInterface() {
 
@@ -71,10 +73,10 @@ public class CollectDataImpl {
 	 */
 	public static void startCollectKpiData(String packageName) {
 		kpiList.clear();
-		String cmd = "adb logcat -v time -s ActivityManager | findStr " + packageName;
+		String cmd = "adb logcat -v time -s ActivityManager | grep " + packageName;
 		System.out.println(cmd);
 		String clearcmd = "adb logcat -c";
-		CollectDataUtil.execCmdCommand(clearcmd);
+		CollectDataUtil.execShellCommand(clearcmd);
 		System.out.println(clearcmd);
 		CollectDataUtil.execCmdCommand(cmd, mGetDataListener);
 	}
@@ -95,13 +97,12 @@ public class CollectDataImpl {
 	 * @return
 	 */
 	public static FpsData getFpsData(String packageName) {
-		String cmd = "adb shell dumpsys gfxinfo " + packageName;
-		commandFpsResult = CollectDataUtil.execCmdCommand(cmd, false, true);
+		String cmd = "shell dumpsys gfxinfo " + packageName;
+		commandFpsResult = CollectDataUtil.execShellCommand(cmd);
 		if (commandFpsResult == null || !"".equals(commandFpsResult.errorMsg)) {
 			LoggerManager.logDebug(LOGTAG, "getFpsData", "get fps is wrong");
 			return null;
 		}
-		fpsdata = commandFpsResult.successMsg;
 		return handleFpsData(commandFpsResult.successMsg);
 
 	}
@@ -135,9 +136,9 @@ public class CollectDataImpl {
 	 * @return
 	 */
 	public static List<String> getRunningProcess(String deviceNo) {
-		String systemcmd = "adb -s " + deviceNo + " shell ps | findStr \"^system\"";
-		String u0cmd = "adb -s " + deviceNo + " shell ps | findStr \"^u0\"";
-		CommandResult runningCmdResult = CollectDataUtil.execCmdCommand(systemcmd, false, true);
+		String systemcmd = "shell ps | grep \"^system\"";
+		String u0cmd = "shell ps | grep \"^u0\"";
+		CommandResult runningCmdResult = CollectDataUtil.execShellCommand(systemcmd);
 		List<String> runningProcess = new ArrayList<>(20);
 		if (runningCmdResult == null || !"".equals(runningCmdResult.errorMsg)) {
 			LoggerManager.logError(LOGTAG, "getRunningProcess", runningCmdResult.errorMsg);
@@ -157,7 +158,7 @@ public class CollectDataImpl {
 			}
 		}
 
-		CommandResult runningU0Result = CollectDataUtil.execCmdCommand(u0cmd, false, true);
+		CommandResult runningU0Result = CollectDataUtil.execShellCommand(u0cmd);
 		if (runningU0Result == null || !"".equals(runningU0Result.errorMsg)) {
 			LoggerManager.logError(LOGTAG, "getRunningProcess", runningU0Result.errorMsg);
 			return runningProcess;
@@ -192,19 +193,19 @@ public class CollectDataImpl {
 			flowData = new FlowData(0, 0, 0);
 			return flowData;
 		}
-		String cmd = "adb shell cat /proc/net/xt_qtaguid/stats";
-		commandFlowResult = CollectDataUtil.execCmdCommand(cmd, false, true);
+		String cmd = "shell cat /proc/net/xt_qtaguid/stats";
+		commandFlowResult = CollectDataUtil.execShellCommand(cmd);
 		int flowSend = 0, flowRecv = 0;
 		if (commandFlowResult == null || commandFlowResult.errorMsg != null && !"".equals(commandFlowResult.errorMsg)) {
-			String cmdSnd = "adb shell cat /proc/uid_stat/" + uid + "/tcp_snd";
-			String cmdRec = "adb shell cat /proc/uid_stat/" + uid + "+/tcp_rcv";
-			commandFlowResult = CollectDataUtil.execCmdCommand(cmdSnd, false, true);
+			String cmdSnd = "shell cat /proc/uid_stat/" + uid + "/tcp_snd";
+			String cmdRec = "shell cat /proc/uid_stat/" + uid + "+/tcp_rcv";
+			commandFlowResult = CollectDataUtil.execShellCommand(cmdSnd);
 
 			if (commandFlowResult != null && !commandFlowResult.errorMsg.contains("No such file or directory")) {
 				flowSend = Integer.parseInt(commandFlowResult.successMsg);
 			}
 
-			commandFlowResult = CollectDataUtil.execCmdCommand(cmdRec, false, true);
+			commandFlowResult = CollectDataUtil.execShellCommand(cmdRec);
 			if (commandFlowResult != null && !commandFlowResult.errorMsg.contains("No such file or directory")) {
 				flowRecv = Integer.parseInt(commandFlowResult.successMsg);
 			}
@@ -216,8 +217,8 @@ public class CollectDataImpl {
 		}
 
 		if (commandFlowResult.successMsg != null && !"".equals(commandFlowResult.successMsg)) {
-			String cmdproc = "adb shell cat /proc/net/xt_qtaguid/stats | grep " + uid;
-			commandFlowResult = CollectDataUtil.execCmdCommand(cmdproc, false, true);
+			String cmdproc = "shell cat /proc/net/xt_qtaguid/stats | grep " + uid;
+			commandFlowResult = CollectDataUtil.execShellCommand(cmdproc);
 			String netStats = commandFlowResult.successMsg;
 			int totalRecv = 0;
 			int totalSend = 0;
@@ -248,8 +249,8 @@ public class CollectDataImpl {
 	 * @return
 	 */
 	public static float getMemoryData(String packageName) {
-		String cmd = "adb shell dumpsys meminfo " + packageName;
-		commandMemoryResult = CollectDataUtil.execCmdCommand(cmd, false, true);
+		String cmd = "shell dumpsys meminfo " + packageName;
+		commandMemoryResult = CollectDataUtil.execShellCommand(cmd);
 		if (commandMemoryResult == null) {
 			return 0;
 		}
@@ -274,6 +275,23 @@ public class CollectDataImpl {
 		}
 		return 0;
 	}
+	
+	/**
+	 *  通过ddmlib获取memory信息
+	 * @param packageName
+	 * @param deviceName
+	 * @return
+	 */
+//	public static float getMemoryData(String packageName, String deviceName) {
+//		AndroidDebugBridge.addClientChangeListener(new IClientChangeListener() {
+//			
+//			@Override
+//			public void clientChanged(Client client, int changeMask) {
+//				// TODO Auto-generated method stub
+//				
+//			}
+//		});
+//	}
 
 	/***
 	 * 用于根据包名获取cpu利用率,每隔Constant.collectInterval时间采集一次数据
@@ -310,8 +328,8 @@ public class CollectDataImpl {
 	 * @return
 	 */
 	public static String getCurActivity() {
-		String cmd = "adb shell dumpsys activity top | findStr ACTIVITY";
-		CommandResult activityResult = CollectDataUtil.execCmdCommand(cmd, false, true);
+		String cmd = "shell dumpsys activity top | grep ACTIVITY";
+		CommandResult activityResult = CollectDataUtil.execShellCommand(cmd);
 
 		if (activityResult != null && !"".equals(activityResult.successMsg)) {
 			String activityName = CommonUtil.formatBlanksToBlank(activityResult.successMsg);
@@ -340,8 +358,8 @@ public class CollectDataImpl {
 	 */
 	private static int getProcData(String packageName) {
 		int pid = getPid(packageName);
-		String cmd = "adb shell cat /proc/" + pid + "/stat";
-		commandCpuResult = CollectDataUtil.execCmdCommand(cmd, false, true);
+		String cmd = "shell cat /proc/" + pid + "/stat";
+		commandCpuResult = CollectDataUtil.execShellCommand(cmd);
 
 		if (commandCpuResult == null) {
 			return 0;
@@ -351,7 +369,11 @@ public class CollectDataImpl {
 			LoggerManager.logError(LOGTAG, "getProcData", commandCpuResult.errorMsg);
 			return 0;
 		}
-		if (commandCpuResult.successMsg != null && !"".equals(commandCpuResult.successMsg)) {
+		
+		if (!CommonUtil.strIsNull(commandCpuResult.successMsg)) {
+			if (commandCpuResult.successMsg.contains("No such file or directory")) {
+				return 0;
+			}
 			String[] times = commandCpuResult.successMsg.split(" ");
 			int utime = Integer.parseInt(times[13]);
 			int stime = Integer.parseInt(times[14]);
@@ -370,8 +392,8 @@ public class CollectDataImpl {
 	 */
 	private static int getCpuTotal() {
 		// 累积了从系统启动到现在的cpu总的信息
-		String cmd = "adb shell cat /proc/stat";
-		commandCpuResult = CollectDataUtil.execCmdCommand(cmd, false, true);
+		String cmd = "shell cat /proc/stat";
+		commandCpuResult = CollectDataUtil.execShellCommand(cmd);
 		if (commandCpuResult == null) {
 			return 0;
 		}
@@ -382,7 +404,7 @@ public class CollectDataImpl {
 		}
 
 		if (commandCpuResult.successMsg != null && commandCpuResult.successMsg != "") {
-			String totalCpu = commandCpuResult.successMsg.split("\n")[0].trim();
+			String totalCpu = commandCpuResult.successMsg.trim().split("\n")[0].trim();
 			String[] cpus = totalCpu.split(" ");
 			int totalCpus = 0;
 			// 前面有两个空格
@@ -405,8 +427,8 @@ public class CollectDataImpl {
 	 */
 	private static String getUid(String packageName) {
 		int pid = getPid(packageName);
-		String cmd = "adb shell cat /proc/" + pid + "/status | grep Uid";
-		commandUidResult = CollectDataUtil.execCmdCommand(cmd, false, true);
+		String cmd = "shell cat /proc/" + pid + "/status | grep Uid";
+		commandUidResult = CollectDataUtil.execShellCommand(cmd);
 		if (commandUidResult == null) {
 			return "";
 		}
@@ -463,7 +485,7 @@ public class CollectDataImpl {
 		if (firstSpilt.length > 0) {
 			String[] secondSpilt = firstSpilt[1].trim().split("View hierarchy");
 			if (secondSpilt.length > 0) { //表示是否有帧率数据
-				String[] thirdSpilt = secondSpilt[0].trim().split("\n\n\t");
+				String[] thirdSpilt = secondSpilt[0].trim().split("\n");
 				if (thirdSpilt == null || thirdSpilt.length < 1) {
 					LoggerManager.logDebug(LOGTAG, "handleFpsData", "no operation mobilephone");
 					return new FpsData(0, 0, 0, activityName);
@@ -517,9 +539,9 @@ public class CollectDataImpl {
 	 * @return
 	 */
 	public static int getPid(String packageName) {
-		String cmd = "adb shell ps | grep " + packageName + " | awk '{print $2}'";
+		String cmd = "shell ps | grep " + packageName;
 		// String cmd = "ps";
-		commandPidResult = CollectDataUtil.execCmdCommand(cmd, false, true);
+		commandPidResult = CollectDataUtil.execShellCommand(cmd);
 		if (commandPidResult == null) {
 			return 0;
 		}
@@ -528,12 +550,13 @@ public class CollectDataImpl {
 			LoggerManager.logError(LOGTAG, "getPid", commandPidResult.errorMsg);
 			return 0;
 		}
-
+		
 		if (commandPidResult.successMsg != null && commandPidResult.successMsg != "") {
-			if (commandPidResult.successMsg.split("\n").length > 1) {
-				return Integer.parseInt(commandPidResult.successMsg.split("\n")[0]);
-			} else {
-				return Integer.parseInt(commandPidResult.successMsg.trim());
+			String[] lines = commandPidResult.successMsg.trim().split("\n");
+			String result = CommonUtil.formatBlanksToBlank(lines[0].trim());
+			String[] results = result.split(" ");
+			if (results.length > 1) {
+				return Integer.parseInt(results[1]);
 			}
 
 		}
@@ -577,18 +600,23 @@ public class CollectDataImpl {
 
 	public static void main(String[] args) {
 		for (int i = 0; i < 20; i++) {
-			try {
-				Thread.sleep(1000);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+//			try {
+//				Thread.sleep(1000);
+//			} catch (InterruptedException e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}
 
-			FpsData fpsData11 = CollectDataImpl.getFpsData("com.xdja.HDSafeEMailClient");
-			System.out.println(fpsData11);
+			float data = CollectDataImpl.getCpuUsage("com.xdja.HDSafeEMailClient");
+			System.out.println(data);
 		}
-
-		// CollectDataImpl.rehandle(getfpsdata);
-
+//		int a = 122;
+//		int b = 1145;
+//		float d = (float)a / b;
+//		float c = 100*(float)a / b;
+//		float c1 = a / b *100;
+//		System.out.println(c);
+//		System.out.println(c1);
+//		System.out.println(d);
 	}
 }

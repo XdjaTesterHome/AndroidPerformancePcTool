@@ -14,7 +14,11 @@ public class GlobalConfig {
 	
 	// 采集数据的时间间隔
 	public static final int collectInterval  = collectDataCount / collectDataTime;
-
+	
+	// 选中的包名
 	public static String PackageName = "";
+	
+	// 选中的设备名称
+	public static String DeviceName = "";
 	
 }

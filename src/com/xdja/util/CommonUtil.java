@@ -32,4 +32,17 @@ public class CommonUtil {
 		contents = m.replaceAll(" ");
 		return contents;
 	}
+	
+	/**
+	 * 判断字符串是否是null或者是“”
+	 * @param str
+	 * @return
+	 */
+	public static boolean strIsNull(String str) {
+		if (str == null || "".equals(str)) {
+			return true;
+		}
+		
+		return false;
+	}
 }

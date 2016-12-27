@@ -8,6 +8,10 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.android.ddmlib.IDevice;
+import com.android.ddmlib.MultiLineReceiver;
+import com.xdja.util.CommonUtil;
+
 /**
  * 和Adb命令进行交互的工具类
  * 
@@ -20,7 +24,9 @@ public class CollectDataUtil {
 	public static final String COMMAND_SH = "sh";
 	public static final String COMMAND_EXIT = "exit\n";
 	public static final String COMMAND_LINE_END = "\n";
-
+	private static IDevice device;
+ //	private static DefaultHardwareDevice mDefaultHardwareDevice;
+	
 	private CollectDataUtil() {
 		throw new AssertionError();
 	}
@@ -319,23 +325,73 @@ public class CollectDataUtil {
 			}
 		}
 	}
-
+	
 	/**
-	 * 能够实时的获取cmd的输出信息
-	 * 
-	 * @param cmd
-	 * @param getDataListener
-	 *            获取数据的getDataListener
+	 * 将device传进来
+	 * @param dev
 	 */
-	public static void execCmdCommand(String cmd) {
-
-		try {
-
-			Process proc = Runtime.getRuntime().exec(cmd);
-		} catch (IOException e) {
-			e.printStackTrace();
-		} finally {
+	public static void setDevice(IDevice dev){
+		device = dev;
+//		if (mDefaultHardwareDevice == null) {
+//			mDefaultHardwareDevice = new DefaultHardwareDevice(device);
+//		}
+	}
+	
+	/**
+	 * 能执行shell command，通过ddmlib
+	 * @param cmd
+	 */
+	public static CommandResult execShellCommand(String cmd){
+		
+		if (device == null) {
+			return new CommandResult(-1, "", "");
 		}
+		if (CommonUtil.strIsNull(cmd)) {
+			return new CommandResult(-1, "", "");
+		}
+		StringBuilder successMsg = new StringBuilder();
+		
+		// 处理cmd
+		cmd = cmd.substring(cmd.indexOf(" "));
+		List<String> results = executeShellCommandWithOutput(device, cmd);
+		if (results.size() > 1) {
+			for(String str:results){
+				successMsg.append(str).append("\n");
+			}
+			
+			return new CommandResult(0, successMsg.toString(), "");
+		}
+		
+		return new CommandResult(0, "", "");
+	}
+	
+	/**
+	 *  通过ddmblib执行cmd命令
+	 * @param device
+	 * @param cmd
+	 * @return
+	 */
+	public static List<String> executeShellCommandWithOutput(IDevice device, String cmd) {
+		final List<String> results = new ArrayList<String>();
+		try {
+			device.executeShellCommand(cmd, new MultiLineReceiver() {
+
+				@Override
+				public void processNewLines(String[] lines) {
+					for (String line : lines) {
+						results.add(line);
+					}
+				}
+
+				@Override
+				public boolean isCancelled() {
+					return false;
+				}
+			});
+		} catch (Exception e) {
+			System.out.println("executeShellCommandWithOutput error = " + e.getMessage());
+		}
+		return results;
 	}
 }
 
@@ -350,3 +406,4 @@ interface GetDataInterface {
 
 	public void getErrorString(String error);
 }
+

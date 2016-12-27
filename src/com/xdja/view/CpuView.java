@@ -102,6 +102,7 @@ public class CpuView extends BaseChartView{
 					}
 					
 					float cpu = CollectDataImpl.getCpuUsage(packageName);
+					System.out.println("cpu = " + cpu);
 					addTotalObservation(cpu);
 				}
 			}
@@ -114,7 +115,7 @@ public class CpuView extends BaseChartView{
      * Í£Ö¹ÈÎÎñ
      */
     public void stop() {
-		
+		stopFlag = true;
 	}
     
 }
