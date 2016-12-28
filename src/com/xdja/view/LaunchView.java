@@ -298,43 +298,42 @@ public class LaunchView extends JFrame {
 	
 	
 	private void startTest() {
-//		if (viewCpu != null) {
-//			viewCpu.start(GlobalConfig.PackageName);
-//		}
+		if (viewCpu != null) {
+			viewCpu.start(GlobalConfig.PackageName);
+		}
 
-//		if (viewMemory != null) {
-//			viewMemory.start(GlobalConfig.PackageName);
-//		}
-		test();
-//		
-//		if (viewFlow != null) {
-//			viewFlow.start(GlobalConfig.PackageName);
-//		}
-//		
-//		if (viewFps != null) {
-//			viewFps.start(GlobalConfig.PackageName);
-//		}
+		if (viewMemory != null) {
+			viewMemory.start(GlobalConfig.PackageName);
+		}
+		
+		if (viewFlow != null) {
+			viewFlow.start(GlobalConfig.PackageName);
+		}
+		
+		if (viewFps != null) {
+			viewFps.start(GlobalConfig.PackageName);
+		}
 	}
 
 	/**
 	 * Ω· ¯≤‚ ‘
 	 */
 	private void stopTest() {
-//		if (viewCpu != null) {
-//			viewCpu.stop();
-//		}
+		if (viewCpu != null) {
+			viewCpu.stop();
+		}
 		
-//		if (viewMemory != null) {
-//			viewMemory.stop();
-//		}
-//		
-//		if (viewFlow != null) {
-//			viewFlow.stop();
-//		}
-//		
-//		if (viewFps != null) {
-//			viewFps.stop();
-//		}
+		if (viewMemory != null) {
+			viewMemory.stop();
+		}
+		
+		if (viewFlow != null) {
+			viewFlow.stop();
+		}
+		
+		if (viewFps != null) {
+			viewFps.stop();
+		}
 	}
 	
 	public void test() {
