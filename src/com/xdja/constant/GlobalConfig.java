@@ -16,6 +16,7 @@ public class GlobalConfig {
 	public static final int collectInterval  = 500;
 	
 	public static final int DEBUGPORT = 1111;
+	public static final int BASEPORT = 7500;
 	
 	// 选中的包名
 	public static String PackageName = "";

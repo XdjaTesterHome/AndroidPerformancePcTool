@@ -12,6 +12,7 @@ public class Constants {
 	public static final String RES_PATH = System.getProperty("user.dir") + File.separator + RESOURCES;
 	public static final String ADB_PATH = LOCAL_PATH + File.separator + RESOURCES + "\\bin\\adb.exe";
 	
+	public static final String IMG_PATH = LOCAL_PATH + File.separator + RESOURCES + File.separator + "image" + File.separator;
 	//log_xDevice
 	public final static String COLON_BLANK = ": ";
 	public final static String COMMA_BLANK = ", ";

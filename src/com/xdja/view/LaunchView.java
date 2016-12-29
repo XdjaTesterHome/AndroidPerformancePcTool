@@ -27,8 +27,8 @@ import com.xdja.constant.Constants;
 import com.xdja.constant.GlobalConfig;
 import com.xdja.log.LoggerManager;
 import com.xdja.util.CommonUtil;
-import com.xdja.util.DialogUtil;
-import com.xdja.util.DialogUtil.ClickDialogBtnListener;
+import com.xdja.util.SwingUiUtil;
+import com.xdja.util.SwingUiUtil.ClickDialogBtnListener;
 
 public class LaunchView extends JFrame implements IDeviceChangeListener {
 
@@ -190,7 +190,6 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 		jTabbedPane.addTab(tabNames[3], kpiTestView);
 
 		// 5.帧率
-
 		viewFps = new FpsView(Constants.FPS, Constants.FPSTITLE, Constants.FPS_UNIT);
 		viewFps.setBounds(rect);
 		jTabbedPane.addTab(tabNames[4], viewFps);
@@ -246,7 +245,7 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 	}
 
 	private void showExitDialog() {
-		DialogUtil.getInstance().showOkAndCancelDialog(this, "提示", "真想退出吗？", "确定", "取消", new ClickDialogBtnListener() {
+		SwingUiUtil.getInstance().showOkAndCancelDialog(this, "提示", "真想退出吗？", "确定", "取消", new ClickDialogBtnListener() {
 
 			@Override
 			public void clickOkBtn() {
@@ -275,10 +274,6 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 		if (viewFlow != null) {
 			viewFlow.start(GlobalConfig.PackageName);
 		}
-
-//		if (viewFps != null) {
-//			viewFps.start(GlobalConfig.PackageName);
-//		}
 	}
 
 	/**
@@ -297,9 +292,6 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 			viewFlow.stop();
 		}
 
-		if (viewFps != null) {
-			viewFps.stop();
-		}
 	}
 
 	@Override

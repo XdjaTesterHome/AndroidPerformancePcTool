@@ -40,7 +40,7 @@ public class AdbManager implements IDebugBridgeChangeListener {
 	 * 对Adb进行初始化
 	 */
 	public void init(){
-		setDefaultSetting(GlobalConfig.DEBUGPORT);
+		setDefaultSetting();
 		createBridge();
 		AndroidDebugBridge.addDebugBridgeChangeListener(this);
 	}
@@ -190,9 +190,10 @@ public class AdbManager implements IDebugBridgeChangeListener {
 	 * 
 	 * @param port
 	 */
-	public void setDefaultSetting(int port) {
-//		DdmPreferences.setDebugPortBase(port);
-//		DdmPreferences.setSelectedDebugPort(port);
+	public void setDefaultSetting() {
+		DdmPreferences.setDebugPortBase(GlobalConfig.BASEPORT);
+		DdmPreferences.setSelectedDebugPort(GlobalConfig.DEBUGPORT);
+		DdmPreferences.setUseAdbHost(true);
 	    DdmPreferences.setInitialThreadUpdate(true);
 	    DdmPreferences.setInitialHeapUpdate(true);
 	}
