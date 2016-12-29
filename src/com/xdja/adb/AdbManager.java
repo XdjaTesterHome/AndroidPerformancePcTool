@@ -1,29 +1,25 @@
 package com.xdja.adb;
 
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.TreeSet;
 
 import com.android.ddmlib.AndroidDebugBridge;
-import com.android.ddmlib.AndroidDebugBridge.IClientChangeListener;
+import com.android.ddmlib.AndroidDebugBridge.IDebugBridgeChangeListener;
 import com.android.ddmlib.Client;
-import com.android.ddmlib.ClientData;
+import com.android.ddmlib.DdmPreferences;
 import com.android.ddmlib.IDevice;
-import com.github.cosysoft.device.android.AndroidDevice;
-import com.github.cosysoft.device.android.impl.AndroidDeviceStore;
+import com.xdja.constant.GlobalConfig;
 import com.xdja.util.CommonUtil;
 
 /***
- * 用于Adb相关的操作，用到了一个开源库https://github.com/cosysoft/device
+ * 用于Adb相关的操作，用到了ddmlib
  * 
  * @author zlw
  *
  */
-public class AdbManager {
+public class AdbManager implements IDebugBridgeChangeListener {
 	private static AdbManager mInstance;
-	private TreeSet<AndroidDevice> devices = null;
+	private TreeSet<AndroidDevice> devices = new TreeSet<>();
+	AndroidDebugBridge myBridge = null;
 
 	public static AdbManager getInstance() {
 		if (mInstance == null) {
@@ -38,7 +34,39 @@ public class AdbManager {
 	}
 
 	private AdbManager() {
-		setEventListener();
+	}
+	
+	/**
+	 * 对Adb进行初始化
+	 */
+	public void init(){
+		setDefaultSetting(GlobalConfig.DEBUGPORT);
+		createBridge();
+		AndroidDebugBridge.addDebugBridgeChangeListener(this);
+	}
+	
+	/**
+	 * 创建AndroidBridge
+	 */
+	private void createBridge() {
+		try {
+			AndroidDebugBridge.init(true);
+		} catch (IllegalStateException e) {
+			e.printStackTrace();
+		}
+
+		myBridge = AndroidDebugBridge.getBridge();
+		if (myBridge == null) {
+			myBridge = AndroidDebugBridge.createBridge(AndroidSdk.adb().getAbsolutePath(), false);
+		}
+		long timeout = System.currentTimeMillis() + 60000;
+		while (!myBridge.hasInitialDeviceList() && System.currentTimeMillis() < timeout) {
+			try {
+				Thread.sleep(50);
+			} catch (InterruptedException e) {
+				throw new RuntimeException(e);
+			}
+		}
 	}
 
 	/**
@@ -47,7 +75,19 @@ public class AdbManager {
 	 * @return
 	 */
 	public TreeSet<AndroidDevice> getDevices() {
-		devices = AndroidDeviceStore.getInstance().getDevices();
+		if (myBridge != null) {
+			IDevice[] origindevices = myBridge.getDevices();
+			AndroidDevice device = null;
+			if (devices.size() > 0) {
+				devices.clear();
+			}
+			System.out.println("origindevices.length = " + origindevices.length);
+			for (int i = 0; i < origindevices.length; i++) {
+				device = new AndroidDevice(origindevices[i]);
+				devices.add(device);
+			}
+
+		}
 		return devices;
 	}
 
@@ -64,10 +104,10 @@ public class AdbManager {
 		}
 
 		if (devices == null) {
-			devices = AndroidDeviceStore.getInstance().getDevices();
+			devices = getDevices();
 		}
 
-		for (AndroidDevice device : devices) {
+		for (IAndroidDevice device : devices) {
 			if (name.equals(device.getName())) {
 				return device.getDevice();
 			}
@@ -87,10 +127,10 @@ public class AdbManager {
 		}
 
 		if (devices == null) {
-			devices = AndroidDeviceStore.getInstance().getDevices();
+			devices = getDevices();
 		}
 
-		for (AndroidDevice device : devices) {
+		for (IAndroidDevice device : devices) {
 			if (name.equals(device.getName())) {
 				return device.getSerialNumber();
 			}
@@ -123,14 +163,9 @@ public class AdbManager {
 	 */
 	public void getAllocInfo(String name, String packageName) {
 		Client client = getClient(name, packageName);
-		client.enableAllocationTracker(true);
-		new Timer().schedule(new TimerTask() {
-			@Override
-			public void run() {
-				client.requestAllocationDetails();
-				client.enableAllocationTracker(false);
-			}
-		}, 3000);
+		if (client != null) {
+			client.updateHeapInfo();
+		}
 	}
 
 	/**
@@ -140,46 +175,40 @@ public class AdbManager {
 	 * @param packageName
 	 * @return
 	 */
-	private Client getClient(String name, String packageName) {
+	public Client getClient(String name, String packageName) {
+		System.out.println("deviceName = " + name + ", = packageName = " + packageName);
 		IDevice device = getIDevice(name);
 
 		if (device != null) {
 			Client client = device.getClient(packageName);
-			client.executeGarbageCollector();
 			return client;
 		}
 		return null;
 	}
 
 	/**
-	 * 设置事件监听
+	 * 设置默认的debug的port
+	 * 
+	 * @param port
 	 */
-	private void setEventListener() {
-		AndroidDebugBridge.addClientChangeListener(new IClientChangeListener() {
+	public void setDefaultSetting(int port) {
+//		DdmPreferences.setDebugPortBase(port);
+//		DdmPreferences.setSelectedDebugPort(port);
+	    DdmPreferences.setInitialThreadUpdate(true);
+	    DdmPreferences.setInitialHeapUpdate(true);
+	}
 
-			@Override
-			public void clientChanged(Client client, int changeMask) {
-				// TODO Auto-generated method stub
-				System.out.println("changeMask = " + changeMask);
-				if ((changeMask & Client.CHANGE_HEAP_ALLOCATIONS) != 0) {
-					if (client.isHeapUpdateEnabled()) {
-						ClientData clientData = client.getClientData();
-						if (clientData != null) {
-							Iterator<Integer> heapIds = clientData.getVmHeapIds();
-							while (heapIds.hasNext()) {
-								Integer integer = (Integer) heapIds.next();
-								Map<String, Long> vmData = clientData.getVmHeapInfo(integer);
-								if (vmData != null && vmData.size() > 0) {
-									for (String key : vmData.keySet()) {
-										System.out.println("key = " + key + ", value=" + vmData.get(key));
-									}
-								}
-							}
-						}
-					}
-				}
-			}
-
-		});
+	@Override
+	public void bridgeChanged(AndroidDebugBridge bridge) {
+		// TODO Auto-generated method stub
+		myBridge = bridge;
+	}
+	
+	/***
+	 * 释放资源
+	 */
+	public void release() {
+		AndroidDebugBridge.removeDebugBridgeChangeListener(this);
+		
 	}
 }

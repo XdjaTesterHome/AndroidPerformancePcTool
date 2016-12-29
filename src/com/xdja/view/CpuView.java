@@ -19,6 +19,8 @@ import org.jfree.data.time.TimeSeriesCollection;
 import org.jfree.ui.RectangleInsets;
 
 import com.xdja.collectdata.CollectDataImpl;
+import com.xdja.collectdata.CpuData;
+import com.xdja.constant.GlobalConfig;
 
 public class CpuView extends BaseChartView{
 	
@@ -29,6 +31,8 @@ public class CpuView extends BaseChartView{
 	private TimeSeries totalcpu;
 	private Thread cpuThread;
 	private boolean stopFlag = false;
+	private CpuData mCurCpuData = null;
+	
 	
 	public CpuView(String chartContent,String title,String yaxisName)  
     {  
@@ -82,7 +86,7 @@ public class CpuView extends BaseChartView{
      * @param y  the total memory used.
      */
     private void addTotalObservation(double y) {
-        this.totalcpu.add(new Millisecond(), y);
+        this.totalcpu.addOrUpdate(new Millisecond(), y);
     }
     
     /**
@@ -96,14 +100,27 @@ public class CpuView extends BaseChartView{
 			public void run() {
 				// TODO Auto-generated method stub
 				stopFlag = false;
+				mCurCpuData = null;
 				while (true) {
 					if (stopFlag) {
 						break;
 					}
 					
-					float cpu = CollectDataImpl.getCpuUsage(packageName);
-					System.out.println("cpu = " + cpu);
-					addTotalObservation(cpu);
+					if (mCurCpuData == null) {
+						mCurCpuData = CollectDataImpl.getCpuUsage(packageName, 0, 0);
+						continue;
+					}
+					
+					mCurCpuData = CollectDataImpl.getCpuUsage(packageName, mCurCpuData.lastProcTotal, mCurCpuData.lastProcPid);
+					
+					addTotalObservation(mCurCpuData.cpuUsage);
+					
+					try {
+						Thread.sleep(GlobalConfig.collectInterval);
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 				}
 			}
 		});

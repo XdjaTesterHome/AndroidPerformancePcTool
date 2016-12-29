@@ -17,8 +17,10 @@ import javax.swing.JTabbedPane;
 
 import org.apache.log4j.Logger;
 import com.android.ddmlib.IDevice;
-import com.github.cosysoft.device.android.AndroidDevice;
+import com.android.ddmlib.AndroidDebugBridge;
+import com.android.ddmlib.AndroidDebugBridge.IDeviceChangeListener;
 import com.xdja.adb.AdbManager;
+import com.xdja.adb.AndroidDevice;
 import com.xdja.collectdata.CollectDataImpl;
 import com.xdja.collectdata.CollectDataUtil;
 import com.xdja.constant.Constants;
@@ -28,7 +30,7 @@ import com.xdja.util.CommonUtil;
 import com.xdja.util.DialogUtil;
 import com.xdja.util.DialogUtil.ClickDialogBtnListener;
 
-public class LaunchView extends JFrame {
+public class LaunchView extends JFrame implements IDeviceChangeListener {
 
 	/**
 	 * serial Version UID is auto generated
@@ -49,6 +51,7 @@ public class LaunchView extends JFrame {
 	private JTabbedPane jTabbedPane = new JTabbedPane();
 	private String[] tabNames = { "   内    存   ", "     cpu    ", "   电   量   ", "    加载时间     ", "   帧   率   ",
 			"   流   量   " };
+
 	/**
 	 * constructor to init a LaunchView instance create a JPanel instance to put
 	 * other controller parts
@@ -63,6 +66,7 @@ public class LaunchView extends JFrame {
 		setBounds(100, 50, 1249, 760);
 		add(frame);
 		setVisible(true);
+		AndroidDebugBridge.addDeviceChangeListener(this);
 	}
 
 	/**
@@ -78,20 +82,10 @@ public class LaunchView extends JFrame {
 		frame.add(comboDevices);
 		Rectangle rect = new Rectangle(0, 0, 300, 30);// 设定绝对位置
 		comboDevices.setBounds(rect);// 添加位置
-
 		comboDevices.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				// comboProcess.removeAllItems();
-				Object selected = getdevice();
-				if (selected != null) {
-					String devicesid = CollectDataImpl.devicesdo(selected);
-					IDevice dev =  AdbManager.getInstance().getIDevice((String)selected);
-					CollectDataUtil.setDevice(dev);
-					List<String> respack = CollectDataImpl.getRunningProcess(devicesid);
-					for (String sn : respack) {
-						comboProcess.addItem(sn);
-					}
-				}
+				updateClientList();
 			}
 		});
 
@@ -224,35 +218,6 @@ public class LaunchView extends JFrame {
 	}
 
 	/**
-	 * 初始化DeviceList
-	 */
-	private void initDeviceList() {
-		// initial android debug bridge
-		// testDevices();
-		TreeSet<AndroidDevice> devices = AdbManager.getInstance().getDevices();
-		List<String> snList = new ArrayList<>(2);
-		for (com.github.cosysoft.device.android.AndroidDevice device : devices) {
-			snList.add(device.getName());
-		}
-
-		for (String sn : snList) {
-			comboDevices.addItem(sn);
-		}
-		
-		String selectDevice = getdevice();
-		if (CommonUtil.strIsNull(selectDevice)) {
-			String devicesid = AdbManager.getInstance().getSerialNumber(selectDevice);
-			IDevice dev = AdbManager.getInstance().getIDevice(selectDevice);
-			CollectDataUtil.setDevice(dev);
-			List<String> respack = CollectDataImpl.getRunningProcess(devicesid);
-			for (String sn : respack) {
-				comboProcess.addItem(sn);
-			}
-		}
-	}
-	
-	
-	/**
 	 * 初始化logger
 	 */
 	private void initLogger() {
@@ -295,8 +260,7 @@ public class LaunchView extends JFrame {
 			}
 		});
 	}
-	
-	
+
 	private void startTest() {
 		if (viewCpu != null) {
 			viewCpu.start(GlobalConfig.PackageName);
@@ -305,11 +269,11 @@ public class LaunchView extends JFrame {
 		if (viewMemory != null) {
 			viewMemory.start(GlobalConfig.PackageName);
 		}
-		
+
 		if (viewFlow != null) {
 			viewFlow.start(GlobalConfig.PackageName);
 		}
-		
+
 		if (viewFps != null) {
 			viewFps.start(GlobalConfig.PackageName);
 		}
@@ -322,30 +286,96 @@ public class LaunchView extends JFrame {
 		if (viewCpu != null) {
 			viewCpu.stop();
 		}
-		
+
 		if (viewMemory != null) {
 			viewMemory.stop();
 		}
-		
+
 		if (viewFlow != null) {
 			viewFlow.stop();
 		}
-		
+
 		if (viewFps != null) {
 			viewFps.stop();
 		}
 	}
-	
-	public void test() {
-		AdbManager.getInstance().getAllocInfo(GlobalConfig.DeviceName, GlobalConfig.PackageName);
+
+	@Override
+	public void deviceConnected(IDevice device) {
+		// TODO Auto-generated method stub
+		updateDeviceList();
 	}
+
+	@Override
+	public void deviceDisconnected(IDevice device) {
+		// TODO Auto-generated method stub
+		updateDeviceList();
+	}
+
+	@Override
+	public void deviceChanged(IDevice device, int changeMask) {
+		// TODO Auto-generated method stub
+		if ((changeMask & IDevice.CHANGE_CLIENT_LIST) != 0) {
+			updateClientList();
+		} else if ((changeMask & IDevice.CHANGE_STATE) != 0) {
+			updateDeviceList();
+		}
+	}
+
+	/***
+	 * 更新DeviceList
+	 */
+	private void updateDeviceList() {
+		TreeSet<AndroidDevice> devices = AdbManager.getInstance().getDevices();
+		System.out.println("updateDeviceList = " + devices.size());
+		List<String> snList = new ArrayList<>(2);
+		for (AndroidDevice device : devices) {
+			snList.add(device.getName());
+		}
+
+		if (comboDevices != null) {
+			comboDevices.removeAllItems();
+		}
+		for (String sn : snList) {
+			comboDevices.addItem(sn);
+		}
+	}
+
+	/**
+	 * 根据Device来获取进程
+	 */
+	private void updateClientList() {
+		String selectDevice = getdevice();
+		if (!CommonUtil.strIsNull(selectDevice)) {
+			String devicesid = AdbManager.getInstance().getSerialNumber(selectDevice);
+			IDevice dev = AdbManager.getInstance().getIDevice(selectDevice);
+			CollectDataUtil.setDevice(dev);
+			List<String> respack = CollectDataImpl.getRunningProcess(devicesid);
+			if (respack.size() > 0 && comboProcess != null) {
+				comboProcess.removeAllItems();
+			}
+			for (String sn : respack) {
+				comboProcess.addItem(sn);
+			}
+		}
+	}
+	
+	/**
+	 *  初始化AdbManager
+	 */
+	private void initAdbManager(){
+		AdbManager.getInstance().init();
+	}
+	
+	
 	public static void main(String[] args) {
 		LaunchView launch = new LaunchView(Constants.PRODUCT_NAME);
 		launch.createParts();
 		launch.initLogger();
-		launch.initDeviceList();
+		launch.initAdbManager();
 		launch.addActionListener();
 		launch.setVisible(true);
-		
+
 	}
+
 }

@@ -23,6 +23,7 @@ public class CollectDataImpl {
 	private static CommandResult commandPidResult, commandUidResult;
 	private static FlowData flowData = null;
 	private static KpiData kpiData = null;
+	private static FpsData fpsData = null;
 	private static List<KpiData> kpiList = new ArrayList<>(28);
 
 	private static GetDataInterface mGetDataListener = new GetDataInterface() {
@@ -100,11 +101,10 @@ public class CollectDataImpl {
 		String cmd = "shell dumpsys gfxinfo " + packageName;
 		commandFpsResult = CollectDataUtil.execShellCommand(cmd);
 		if (commandFpsResult == null || !"".equals(commandFpsResult.errorMsg)) {
-			LoggerManager.logDebug(LOGTAG, "getFpsData", "get fps is wrong");
+//			LoggerManager.logDebug(LOGTAG, "getFpsData", "get fps is wrong");
 			return null;
 		}
 		return handleFpsData(commandFpsResult.successMsg);
-
 	}
 
 	// public static KpiData getKpiData(String packageName){
@@ -124,7 +124,7 @@ public class CollectDataImpl {
 		if (m.find()) {
 			selected = m.group(2);
 		} else {
-			System.out.println("NO MATCH");
+			// System.out.println("devicesdo NO MATCH");
 		}
 		return (String) selected;
 	}
@@ -189,7 +189,7 @@ public class CollectDataImpl {
 	public static FlowData getFlowData(String packageName) {
 		String uid = getUid(packageName);
 		if (uid == null || "".equals(uid)) {
-			LoggerManager.logDebug(LOGTAG, "getFlowData", "Uid is Null");
+//			LoggerManager.logDebug(LOGTAG, "getFlowData", "Uid is Null");
 			flowData = new FlowData(0, 0, 0);
 			return flowData;
 		}
@@ -275,23 +275,6 @@ public class CollectDataImpl {
 		}
 		return 0;
 	}
-	
-	/**
-	 *  通过ddmlib获取memory信息
-	 * @param packageName
-	 * @param deviceName
-	 * @return
-	 */
-//	public static float getMemoryData(String packageName, String deviceName) {
-//		AndroidDebugBridge.addClientChangeListener(new IClientChangeListener() {
-//			
-//			@Override
-//			public void clientChanged(Client client, int changeMask) {
-//				// TODO Auto-generated method stub
-//				
-//			}
-//		});
-//	}
 
 	/***
 	 * 用于根据包名获取cpu利用率,每隔Constant.collectInterval时间采集一次数据
@@ -299,27 +282,17 @@ public class CollectDataImpl {
 	 * @param packageName
 	 *            测试的包名
 	 */
-	public static float getCpuUsage(String packageName) {
+	public static CpuData getCpuUsage(String packageName, int lastProcTotal, int lastProcPid) {
 		int startProcTotal = getCpuTotal();
 		int startProcPid = getProcData(packageName);
-		// 每隔1s取一次数据。
-		try {
-			Thread.sleep(1000);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
-		int endProcTotal = getCpuTotal();
-		int endProcPid = getProcData(packageName);
 		// 保留2位小数
 		float cpuData = 0;
 		// 防止分母为0的情况存在
-		if (startProcTotal - endProcTotal != 0) {
-			cpuData = (float) (endProcPid - startProcPid) / (endProcTotal - startProcTotal) * 100;
+		if (startProcTotal - lastProcTotal != 0) {
+			cpuData = (float) (lastProcPid - startProcPid) / (lastProcTotal - startProcTotal) * 100;
 		}
 
-		return CommonUtil.getTwoDots(cpuData);
+		return new CpuData(startProcTotal, startProcPid, CommonUtil.getTwoDots(cpuData));
 	}
 
 	/***
@@ -369,7 +342,7 @@ public class CollectDataImpl {
 			LoggerManager.logError(LOGTAG, "getProcData", commandCpuResult.errorMsg);
 			return 0;
 		}
-		
+
 		if (!CommonUtil.strIsNull(commandCpuResult.successMsg)) {
 			if (commandCpuResult.successMsg.contains("No such file or directory")) {
 				return 0;
@@ -456,7 +429,7 @@ public class CollectDataImpl {
 		if (m.find()) {
 			resu = (String) m.group(0);
 		} else {
-			System.out.println("NO MATCH");
+			System.out.println("handleFps NO MATCH");
 		}
 		return resu;
 
@@ -472,22 +445,20 @@ public class CollectDataImpl {
 		if (content == null || "".equals(content)) {
 			return null;
 		}
-		FpsData fpsData = null;
-		content = handleFps(content);
-		
-//		// content = CommonUtil.formatBlanksToBlank(content);
-//		// System.out.println(content);
-		String[] firstSpilt = content.split("Execute");
-//		
-//		// System.out.println(Arrays.toString(firstSpilt));
-//		// System.out.println(firstSpilt[2]);
 		String activityName = CollectDataImpl.getCurActivity();
+		content = handleFps(content);
+		if (content == null) {
+			return new FpsData(0, 0, 0, activityName);
+		}
+
+		String[] firstSpilt = content.split("Execute");
+
 		if (firstSpilt.length > 0) {
 			String[] secondSpilt = firstSpilt[1].trim().split("View hierarchy");
-			if (secondSpilt.length > 0) { //表示是否有帧率数据
+			if (secondSpilt.length > 0) { // 表示是否有帧率数据
 				String[] thirdSpilt = secondSpilt[0].trim().split("\n");
 				if (thirdSpilt == null || thirdSpilt.length < 1) {
-					LoggerManager.logDebug(LOGTAG, "handleFpsData", "no operation mobilephone");
+//					LoggerManager.logDebug(LOGTAG, "handleFpsData", "no operation mobilephone");
 					return new FpsData(0, 0, 0, activityName);
 				}
 
@@ -500,7 +471,7 @@ public class CollectDataImpl {
 					fpsSplit = thirdSpilt[i].split("\t");
 					// 判断是否是4列数字，不是4列数字，直接跳过
 					if (fpsSplit.length % 4 != 0) {
-						LoggerManager.logDebug(LOGTAG, "handleFpsData", "fps count is wrong");
+//						LoggerManager.logDebug(LOGTAG, "handleFpsData", "fps count is wrong");
 						continue;
 					}
 					// 计算一帧的渲染时间
@@ -522,10 +493,10 @@ public class CollectDataImpl {
 				int fps = frameCount * 60 / (frameCount + vsync_count);
 
 				fpsData = new FpsData(fps, jank_count, frameCount, activityName);
-			}else {
-				fpsData =  new FpsData(0, 0, 0, activityName);
+			} else {
+				fpsData = new FpsData(0, 0, 0, activityName);
 			}
-			
+
 		}
 
 		return fpsData;
@@ -550,7 +521,7 @@ public class CollectDataImpl {
 			LoggerManager.logError(LOGTAG, "getPid", commandPidResult.errorMsg);
 			return 0;
 		}
-		
+
 		if (commandPidResult.successMsg != null && commandPidResult.successMsg != "") {
 			String[] lines = commandPidResult.successMsg.trim().split("\n");
 			String result = CommonUtil.formatBlanksToBlank(lines[0].trim());
@@ -599,24 +570,5 @@ public class CollectDataImpl {
 	}
 
 	public static void main(String[] args) {
-		for (int i = 0; i < 20; i++) {
-//			try {
-//				Thread.sleep(1000);
-//			} catch (InterruptedException e) {
-//				// TODO Auto-generated catch block
-//				e.printStackTrace();
-//			}
-
-			float data = CollectDataImpl.getCpuUsage("com.xdja.HDSafeEMailClient");
-			System.out.println(data);
-		}
-//		int a = 122;
-//		int b = 1145;
-//		float d = (float)a / b;
-//		float c = 100*(float)a / b;
-//		float c1 = a / b *100;
-//		System.out.println(c);
-//		System.out.println(c1);
-//		System.out.println(d);
 	}
 }

@@ -19,6 +19,7 @@ import org.jfree.data.category.DefaultCategoryDataset;
 
 import com.xdja.collectdata.CollectDataImpl;
 import com.xdja.collectdata.FpsData;
+import com.xdja.constant.GlobalConfig;
 
 public class FpsView extends BaseChartView {
 
@@ -101,6 +102,13 @@ public class FpsView extends BaseChartView {
 						if (mPlot != null) {
 							mPlot.setDataset(mDataset);
 						}
+					}
+					
+					try {
+						Thread.sleep(GlobalConfig.collectInterval);
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
 					}
 				}
 			}
