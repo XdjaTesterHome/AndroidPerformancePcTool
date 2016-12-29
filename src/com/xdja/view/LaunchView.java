@@ -123,6 +123,7 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 						jb2.setEnabled(true);
 						jb1.setEnabled(false);
 						comboDevices.setEnabled(false);
+						comboProcess.setEnabled(false);
 						startTest();
 					}
 				});
@@ -150,6 +151,7 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 						jb1.setEnabled(true);
 						jb2.setEnabled(false);
 						comboDevices.setEnabled(true);
+						comboProcess.setEnabled(true);
 						stopTest();
 					}
 				});
@@ -274,9 +276,9 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 			viewFlow.start(GlobalConfig.PackageName);
 		}
 
-		if (viewFps != null) {
-			viewFps.start(GlobalConfig.PackageName);
-		}
+//		if (viewFps != null) {
+//			viewFps.start(GlobalConfig.PackageName);
+//		}
 	}
 
 	/**
@@ -326,6 +328,9 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 	 * 更新DeviceList
 	 */
 	private void updateDeviceList() {
+		if (comboDevices != null && !comboDevices.isEnabled()) {
+			return ;
+		}
 		TreeSet<AndroidDevice> devices = AdbManager.getInstance().getDevices();
 		System.out.println("updateDeviceList = " + devices.size());
 		List<String> snList = new ArrayList<>(2);
@@ -345,6 +350,9 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 	 * 根据Device来获取进程
 	 */
 	private void updateClientList() {
+		if (comboProcess != null && !comboProcess.isEnabled()) {
+			return ;
+		}
 		String selectDevice = getdevice();
 		if (!CommonUtil.strIsNull(selectDevice)) {
 			String devicesid = AdbManager.getInstance().getSerialNumber(selectDevice);

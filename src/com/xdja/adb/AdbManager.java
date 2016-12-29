@@ -176,7 +176,6 @@ public class AdbManager implements IDebugBridgeChangeListener {
 	 * @return
 	 */
 	public Client getClient(String name, String packageName) {
-		System.out.println("deviceName = " + name + ", = packageName = " + packageName);
 		IDevice device = getIDevice(name);
 
 		if (device != null) {

@@ -10,6 +10,8 @@ import java.util.List;
 
 import com.android.ddmlib.IDevice;
 import com.android.ddmlib.MultiLineReceiver;
+import com.xdja.adb.AdbManager;
+import com.xdja.constant.GlobalConfig;
 import com.xdja.util.CommonUtil;
 
 /**
@@ -332,9 +334,6 @@ public class CollectDataUtil {
 	 */
 	public static void setDevice(IDevice dev){
 		device = dev;
-//		if (mDefaultHardwareDevice == null) {
-//			mDefaultHardwareDevice = new DefaultHardwareDevice(device);
-//		}
 	}
 	
 	/**
@@ -344,7 +343,7 @@ public class CollectDataUtil {
 	public static CommandResult execShellCommand(String cmd){
 		
 		if (device == null) {
-			return new CommandResult(-1, "", "");
+			device = AdbManager.getInstance().getIDevice(GlobalConfig.DeviceName);
 		}
 		if (CommonUtil.strIsNull(cmd)) {
 			return new CommandResult(-1, "", "");

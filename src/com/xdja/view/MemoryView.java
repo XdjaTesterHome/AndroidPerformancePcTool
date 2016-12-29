@@ -32,18 +32,21 @@ public class MemoryView extends BaseChartView implements IClientChangeListener {
 	 */
 	private static final long serialVersionUID = -9002331611054515951L;
 	private TimeSeries totalAlloc;
+	private TimeSeries freeAlloc;
 	private boolean stopFlag = false;
 	protected Client mCurClient = null;
 	private Thread memoryThread;
 	
 	public MemoryView(String chartContent, String title, String yaxisName) {
 		super();
-		this.totalAlloc = new TimeSeries("已经分配的内存");
+		this.totalAlloc = new TimeSeries("Alloc memory");
+		this.freeAlloc  = new TimeSeries("Free memory");
 		TimeSeriesCollection dataset = new TimeSeriesCollection();
 		dataset.addSeries(this.totalAlloc);
-
+		dataset.addSeries(this.freeAlloc);
+		
 		DateAxis domain = new DateAxis("Time");
-		NumberAxis range = new NumberAxis("Memory(KB)");
+		NumberAxis range = new NumberAxis("Memory(MB)");
 		domain.setTickLabelFont(new Font("SansSerif", Font.PLAIN, 12));
 		range.setTickLabelFont(new Font("SansSerif", Font.PLAIN, 12));
 		domain.setLabelFont(new Font("SansSerif", Font.PLAIN, 14));
@@ -51,8 +54,9 @@ public class MemoryView extends BaseChartView implements IClientChangeListener {
 
 		XYItemRenderer renderer = new XYLineAndShapeRenderer(true, false);
 		renderer.setSeriesPaint(0, Color.red);
-		// renderer.setSeriesPaint(1, Color.green);
+		renderer.setSeriesPaint(1, Color.green);
 		renderer.setSeriesStroke(0, new BasicStroke(3F));
+		renderer.setSeriesStroke(1, new BasicStroke(3F));
 
 		XYPlot plot = new XYPlot(dataset, domain, range, renderer);
 		plot.setBackgroundPaint(Color.lightGray);
@@ -80,8 +84,9 @@ public class MemoryView extends BaseChartView implements IClientChangeListener {
 	 * @param y
 	 *            the total memory used.
 	 */
-	private void addTotalObservation(double y) {
-		this.totalAlloc.addOrUpdate(new Millisecond(), y);
+	private void addTotalObservation(double totalMemory, double freeMemory) {
+		this.totalAlloc.addOrUpdate(new Millisecond(), totalMemory);
+		this.freeAlloc.addOrUpdate(new Millisecond(), freeMemory);
 	}
 
 	/**
@@ -133,7 +138,6 @@ public class MemoryView extends BaseChartView implements IClientChangeListener {
 	@Override
 	public void clientChanged(Client client, int changeMask) {
 		// TODO Auto-generated method stub
-		System.out.println("changeMask = " + changeMask);
 		if (mCurClient != null && mCurClient == client) {
 			if ((changeMask & Client.CHANGE_HEAP_DATA) != 0) {
 				// if (client.isHeapUpdateEnabled()) {
@@ -142,9 +146,10 @@ public class MemoryView extends BaseChartView implements IClientChangeListener {
 				if (client != null) {
 					ClientData.HeapInfo m = client.getClientData().getVmHeapInfo(1);
 					if (m != null) {
-						allocMb = m.bytesAllocated / (1024.f);
-						freeMb = m.sizeInBytes / (1024.f) - allocMb;
-						addTotalObservation(allocMb);
+						allocMb = m.bytesAllocated / (1024.f * 1024.f);
+						freeMb = m.sizeInBytes / (1024.f * 1024.f) - allocMb;
+						System.out.println("allocMb = " + allocMb + "freeMb = " + freeMb);
+						addTotalObservation(allocMb,freeMb);
 					}
 				}
 			}

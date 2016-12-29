@@ -5,9 +5,6 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.android.ddmlib.AndroidDebugBridge;
-import com.android.ddmlib.AndroidDebugBridge.IClientChangeListener;
-import com.android.ddmlib.Client;
 import com.xdja.log.LoggerManager;
 import com.xdja.util.CommonUtil;
 
@@ -24,7 +21,8 @@ public class CollectDataImpl {
 	private static FlowData flowData = null;
 	private static KpiData kpiData = null;
 	private static FpsData fpsData = null;
-	private static List<KpiData> kpiList = new ArrayList<>(28);
+	private static List<KpiData> kpiList = new ArrayList<>(12);
+	private static List<FpsData> fpsList = new ArrayList<>(12);
 
 	private static GetDataInterface mGetDataListener = new GetDataInterface() {
 
@@ -97,19 +95,17 @@ public class CollectDataImpl {
 	 * @param packageName
 	 * @return
 	 */
-	public static FpsData getFpsData(String packageName) {
+	public static List<FpsData> getFpsData(String packageName) {
 		String cmd = "shell dumpsys gfxinfo " + packageName;
 		commandFpsResult = CollectDataUtil.execShellCommand(cmd);
 		if (commandFpsResult == null || !"".equals(commandFpsResult.errorMsg)) {
-//			LoggerManager.logDebug(LOGTAG, "getFpsData", "get fps is wrong");
+			LoggerManager.logDebug(LOGTAG, "getFpsData", "get fps is wrong");
 			return null;
 		}
-		return handleFpsData(commandFpsResult.successMsg);
+//		return handleFpsData(commandFpsResult.successMsg);
+		return null;
 	}
 
-	// public static KpiData getKpiData(String packageName){
-	//
-	// }
 	/**
 	 * 设备ID编号处理，处理为进程保活方法所需参数，可以使用的设备号
 	 * 
@@ -441,14 +437,14 @@ public class CollectDataImpl {
 	 * @param content
 	 * @return
 	 */
-	private static FpsData handleFpsData(String content) {
+	private static List<FpsData> handleFpsData(String content) {
 		if (content == null || "".equals(content)) {
-			return null;
+			return fpsList;
 		}
 		String activityName = CollectDataImpl.getCurActivity();
 		content = handleFps(content);
 		if (content == null) {
-			return new FpsData(0, 0, 0, activityName);
+			return fpsList;
 		}
 
 		String[] firstSpilt = content.split("Execute");
@@ -458,8 +454,9 @@ public class CollectDataImpl {
 			if (secondSpilt.length > 0) { // 表示是否有帧率数据
 				String[] thirdSpilt = secondSpilt[0].trim().split("\n");
 				if (thirdSpilt == null || thirdSpilt.length < 1) {
+					System.out.println("handleFpsData thirdSpilt == null");
 //					LoggerManager.logDebug(LOGTAG, "handleFpsData", "no operation mobilephone");
-					return new FpsData(0, 0, 0, activityName);
+					return fpsList;
 				}
 
 				String[] fpsSplit;
@@ -471,6 +468,7 @@ public class CollectDataImpl {
 					fpsSplit = thirdSpilt[i].split("\t");
 					// 判断是否是4列数字，不是4列数字，直接跳过
 					if (fpsSplit.length % 4 != 0) {
+						System.out.println("handleFpsData fpsSplit.length % 4");
 //						LoggerManager.logDebug(LOGTAG, "handleFpsData", "fps count is wrong");
 						continue;
 					}
@@ -493,13 +491,21 @@ public class CollectDataImpl {
 				int fps = frameCount * 60 / (frameCount + vsync_count);
 
 				fpsData = new FpsData(fps, jank_count, frameCount, activityName);
-			} else {
-				fpsData = new FpsData(0, 0, 0, activityName);
-			}
-
+				System.out.println(fpsData);
+				if (fpsList.contains(fpsData)) {
+					int lastjankCount = fpsList.get(fpsList.indexOf(fpsData)).dropcount;
+					int lastframeCount = fpsList.get(fpsList.indexOf(fpsData)).framecount;
+					int lastfps = fpsList.get(fpsList.indexOf(fpsData)).fps;
+					fpsData.fps = (fpsData.fps + lastfps) / 2;
+					fpsData.framecount = (fpsData.framecount + lastframeCount) / 2;
+					fpsData.dropcount = (fpsData.dropcount + lastjankCount) / 2;
+				}
+				
+				fpsList.add(fpsData);
+			} 
 		}
 
-		return fpsData;
+		return fpsList;
 
 	}
 
@@ -570,5 +576,21 @@ public class CollectDataImpl {
 	}
 
 	public static void main(String[] args) {
+		int i = 0;
+		while(true){
+			i += 1;
+			List<FpsData> fpsDataList = getFpsData("com.xdja.HDSafeEMailClient");
+			System.out.println(fpsDataList);
+			if (i > 20) {
+				break;
+			}
+			
+			try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
 	}
 }

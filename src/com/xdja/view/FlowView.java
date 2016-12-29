@@ -101,6 +101,8 @@ public class FlowView extends BaseChartView {
 					if (mFlowData != null) {
 						if (mLastFlow == -1) {
 							addFlowObservation(0);
+							mLastFlow = mFlowData.flowTotal;
+							continue;
 						}
 						addFlowObservation(mFlowData.flowTotal - mLastFlow);
 						mLastFlow = mFlowData.flowTotal;

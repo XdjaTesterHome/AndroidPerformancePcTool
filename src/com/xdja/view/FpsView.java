@@ -1,8 +1,13 @@
 package com.xdja.view;
 
 import java.awt.Color;
+import java.awt.FlowLayout;
 import java.awt.Font;
+import java.awt.Rectangle;
+import java.util.List;
+
 import javax.swing.BorderFactory;
+import javax.swing.JTextField;
 
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
@@ -29,12 +34,13 @@ public class FpsView extends BaseChartView {
 	private static final long serialVersionUID = -9002331611054515951L;
 	private boolean stopFlag = false;
 	private Thread fpsThread;
-	private FpsData fpsdata = null;
+	private List<FpsData> fpsdataList = null;
 	private CategoryPlot mPlot;
 	private DefaultCategoryDataset mDataset  = null;
 	
 	public FpsView(String chartContent, String title, String yaxisName) {
 		super();
+//		setLayout(new FlowLayout(FlowLayout.LEADING));
 		mDataset = new DefaultCategoryDataset();
 		JFreeChart mBarchart = ChartFactory.createBarChart(title, chartContent, yaxisName, mDataset,
 				PlotOrientation.VERTICAL, // 图表方向
@@ -74,9 +80,21 @@ public class FpsView extends BaseChartView {
 		ChartPanel chartPanel = new ChartPanel(mBarchart);
 		chartPanel.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4),
 				BorderFactory.createLineBorder(Color.black)));
+//		addSigleSwitch();
 		add(chartPanel);
 	}
-
+	
+	/**
+	 * 
+	 */
+	private void addSigleSwitch(){
+		JTextField textField = new JTextField("I am test");
+		Rectangle rect = new Rectangle(0, 0, 30, 30);
+		textField.setBounds(rect);
+		add(textField);
+	}
+	
+	
 	/**
 	 * 开始测试
 	 * 
@@ -93,14 +111,16 @@ public class FpsView extends BaseChartView {
 						break;
 					}
 
-					fpsdata = CollectDataImpl.getFpsData(packageName);
-					if (fpsdata != null) {
-//						mDataset = new DefaultCategoryDataset();
-						mDataset.addValue(fpsdata.fps, "帧率", fpsdata.activityName);
-						mDataset.addValue(fpsdata.dropcount, "丢帧数", fpsdata.activityName);
-						mDataset.addValue(fpsdata.framecount, "总帧数", fpsdata.activityName);
-						if (mPlot != null) {
-							mPlot.setDataset(mDataset);
+					fpsdataList = CollectDataImpl.getFpsData(packageName);
+					if (fpsdataList != null ) {
+						for(FpsData fpsdata : fpsdataList){
+//							mDataset = new DefaultCategoryDataset();
+							mDataset.addValue(fpsdata.fps, "帧率", fpsdata.activityName);
+							mDataset.addValue(fpsdata.dropcount, "丢帧数", fpsdata.activityName);
+							mDataset.addValue(fpsdata.framecount, "总帧数", fpsdata.activityName);
+							if (mPlot != null) {
+								mPlot.setDataset(mDataset);
+							}
 						}
 					}
 					
