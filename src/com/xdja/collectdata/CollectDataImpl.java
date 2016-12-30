@@ -452,6 +452,7 @@ public class CollectDataImpl {
 		}
 		FpsData fpsData = null;
 		content = handleFps(content);
+		if (content!=null){
 		
 //		// content = CommonUtil.formatBlanksToBlank(content);
 //		// System.out.println(content);
@@ -504,6 +505,7 @@ public class CollectDataImpl {
 				fpsData =  new FpsData(0, 0, 0, activityName);
 			}
 			
+		}
 		}
 
 		return fpsData;
@@ -576,19 +578,31 @@ public class CollectDataImpl {
 	}
 
 	public static void main(String[] args) {
+		new Thread(new Runnable(){
+			
+			public void run() {
+				// TODO Auto-generated method stub
+			startCollectKpiData("com.xdja.HDSafeEMailClient");	
+			}}).start();
+		
 		for (int i = 0; i < 20; i++) {
 			try {
-				Thread.sleep(1000);
+				Thread.sleep(5000);
+				System.out.println(getKpiData());
+				
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
-			}
+			}}
 
-			FpsData fpsData11 = CollectDataImpl.getFpsData("com.xdja.HDSafeEMailClient");
-			System.out.println(fpsData11);
-		}
+//			FpsData fpsData11 = CollectDataImpl.getFpsData("com.xdja.HDSafeEMailClient");
+//			System.out.println(fpsData11);
+		
+		
 
 		// CollectDataImpl.rehandle(getfpsdata);
 
 	}
+
+	
 }

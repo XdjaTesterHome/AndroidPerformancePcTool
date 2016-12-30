@@ -122,9 +122,13 @@ public class LaunchView extends JFrame {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				// TODO Auto-generated method stub
+				String packageNameold = GlobalConfig.PackageName ;
 				String packageName = (String) comboProcess.getSelectedItem();
 				if (packageName != null) {
 					GlobalConfig.PackageName = packageName;
+				}
+				if (packageNameold !=GlobalConfig.PackageName){
+					kpiTestView.clear();
 				}
 			}
 		});
@@ -146,7 +150,12 @@ public class LaunchView extends JFrame {
 						jb2.setEnabled(true);
 						jb1.setEnabled(false);
 						comboDevices.setEnabled(false);
-						startTest();
+						try {
+							startTest();
+						} catch (InterruptedException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
 					}
 				});
 
@@ -206,7 +215,7 @@ public class LaunchView extends JFrame {
 		jTabbedPane.addTab(tabNames[2], viewBattery);
 
 		// 4.kpiTest
-		kpiTestView = new KpiTestView(Constants.KPITITLE, Constants.KPI);
+		kpiTestView = new KpiTestView(Constants.KPI,Constants.KPITITLE, Constants.KPI);
 		viewBattery.setBounds(rect);
 		jTabbedPane.addTab(tabNames[3], kpiTestView);
 
@@ -458,7 +467,7 @@ public class LaunchView extends JFrame {
 	}
 	
 	
-	private void startTest() {
+	private void startTest() throws InterruptedException {
 		if (viewMemory != null) {
 			viewMemory.start(GlobalConfig.PackageName);
 		}
@@ -474,6 +483,13 @@ public class LaunchView extends JFrame {
 		if (viewFps != null) {
 			viewFps.start(GlobalConfig.PackageName);
 		}
+		if (kpiTestView != null) {
+			kpiTestView.start(GlobalConfig.PackageName);
+		}
+		if (viewBattery != null) {
+			viewBattery.start(GlobalConfig.PackageName);
+		}
+		
 	}
 
 	/**
@@ -494,6 +510,14 @@ public class LaunchView extends JFrame {
 		
 		if (viewFps != null) {
 			viewFps.stop();
+		}
+		
+		if (kpiTestView != null) {
+			kpiTestView.stop();
+		}
+		
+		if (viewBattery != null) {
+			viewBattery.stop();
 		}
 	}
 

@@ -243,6 +243,7 @@ public class CollectDataUtil {
 				while ((s = successResult.readLine()) != null) {
 					successMsg.append(s).append("\n");
 				}
+//				System.out.println(successMsg);//
 //				 读取错误流可能会阻塞流程waitFor（）
 				 while ((s = errorResult.readLine()) != null) {
 				 errorMsg.append(s).append("\n");
@@ -251,7 +252,6 @@ public class CollectDataUtil {
 			WatchThread wt = new WatchThread(process);  
 			wt.start();  
 			result = process.waitFor();
-			
 //			ArrayList<String> commandStream = wt.getStream();
 			wt.setOver(true); 
 		} catch (IOException e) {

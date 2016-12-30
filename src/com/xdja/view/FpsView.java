@@ -20,6 +20,7 @@ import org.jfree.data.category.DefaultCategoryDataset;
 
 import com.xdja.collectdata.CollectDataImpl;
 import com.xdja.collectdata.FpsData;
+import com.xdja.constant.Constants;
 
 public class FpsView extends BaseChartView {
 
@@ -112,7 +113,7 @@ public class FpsView extends BaseChartView {
 					}
 
 					fpsdata = CollectDataImpl.getFpsData(packageName);
-					System.out.println(fpsdata);
+//					System.out.println(fpsdata);
 					if (fpsdata != null) {
 //						mDataset = new DefaultCategoryDataset();
 						mDataset.addValue(fpsdata.fps, "Ö¡ÂÊ", fpsdata.activityName);
@@ -132,4 +133,10 @@ public class FpsView extends BaseChartView {
 	public void stop() {
 		stopFlag = true;
 	}
+	
+	
+	
+	
 }
+
+

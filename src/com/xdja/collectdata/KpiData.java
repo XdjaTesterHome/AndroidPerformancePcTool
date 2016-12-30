@@ -17,7 +17,7 @@ public class KpiData {
 	@Override
 	public String toString() {
 		// TODO Auto-generated method stub
-		return "currentPage = " + currentPage + ", loadTime = " + this.loadTime;
+		return "currentPage = " + this.currentPage + ", loadTime = " + this.loadTime;
 	}
 	
 	
