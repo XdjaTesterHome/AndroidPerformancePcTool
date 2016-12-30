@@ -11,8 +11,6 @@ import javax.swing.Timer;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.StandardChartTheme;
 
-import com.xdja.constant.GlobalConfig;
-
 public abstract class BaseChartView extends JPanel{
 
 	/**
@@ -22,6 +20,7 @@ public abstract class BaseChartView extends JPanel{
 	private static Font FONT = new Font("ËÎÌו", Font.PLAIN, 12);
 	protected Timer mTaskTimer;
 	protected ActionListener mActionListener;
+
 	public BaseChartView() {
 		super(new BorderLayout());
 		// TODO Auto-generated constructor stub

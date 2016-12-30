@@ -3,43 +3,35 @@ package com.xdja.view;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.FocusEvent;
-import java.awt.event.FocusListener;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.TreeSet;
 
-import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
-import javax.swing.JTextField;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
 
 import org.apache.log4j.Logger;
+
+import com.android.ddmlib.AndroidDebugBridge;
+import com.android.ddmlib.AndroidDebugBridge.IDeviceChangeListener;
 import com.android.ddmlib.IDevice;
-import com.github.cosysoft.device.android.impl.AndroidDeviceStore;
-import com.xdja.adb.AdbHelper;
+import com.xdja.adb.AdbManager;
 import com.xdja.adb.AndroidDevice;
-import com.xdja.adb.DeviceManager;
 import com.xdja.collectdata.CollectDataImpl;
-import com.xdja.adb.DeviceManager.DeviceStateListener;
+import com.xdja.collectdata.CollectDataUtil;
 import com.xdja.constant.Constants;
 import com.xdja.constant.GlobalConfig;
 import com.xdja.log.LoggerManager;
-import com.xdja.monitor.ControllerMonitor;
-import com.xdja.util.DialogUtil;
-import com.xdja.util.DialogUtil.ClickDialogBtnListener;
+import com.xdja.util.CommonUtil;
+import com.xdja.util.SwingUiUtil;
+import com.xdja.util.SwingUiUtil.ClickDialogBtnListener;
 
-public class LaunchView extends JFrame {
+public class LaunchView extends JFrame implements IDeviceChangeListener {
 
 	/**
 	 * serial Version UID is auto generated
@@ -52,21 +44,14 @@ public class LaunchView extends JFrame {
 	private MemoryView viewMemory;
 	private FlowView viewFlow;
 	private CpuView viewCpu;
-	private BatteryView viewBattery;
 	private KpiTestView kpiTestView;
 	private FpsView viewFps;
-	private JTextField textPackage;
-	private JComboBox<String> comboPackageList;
-	private List<String> packageList = new ArrayList<String>();
-	private DefaultComboBoxModel<String> model;
+	private BatteryView viewBattery;
 	private static JComboBox<String> comboDevices;
-	private JComboBox<String> comboProcess;
+	private static JComboBox<String> comboProcess;
 	private JTabbedPane jTabbedPane = new JTabbedPane();
 	private String[] tabNames = { "   内    存   ", "     cpu    ", "   电   量   ", "    加载时间     ", "   帧   率   ",
 			"   流   量   " };
-
-	// 保存一份当前连接到pc的设备列表
-	private List<AndroidDevice> devices = new ArrayList<AndroidDevice>(12);
 
 	/**
 	 * constructor to init a LaunchView instance create a JPanel instance to put
@@ -75,13 +60,14 @@ public class LaunchView extends JFrame {
 	 * @param name:
 	 *            author name
 	 */
-	public LaunchView(String name) {
-		this.author = name;
+	public LaunchView() {
+		this.author = Constants.PRODUCT_NAME;
 		this.frame = new JPanel();
 		setTitle(String.format("%s v1.0", author));
 		setBounds(100, 50, 1249, 760);
 		add(frame);
 		setVisible(true);
+		AndroidDebugBridge.addDeviceChangeListener(this);
 	}
 
 	/**
@@ -97,18 +83,10 @@ public class LaunchView extends JFrame {
 		frame.add(comboDevices);
 		Rectangle rect = new Rectangle(0, 0, 300, 30);// 设定绝对位置
 		comboDevices.setBounds(rect);// 添加位置
-
 		comboDevices.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				// comboProcess.removeAllItems();
-				Object selected = getdevice();
-				if (selected != null) {
-					String devicesid = CollectDataImpl.devicesdo(selected);
-					List<String> respack = CollectDataImpl.getRunningProcess(devicesid);
-					for (String sn : respack) {
-						comboProcess.addItem(sn);
-					}
-				}
+				updateClientList();
 			}
 		});
 
@@ -150,12 +128,8 @@ public class LaunchView extends JFrame {
 						jb2.setEnabled(true);
 						jb1.setEnabled(false);
 						comboDevices.setEnabled(false);
-						try {
-							startTest();
-						} catch (InterruptedException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
+						comboProcess.setEnabled(false);
+						startTest();
 					}
 				});
 
@@ -182,6 +156,7 @@ public class LaunchView extends JFrame {
 						jb1.setEnabled(true);
 						jb2.setEnabled(false);
 						comboDevices.setEnabled(true);
+						comboProcess.setEnabled(true);
 						stopTest();
 					}
 				});
@@ -220,7 +195,6 @@ public class LaunchView extends JFrame {
 		jTabbedPane.addTab(tabNames[3], kpiTestView);
 
 		// 5.帧率
-
 		viewFps = new FpsView(Constants.FPS, Constants.FPSTITLE, Constants.FPS_UNIT);
 		viewFps.setBounds(rect);
 		jTabbedPane.addTab(tabNames[4], viewFps);
@@ -247,38 +221,6 @@ public class LaunchView extends JFrame {
 				showExitDialog();
 			}
 		});
-
-		addPackageListener();
-	}
-
-	/**
-	 * 初始化DeviceList
-	 */
-	private void initDeviceList() {
-		// initial android debug bridge
-		// testDevices();
-		TreeSet<com.github.cosysoft.device.android.AndroidDevice> devices = AndroidDeviceStore.getInstance()
-				.getDevices();
-		List<String> snList = new ArrayList<>(2);
-		for (com.github.cosysoft.device.android.AndroidDevice device : devices) {
-			snList.add(device.getName());
-		}
-
-		for (String sn : snList) {
-			comboDevices.addItem(sn);
-		}
-		System.out.println(getdevice());
-		if (getdevice() != null) {
-			Object selected = getdevice();
-			String devicesid = CollectDataImpl.devicesdo(selected);
-			List<String> respack = CollectDataImpl.getRunningProcess(devicesid);
-			for (String sn : respack) {
-				comboProcess.addItem(sn);
-			}
-		}
-
-		// 为几个可操作的控件添加监听器
-		addDeviceChangeListener();
 	}
 
 	/**
@@ -293,147 +235,6 @@ public class LaunchView extends JFrame {
 	}
 
 	/**
-	 * 添加设备变化的监听
-	 */
-	private void addDeviceChangeListener() {
-		DeviceManager.getInstance().setDeviceStateListener(new DeviceStateListener() {
-
-			@Override
-			public void deviceDisconnected(AndroidDevice idevice) {
-				// TODO Auto-generated method stub
-				devices = DeviceManager.getInstance().getAndroidDevice();
-				String comboDevicesName = DeviceManager.getInstance().getDeviceName(idevice);
-
-				if (devices.size() > 0 && !devices.contains(idevice)) {
-					devices.add(idevice);
-					comboDevices.addItem(comboDevicesName);
-				} else {
-					comboDevices.removeAllItems();
-					devices.add(idevice);
-					// 名称构成：设备名称_设备序列号
-					comboDevices.addItem(comboDevicesName);
-				}
-			}
-
-			@Override
-			public void deviceConnected(AndroidDevice idevice) {
-				// TODO Auto-generated method stub
-				String comboDevicesName = DeviceManager.getInstance().getDeviceName(idevice);
-
-				comboDevices.removeItem(comboDevicesName);
-				devices.remove(idevice);
-			}
-		});
-	}
-
-	private boolean isAdjusting(JComboBox<String> cbInput) {
-		if (cbInput.getClientProperty(Constants.ADJUSTING) instanceof Boolean) {
-			return (Boolean) cbInput.getClientProperty(Constants.ADJUSTING);
-		}
-		return false;
-	}
-
-	private void setAdjusting(JComboBox<String> cbInput, boolean adjusting) {
-		cbInput.putClientProperty(Constants.ADJUSTING, adjusting);
-
-	}
-
-	private void updateList(List<String> list) {
-		setAdjusting(comboPackageList, true);
-		model.removeAllElements();
-		String input = textPackage.getText();
-		if (!input.isEmpty()) {
-			for (String item : list) {
-				if (item.toLowerCase().startsWith(input.toLowerCase())) {
-					model.addElement(item);
-				}
-			}
-		} else {
-			for (String item : list) {
-				model.addElement(item);
-			}
-		}
-		comboPackageList.setPopupVisible(model.getSize() > 0);
-		setAdjusting(comboPackageList, false);
-	}
-
-	private void addPackageListener() {
-		if (comboPackageList != null) {
-			comboPackageList.addActionListener(new ActionListener() {
-				@Override
-				public void actionPerformed(ActionEvent e) {
-					if (!isAdjusting(comboPackageList) && comboPackageList.getSelectedItem() != null) {
-						textPackage.setText(comboPackageList.getSelectedItem().toString());
-					}
-				}
-			});
-		}
-		if (textPackage != null) {
-			textPackage.addFocusListener(new FocusListener() {
-				@Override
-				public void focusGained(FocusEvent e) {
-					IDevice dev = AdbHelper.getInstance().getDevice((String) comboDevices.getSelectedItem());
-					ControllerMonitor.getInstance().setDevice(dev);
-					List<String> ret = ControllerMonitor.getInstance().getPackageController().getInfo();
-					Iterator<String> iterator = ret.iterator();
-					while (iterator.hasNext()) {
-						logger.info(iterator.next());
-					}
-					packageList = ret;
-					// refresh package list
-					updateList(packageList);
-				}
-
-				@Override
-				public void focusLost(FocusEvent e) {
-					if (comboPackageList.isPopupVisible()) {
-						comboPackageList.setPopupVisible(false);
-					}
-				}
-			});
-
-			textPackage.getDocument().addDocumentListener(new DocumentListener() {
-				public void insertUpdate(DocumentEvent e) {
-					updateList(packageList);
-				}
-
-				public void removeUpdate(DocumentEvent e) {
-					updateList(packageList);
-				}
-
-				public void changedUpdate(DocumentEvent e) {
-					updateList(packageList);
-				}
-
-			});
-
-			textPackage.addKeyListener(new KeyAdapter() {
-				@Override
-				public void keyPressed(KeyEvent event) {
-					setAdjusting(comboPackageList, true);
-					if (event.getKeyCode() == KeyEvent.VK_SPACE && comboPackageList.isPopupVisible()) {
-						event.setKeyCode(KeyEvent.VK_ENTER);
-					}
-					if (event.getKeyCode() == KeyEvent.VK_ENTER || event.getKeyCode() == KeyEvent.VK_UP
-							|| event.getKeyCode() == KeyEvent.VK_DOWN) {
-						event.setSource(comboPackageList);
-						comboPackageList.dispatchEvent(event);
-						if (event.getKeyCode() == KeyEvent.VK_ENTER) {
-							textPackage.setText(comboPackageList.getSelectedItem().toString());
-							comboPackageList.setPopupVisible(false);
-						}
-					}
-					if (event.getKeyCode() == KeyEvent.VK_ESCAPE) {
-						comboPackageList.setPopupVisible(false);
-					}
-					setAdjusting(comboPackageList, false);
-				}
-			});
-		}
-
-	}
-
-	/**
 	 * 获取选中的device
 	 * 
 	 * @return
@@ -443,13 +244,13 @@ public class LaunchView extends JFrame {
 		if (comboDevices != null) {
 			devicename = (String) comboDevices.getSelectedItem();
 		}
-
+		GlobalConfig.DeviceName = devicename;
 		return devicename;
 
 	}
 
 	private void showExitDialog() {
-		DialogUtil.getInstance().showOkAndCancelDialog(this, "提示", "真想退出吗？", "确定", "取消", new ClickDialogBtnListener() {
+		SwingUiUtil.getInstance().showOkAndCancelDialog(this, "提示", "真想退出吗？", "确定", "取消", new ClickDialogBtnListener() {
 
 			@Override
 			public void clickOkBtn() {
@@ -465,51 +266,96 @@ public class LaunchView extends JFrame {
 			}
 		});
 	}
-	
-	
-	private void startTest() throws InterruptedException {
-		if (viewMemory != null) {
-			viewMemory.start(GlobalConfig.PackageName);
-		}
-
+	private void startTest() {
 		if (viewCpu != null) {
 			viewCpu.start(GlobalConfig.PackageName);
+		}
+
+		if (viewMemory != null) {
+			viewMemory.start(GlobalConfig.PackageName);
 		}
 
 		if (viewFlow != null) {
 			viewFlow.start(GlobalConfig.PackageName);
 		}
 		
-		if (viewFps != null) {
-			viewFps.start(GlobalConfig.PackageName);
-		}
 		if (kpiTestView != null) {
-			kpiTestView.start(GlobalConfig.PackageName);
+			try {
+				kpiTestView.start(GlobalConfig.PackageName);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 		if (viewBattery != null) {
-			viewBattery.start(GlobalConfig.PackageName);
+			try {
+				viewBattery.start(GlobalConfig.PackageName);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
-		
 	}
 
 	/**
 	 * 结束测试
 	 */
 	private void stopTest() {
-		if (viewMemory != null) {
-			viewMemory.stop();
-		}
-
 		if (viewCpu != null) {
 			viewCpu.stop();
+		}
+
+		if (viewMemory != null) {
+			viewMemory.stop();
 		}
 
 		if (viewFlow != null) {
 			viewFlow.stop();
 		}
-		
-		if (viewFps != null) {
-			viewFps.stop();
+
+	}
+
+	@Override
+	public void deviceConnected(IDevice device) {
+		// TODO Auto-generated method stub
+		updateDeviceList();
+	}
+
+	@Override
+	public void deviceDisconnected(IDevice device) {
+		// TODO Auto-generated method stub
+		updateDeviceList();
+	}
+
+	@Override
+	public void deviceChanged(IDevice device, int changeMask) {
+		// TODO Auto-generated method stub
+		if ((changeMask & IDevice.CHANGE_CLIENT_LIST) != 0) {
+			updateClientList();
+		} else if ((changeMask & IDevice.CHANGE_STATE) != 0) {
+			updateDeviceList();
+		}
+	}
+
+	/***
+	 * 更新DeviceList
+	 */
+	private void updateDeviceList() {
+		if (comboDevices != null && !comboDevices.isEnabled()) {
+			return ;
+		}
+		TreeSet<AndroidDevice> devices = AdbManager.getInstance().getDevices();
+		System.out.println("updateDeviceList = " + devices.size());
+		List<String> snList = new ArrayList<>(2);
+		for (AndroidDevice device : devices) {
+			snList.add(device.getName());
+		}
+
+		if (comboDevices != null) {
+			comboDevices.removeAllItems();
+		}
+		for (String sn : snList) {
+			comboDevices.addItem(sn);
 		}
 		
 		if (kpiTestView != null) {
@@ -521,13 +367,63 @@ public class LaunchView extends JFrame {
 		}
 	}
 
+	/**
+	 * 根据Device来获取进程
+	 */
+	private void updateClientList() {
+		if (comboProcess != null && !comboProcess.isEnabled()) {
+			return ;
+		}
+		String selectDevice = getdevice();
+		if (!CommonUtil.strIsNull(selectDevice)) {
+			String devicesid = AdbManager.getInstance().getSerialNumber(selectDevice);
+			IDevice dev = AdbManager.getInstance().getIDevice(selectDevice);
+			CollectDataUtil.setDevice(dev);
+			List<String> respack = CollectDataImpl.getRunningProcess(devicesid);
+			if (respack.size() > 0 && comboProcess != null) {
+				comboProcess.removeAllItems();
+			}
+			for (String sn : respack) {
+				comboProcess.addItem(sn);
+			}
+		}
+	}
+	
+	/**
+	 *  初始化AdbManager
+	 */
+	private void initAdbManager(){
+		AdbManager.getInstance().init();
+	}
+	
+	/**
+	 *  设置设备选择框是否可以选择
+	 * @param isEnable
+	 */
+	public static void setComboxDevicesEnable(boolean isEnable){
+		if (comboDevices != null) {
+			comboDevices.setEnabled(isEnable);
+		}
+	}
+	
+	/**
+	 *  设置进程选择框是否可以使用
+	 * @param isEnable
+	 */
+	public static void setComboxProcessEnable(boolean isEnable){
+		if (comboProcess != null) {
+			comboProcess.setEnabled(isEnable);
+		}
+	}
+	
 	public static void main(String[] args) {
-		LaunchView launch = new LaunchView(Constants.PRODUCT_NAME);
+		LaunchView launch = new LaunchView();
 		launch.createParts();
 		launch.initLogger();
-		launch.initDeviceList();
+		launch.initAdbManager();
 		launch.addActionListener();
 		launch.setVisible(true);
 
 	}
+
 }

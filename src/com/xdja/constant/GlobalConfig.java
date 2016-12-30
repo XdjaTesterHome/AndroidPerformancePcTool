@@ -13,8 +13,15 @@ public class GlobalConfig {
 	public static final int collectDataTime  = 20;
 	
 	// 采集数据的时间间隔
-	public static final int collectInterval  = collectDataCount / collectDataTime;
-
+	public static final int collectInterval  = 500;
+	
+	public static final int DEBUGPORT = 1111;
+	public static final int BASEPORT = 7500;
+	
+	// 选中的包名
 	public static String PackageName = "";
+	
+	// 选中的设备名称
+	public static String DeviceName = "";
 	
 }

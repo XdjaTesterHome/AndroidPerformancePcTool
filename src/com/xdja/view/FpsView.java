@@ -1,8 +1,14 @@
 package com.xdja.view;
 
 import java.awt.Color;
+import java.awt.FlowLayout;
 import java.awt.Font;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.List;
+
 import javax.swing.BorderFactory;
+import javax.swing.JButton;
 
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
@@ -15,12 +21,12 @@ import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.renderer.category.BarRenderer;
 import org.jfree.chart.title.LegendTitle;
 import org.jfree.chart.title.TextTitle;
-import org.jfree.data.category.CategoryDataset;
 import org.jfree.data.category.DefaultCategoryDataset;
 
 import com.xdja.collectdata.CollectDataImpl;
 import com.xdja.collectdata.FpsData;
-import com.xdja.constant.Constants;
+import com.xdja.constant.GlobalConfig;
+import com.xdja.util.SwingUiUtil;
 
 public class FpsView extends BaseChartView {
 
@@ -30,12 +36,14 @@ public class FpsView extends BaseChartView {
 	private static final long serialVersionUID = -9002331611054515951L;
 	private boolean stopFlag = false;
 	private Thread fpsThread;
-	private FpsData fpsdata = null;
+	private List<FpsData> fpsdataList = null;
 	private CategoryPlot mPlot;
 	private DefaultCategoryDataset mDataset  = null;
+	private final static String  NOMESSGE = "测试帧率，请在开发者选项中找到【GPU呈现模式分析】，打开【在adb shell dumpsys gfxinfo中】选项";
 	
 	public FpsView(String chartContent, String title, String yaxisName) {
 		super();
+//		setLayout(new FlowLayout(FlowLayout.LEADING));
 		mDataset = new DefaultCategoryDataset();
 		JFreeChart mBarchart = ChartFactory.createBarChart(title, chartContent, yaxisName, mDataset,
 				PlotOrientation.VERTICAL, // 图表方向
@@ -54,6 +62,9 @@ public class FpsView extends BaseChartView {
 
 		// 设置柱状图轴
 		CategoryPlot mPlot = mBarchart.getCategoryPlot();
+		mPlot.setNoDataMessage(NOMESSGE);
+		mPlot.setNoDataMessageFont(new Font("粗体", Font.BOLD, 17));
+		
 		// x轴
 		CategoryAxis mDomainAxis = mPlot.getDomainAxis();
 		mDomainAxis.setLabelFont(new Font("宋体", Font.PLAIN, 15));
@@ -69,33 +80,49 @@ public class FpsView extends BaseChartView {
 		BarRenderer mRenderer = new BarRenderer();
 		mRenderer.setBaseItemLabelGenerator(new StandardCategoryItemLabelGenerator());
 		mRenderer.setBaseItemLabelsVisible(true);
+		
 		mPlot.setRenderer(mRenderer);
 		
 		//将freechart添加到面板中
 		ChartPanel chartPanel = new ChartPanel(mBarchart);
 		chartPanel.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4),
 				BorderFactory.createLineBorder(Color.black)));
+//		addSigleSwitch();
+		chartPanel.setLayout(new FlowLayout(FlowLayout.RIGHT));
+		//添加单独的图标
+		JButton startBtn = SwingUiUtil.getInstance().createBtnWithColor("开始", Color.green);
+		JButton pauseBtn = SwingUiUtil.getInstance().createBtnWithColor("结束", Color.RED);
+		pauseBtn.setEnabled(false);
+		startBtn.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// TODO Auto-generated method stub
+				startBtn.setEnabled(false);
+				pauseBtn.setEnabled(true);
+				start(GlobalConfig.PackageName);
+			}
+		});
+		
+		pauseBtn.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// TODO Auto-generated method stub
+				startBtn.setEnabled(true);
+				pauseBtn.setEnabled(false);
+				stop();
+			}
+		});
+		
+		startBtn.setLocation(0, 30);
+		pauseBtn.setLocation(30, 30);
+		
+		chartPanel.add(startBtn);
+		chartPanel.add(pauseBtn);
 		add(chartPanel);
 	}
-
-	/**
-	 * Adds an observation to the 'total memory' time series.
-	 *
-	 * @param fpsdata
-	 *            the total memory used.FpsData
-	 */
-	// private void addTotalObservation(FpsData fpsdata) {
-	// this.totalFps.add(new Millisecond(), fpsdata);
-	// }
-
-	public static CategoryDataset createDataset(DefaultCategoryDataset ds, FpsData str, int i) // 创建柱状图数据集
-	{
-		ds.addValue(str.fps, "帧率", "第" + i + "次");
-		ds.addValue(str.dropcount, "卡顿", "第" + i + "次");
-		ds.addValue(str.framecount, "丢帧", "第" + i + "次");
-		return ds;
-	}
-
+	
 	/**
 	 * 开始测试
 	 * 
@@ -111,17 +138,25 @@ public class FpsView extends BaseChartView {
 					if (stopFlag) {
 						break;
 					}
-
-					fpsdata = CollectDataImpl.getFpsData(packageName);
-//					System.out.println(fpsdata);
-					if (fpsdata != null) {
-//						mDataset = new DefaultCategoryDataset();
-						mDataset.addValue(fpsdata.fps, "帧率", fpsdata.activityName);
-						mDataset.addValue(fpsdata.dropcount, "丢帧数", fpsdata.activityName);
-						mDataset.addValue(fpsdata.framecount, "总帧数", fpsdata.activityName);
-						if (mPlot != null) {
-							mPlot.setDataset(mDataset);
+					fpsdataList = CollectDataImpl.getFpsData(packageName);
+					System.out.println(fpsdataList);
+					if (fpsdataList != null ) {
+						for(FpsData fpsdata : fpsdataList){
+//							mDataset = new DefaultCategoryDataset();
+							mDataset.addValue(fpsdata.fps, "帧率", fpsdata.activityName);
+							mDataset.addValue(fpsdata.dropcount, "丢帧数", fpsdata.activityName);
+							mDataset.addValue(fpsdata.framecount, "总帧数", fpsdata.activityName);
+							if (mPlot != null) {
+								mPlot.setDataset(mDataset);
+							}
 						}
+					}
+					
+					try {
+						Thread.sleep(GlobalConfig.collectInterval);
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
 					}
 				}
 			}

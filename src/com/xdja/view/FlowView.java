@@ -20,6 +20,7 @@ import org.jfree.ui.RectangleInsets;
 
 import com.xdja.collectdata.CollectDataImpl;
 import com.xdja.collectdata.FlowData;
+import com.xdja.constant.GlobalConfig;
 
 public class FlowView extends BaseChartView {
 
@@ -76,7 +77,7 @@ public class FlowView extends BaseChartView {
 	 *            the total memory used.
 	 */
 	private void addFlowObservation(double y) {
-		this.flowCost.add(new Millisecond(), y);
+		this.flowCost.addOrUpdate(new Millisecond(), y);
 	}
 	
 	/**
@@ -90,6 +91,7 @@ public class FlowView extends BaseChartView {
 			public void run() {
 				// TODO Auto-generated method stub
 				stopFlag = false;
+				mLastFlow = -1;
 				while (true) {
 					if (stopFlag) {
 						break;
@@ -99,9 +101,18 @@ public class FlowView extends BaseChartView {
 					if (mFlowData != null) {
 						if (mLastFlow == -1) {
 							addFlowObservation(0);
+							mLastFlow = mFlowData.flowTotal;
+							continue;
 						}
 						addFlowObservation(mFlowData.flowTotal - mLastFlow);
 						mLastFlow = mFlowData.flowTotal;
+						
+						try {
+							Thread.sleep(GlobalConfig.collectInterval);
+						} catch (InterruptedException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
 					}
 				}
 			}

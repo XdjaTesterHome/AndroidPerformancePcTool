@@ -24,4 +24,16 @@ public class FpsData {
 		return "fps = " + this.fps + ", dropcount = " + this.dropcount + ", framecount = " + framecount + ", activityName =" + activityName;
 		
 	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		// TODO Auto-generated method stub
+		return this.activityName.equals(((FpsData)obj).activityName);
+	}
+	
+	@Override
+	public int hashCode() {
+		// TODO Auto-generated method stub
+		return this.activityName.hashCode();
+	}
 }
