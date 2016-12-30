@@ -147,6 +147,7 @@ public class FpsView extends BaseChartView {
 					}
 
 					fpsdataList = CollectDataImpl.getFpsData(packageName);
+					System.out.println(fpsdataList);
 					if (fpsdataList != null ) {
 						for(FpsData fpsdata : fpsdataList){
 //							mDataset = new DefaultCategoryDataset();

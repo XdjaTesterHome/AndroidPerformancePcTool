@@ -2,9 +2,13 @@ package com.xdja.view;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
+import java.awt.FlowLayout;
 import java.awt.Font;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 import javax.swing.BorderFactory;
+import javax.swing.JButton;
 
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
@@ -24,6 +28,7 @@ import com.android.ddmlib.Client;
 import com.android.ddmlib.ClientData;
 import com.xdja.adb.AdbManager;
 import com.xdja.constant.GlobalConfig;
+import com.xdja.util.SwingUiUtil;
 
 public class MemoryView extends BaseChartView implements IClientChangeListener {
 
@@ -75,6 +80,20 @@ public class MemoryView extends BaseChartView implements IClientChangeListener {
 		ChartPanel chartPanel = new ChartPanel(chart);
 		chartPanel.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4),
 				BorderFactory.createLineBorder(Color.black)));
+		chartPanel.setLayout(new FlowLayout(FlowLayout.RIGHT));
+		//添加单独的图标
+		JButton gcButton = SwingUiUtil.getInstance().createBtnWithColor("GC", Color.green);
+		gcButton.setLocation(0, 30);
+		gcButton.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// TODO Auto-generated method stub
+				AdbManager.getInstance().causeGC(GlobalConfig.PackageName);
+			}
+		});
+		chartPanel.add(gcButton);
+		
 		add(chartPanel);
 	}
 

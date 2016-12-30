@@ -102,8 +102,8 @@ public class CollectDataImpl {
 			LoggerManager.logDebug(LOGTAG, "getFpsData", "get fps is wrong");
 			return null;
 		}
-//		return handleFpsData(commandFpsResult.successMsg);
-		return null;
+		return handleFpsData(commandFpsResult.successMsg);
+//		return null;
 	}
 
 	/**
@@ -285,7 +285,7 @@ public class CollectDataImpl {
 		float cpuData = 0;
 		// 防止分母为0的情况存在
 		if (startProcTotal - lastProcTotal != 0) {
-			cpuData = (float) (lastProcPid - startProcPid) / (lastProcTotal - startProcTotal) * 100;
+			cpuData = (float) (startProcPid - lastProcPid ) / (startProcTotal - lastProcTotal) * 100;
 		}
 
 		return new CpuData(startProcTotal, startProcPid, CommonUtil.getTwoDots(cpuData));

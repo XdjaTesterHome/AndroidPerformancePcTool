@@ -47,7 +47,7 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 	private FpsView viewFps;
 	private BatteryView viewBattery;
 	private static JComboBox<String> comboDevices;
-	private JComboBox<String> comboProcess;
+	private static JComboBox<String> comboProcess;
 	private JTabbedPane jTabbedPane = new JTabbedPane();
 	private String[] tabNames = { "   内    存   ", "     cpu    ", "   电   量   ", "    加载时间     ", "   帧   率   ",
 			"   流   量   " };
@@ -59,8 +59,8 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 	 * @param name:
 	 *            author name
 	 */
-	public LaunchView(String name) {
-		this.author = name;
+	public LaunchView() {
+		this.author = Constants.PRODUCT_NAME;
 		this.frame = new JPanel();
 		setTitle(String.format("%s v1.0", author));
 		setBounds(100, 50, 1249, 760);
@@ -367,9 +367,28 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 		AdbManager.getInstance().init();
 	}
 	
+	/**
+	 *  设置设备选择框是否可以选择
+	 * @param isEnable
+	 */
+	public static void setComboxDevicesEnable(boolean isEnable){
+		if (comboDevices != null) {
+			comboDevices.setEnabled(isEnable);
+		}
+	}
+	
+	/**
+	 *  设置进程选择框是否可以使用
+	 * @param isEnable
+	 */
+	public static void setComboxProcessEnable(boolean isEnable){
+		if (comboProcess != null) {
+			comboProcess.setEnabled(isEnable);
+		}
+	}
 	
 	public static void main(String[] args) {
-		LaunchView launch = new LaunchView(Constants.PRODUCT_NAME);
+		LaunchView launch = new LaunchView();
 		launch.createParts();
 		launch.initLogger();
 		launch.initAdbManager();

@@ -144,8 +144,8 @@ public class AdbManager implements IDebugBridgeChangeListener {
 	 * @param name
 	 *            设备的名称
 	 */
-	public void causeGC(String name, String packageName) {
-		Client client = getClient(name, packageName);
+	public void causeGC(String packageName) {
+		Client client = getClient(GlobalConfig.DeviceName, packageName);
 		if (client != null) {
 			client.executeGarbageCollector();
 		}
