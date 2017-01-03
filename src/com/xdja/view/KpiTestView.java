@@ -1,23 +1,16 @@
 package com.xdja.view;
 
-import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.Font;
-import java.awt.Frame;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.List;
 
 import javax.swing.BorderFactory;
-import javax.swing.JPanel;
-import javax.swing.Timer;
 
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
-import org.jfree.chart.StandardChartTheme;
 import org.jfree.chart.axis.CategoryAxis;
+import org.jfree.chart.axis.CategoryLabelPositions;
 import org.jfree.chart.axis.ValueAxis;
 import org.jfree.chart.labels.StandardCategoryItemLabelGenerator;
 import org.jfree.chart.plot.CategoryPlot;
@@ -25,16 +18,11 @@ import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.renderer.category.BarRenderer;
 import org.jfree.chart.title.LegendTitle;
 import org.jfree.chart.title.TextTitle;
-import org.jfree.data.category.CategoryDataset;
 import org.jfree.data.category.DefaultCategoryDataset;
 
 import com.xdja.collectdata.CollectDataImpl;
-import com.xdja.collectdata.FpsData;
 import com.xdja.collectdata.KpiData;
-import com.xdja.constant.Constants;
 import com.xdja.constant.GlobalConfig;
-
-
 
 public class KpiTestView extends BaseChartView {
 
@@ -43,14 +31,12 @@ public class KpiTestView extends BaseChartView {
 	 */
 	private static final long serialVersionUID = -9002331611054515951L;
 	private boolean stopFlag = false;
-	private Thread kpiThread,kdatathread;
-	private List<KpiData> KpiData  = null;
-	
-	
+	private Thread kpiThread, kdatathread;
+	private List<KpiData> KpiData = null;
+
 	private CategoryPlot mPlot;
-	private DefaultCategoryDataset mDataset  = null;
-	
-	
+	private DefaultCategoryDataset mDataset = null;
+
 	public KpiTestView(String chartContent, String title, String yaxisName) {
 		super();
 		mDataset = new DefaultCategoryDataset();
@@ -73,6 +59,7 @@ public class KpiTestView extends BaseChartView {
 		CategoryPlot mPlot = mBarchart.getCategoryPlot();
 		// x轴
 		CategoryAxis mDomainAxis = mPlot.getDomainAxis();
+		mDomainAxis.setCategoryLabelPositions(CategoryLabelPositions.UP_45);
 		mDomainAxis.setLabelFont(new Font("宋体", Font.PLAIN, 15));
 		// 设置x轴坐标字体
 		mDomainAxis.setTickLabelFont(new Font("宋体", Font.PLAIN, 15));
@@ -88,8 +75,8 @@ public class KpiTestView extends BaseChartView {
 		mRenderer.setBaseItemLabelGenerator(new StandardCategoryItemLabelGenerator());
 		mRenderer.setBaseItemLabelsVisible(true);
 		mPlot.setRenderer(mRenderer);
-		
-		//将freechart添加到面板中
+
+		// 将freechart添加到面板中
 		ChartPanel chartPanel = new ChartPanel(mBarchart);
 		chartPanel.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4),
 				BorderFactory.createLineBorder(Color.black)));
@@ -97,97 +84,49 @@ public class KpiTestView extends BaseChartView {
 	}
 
 	/**
-	 * Adds an observation to the 'total memory' time series.
-	 *
-	 * @param fpsdata
-	 *            the total memory used.FpsData
-	 */
-	
-
-//
-//	/**
-//	 * 开始测试
-//	 * 
-//	 * @param packageName
-//	 */
-//	public void start(String packageName) {
-//		
-//		new Thread(new Runnable(){
-//			
-//			public void run() {
-//				// TODO Auto-generated method stub
-//			CollectDataImpl.startCollectKpiData(packageName);	
-//			}}).start();
-//		
-//		kpiThread = new Thread(new Runnable() {
-//			@Override
-//			public void run() {
-//				// TODO Auto-generated method stub
-//				int i=0;
-//				stopFlag = false;
-//				while (true) {
-//					if (stopFlag) {
-//						break;
-//					}
-//					
-//					KpiData = CollectDataImpl.getKpiData();
-//					System.out.println(KpiData);
-//					if (KpiData != null) {
-//						int m = KpiData.size() ;
-//						if (m>i){
-//						mDataset.addValue(KpiData.get(i+1).loadTime, "kpi", KpiData.get(i+1).currentPage);
-//						i++;
-//						}else if (i>0) {
-//							mDataset.addValue(KpiData.get(i).loadTime, "kpi", KpiData.get(i).currentPage);}
-//						if (mPlot != null) {
-//							mPlot.setDataset(mDataset);
-//						}
-//					}
-//				}
-//			}
-//		});
-//
-//		kpiThread.start();
-//	}
-	
-	
-	/**
 	 * 开始测试
 	 * 
 	 * @param packageName
-	 * @throws InterruptedException 
+	 * @throws InterruptedException
 	 */
 	public void start(String packageName) throws InterruptedException {
-		
-		kdatathread = new Thread(new Runnable(){
-			
+
+		kdatathread = new Thread(new Runnable() {
+
 			public void run() {
 				// TODO Auto-generated method stub
-			
-			CollectDataImpl.startCollectKpiData(packageName);
-			}});
+
+				CollectDataImpl.startCollectKpiData(packageName);
+			}
+		});
 		kdatathread.start();
 		kpiThread = new Thread(new Runnable() {
 			@Override
 			public void run() {
 				// TODO Auto-generated method stub
-		        stopFlag = false;
+				stopFlag = false;
 				while (true) {
 					if (stopFlag) {
 						break;
 					}
-					
+
 					KpiData = CollectDataImpl.getKpiData();
-					System.out.println(KpiData);
 					if (KpiData != null) {
-						int listSize=KpiData.size(); 
-//						mDataset = new DefaultCategoryDataset();
-						for (int i=0;i<listSize;i++){
-						mDataset.addValue(KpiData.get(i).loadTime, "kpi", KpiData.get(i).currentPage);
+						int listSize = KpiData.size();
+						// mDataset = new DefaultCategoryDataset();
+						for (int i = 0; i < listSize; i++) {
+							mDataset.addValue(KpiData.get(i).loadTime, "kpi", KpiData.get(i).currentPage);
 						}
 						if (mPlot != null) {
 							mPlot.setDataset(mDataset);
 						}
+					}
+					
+					try {
+						Thread.sleep(GlobalConfig.collectMIDDLEInterval);
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
 					}
 				}
 			}
@@ -198,11 +137,12 @@ public class KpiTestView extends BaseChartView {
 
 	public void stop() {
 		stopFlag = true;
-    }
-	
+	}
+
 	public void clear() {
-		if (KpiData!=null){
-	KpiData.clear();}
+		if (KpiData != null) {
+			KpiData.clear();
+		}
 	}
 
 }

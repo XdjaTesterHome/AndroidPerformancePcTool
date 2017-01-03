@@ -63,7 +63,6 @@ public class FlowView extends BaseChartView {
 
 		range.setStandardTickUnits(NumberAxis.createIntegerTickUnits());
 		JFreeChart chart = new JFreeChart(title, new Font("SansSerif", Font.BOLD, 24), plot, true);
-		chart.setBackgroundPaint(Color.white);
 		ChartPanel chartPanel = new ChartPanel(chart);
 		chartPanel.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4),
 				BorderFactory.createLineBorder(Color.black)));

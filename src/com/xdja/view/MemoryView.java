@@ -167,7 +167,6 @@ public class MemoryView extends BaseChartView implements IClientChangeListener {
 					if (m != null) {
 						allocMb = m.bytesAllocated / (1024.f * 1024.f);
 						freeMb = m.sizeInBytes / (1024.f * 1024.f) - allocMb;
-						System.out.println("allocMb = " + allocMb + "freeMb = " + freeMb);
 						addTotalObservation(allocMb,freeMb);
 					}
 				}

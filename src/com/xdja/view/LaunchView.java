@@ -78,7 +78,6 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 	 * constructor to init a LaunchView instance create a JPanel instance to put
 	 * other controller parts 用于创建一个父控件来摆放其他的控件，这里是用来显示其他的测试项
 	 */
-	@SuppressWarnings({ "rawtypes", "unchecked", "serial" })
 	public void createParts() {
 		// 必须显式设置布局格式为空，否则不会按照我们设置好的格式布局
 		frame.setLayout(null);

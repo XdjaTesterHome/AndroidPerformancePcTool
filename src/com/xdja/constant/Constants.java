@@ -68,7 +68,7 @@ public class Constants {
 	public static final String FPS_UNIT = "数量";
 	
 	public static final String KPITITLE = "kpi测试结果";
-	public static final String KPI = "页面加载时间";
+	public static final String KPI = "页面加载时间(ms)";
 	public static final String KPI_UNIT = "ms";
 	
 	public static final String ABOUT = "用于测试Android性能";

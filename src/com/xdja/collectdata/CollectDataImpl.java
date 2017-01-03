@@ -35,11 +35,9 @@ public class CollectDataImpl {
 				if (contents.length > 1) {
 					String kpiStr = contents[1].trim();
 					String nowPageName = kpiStr.split(":")[0].trim();
-					nowPageName = nowPageName.split("/")[1].trim();
-					if (nowPageName.startsWith(".")) {
-						nowPageName = nowPageName.substring(1);
-					}
-
+					int index = nowPageName.lastIndexOf(".");
+					nowPageName = nowPageName.substring(index + 1);
+					
 					String costtimeStr = kpiStr.split(":")[1].trim();
 					int costTime = formatStrToms(costtimeStr);
 					if (nowPageName == null || "".equals(nowPageName)) {
@@ -205,8 +203,8 @@ public class CollectDataImpl {
 			if (commandFlowResult != null && !commandFlowResult.errorMsg.contains("No such file or directory")) {
 				flowRecv = Integer.parseInt(commandFlowResult.successMsg);
 			}
-
-			float totalFlow = (flowSend + flowRecv) / 1024 / 1024;
+			
+			float totalFlow = (float)(flowSend + flowRecv) / 1024 / 1024;
 			totalFlow = CommonUtil.getTwoDots(totalFlow);
 			flowData = new FlowData(totalFlow, flowRecv, flowSend);
 			return flowData;
@@ -227,7 +225,7 @@ public class CollectDataImpl {
 				totalRecv += recv_bytes;
 				totalSend += send_bytes;
 			}
-
+			System.out.println("totalSend = " + totalSend + ", totalRecv = " + totalRecv);
 			float totalFlows = (totalRecv + totalSend) / 1024;
 			totalFlows = CommonUtil.getTwoDots(totalFlows);
 			flowData = new FlowData(totalFlows, totalRecv, totalSend);
@@ -292,7 +290,7 @@ public class CollectDataImpl {
 	}
 
 	/***
-	 * 获取当前的页面
+	 * 获取当前的页面,只返回Activity的名字
 	 * 
 	 * @return
 	 */
@@ -304,11 +302,8 @@ public class CollectDataImpl {
 			String activityName = CommonUtil.formatBlanksToBlank(activityResult.successMsg);
 			activityName = activityName.trim();
 			activityName = activityName.split(" ")[1];
-			activityName = activityName.split("/")[1];
-			if (activityName.startsWith(".")) {
-				activityName = activityName.substring(1);
-			}
-
+			int index = activityName.indexOf("/");
+			activityName = activityName.substring(index + 1);
 			return activityName;
 		}
 

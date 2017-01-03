@@ -14,6 +14,7 @@ import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.CategoryAxis;
+import org.jfree.chart.axis.CategoryLabelPositions;
 import org.jfree.chart.axis.ValueAxis;
 import org.jfree.chart.labels.StandardCategoryItemLabelGenerator;
 import org.jfree.chart.plot.CategoryPlot;
@@ -67,6 +68,7 @@ public class FpsView extends BaseChartView {
 		
 		// x轴
 		CategoryAxis mDomainAxis = mPlot.getDomainAxis();
+		mDomainAxis.setCategoryLabelPositions(CategoryLabelPositions.UP_45);
 		mDomainAxis.setLabelFont(new Font("宋体", Font.PLAIN, 15));
 		// 设置x轴坐标字体
 		mDomainAxis.setTickLabelFont(new Font("宋体", Font.PLAIN, 15));
@@ -139,7 +141,6 @@ public class FpsView extends BaseChartView {
 						break;
 					}
 					fpsdataList = CollectDataImpl.getFpsData(packageName);
-					System.out.println(fpsdataList);
 					if (fpsdataList != null ) {
 						for(FpsData fpsdata : fpsdataList){
 //							mDataset = new DefaultCategoryDataset();
@@ -153,7 +154,7 @@ public class FpsView extends BaseChartView {
 					}
 					
 					try {
-						Thread.sleep(GlobalConfig.collectInterval);
+						Thread.sleep(GlobalConfig.collectMIDDLEInterval);
 					} catch (InterruptedException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();

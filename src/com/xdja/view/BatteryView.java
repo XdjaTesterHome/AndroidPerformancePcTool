@@ -1,25 +1,17 @@
 
 package com.xdja.view;
 
-import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.Font;
-import java.awt.Frame;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.IOException;
-import java.util.List;
 
 import javax.swing.BorderFactory;
-import javax.swing.JPanel;
-import javax.swing.Timer;
 
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
-import org.jfree.chart.StandardChartTheme;
 import org.jfree.chart.axis.CategoryAxis;
+import org.jfree.chart.axis.CategoryLabelPositions;
 import org.jfree.chart.axis.ValueAxis;
 import org.jfree.chart.labels.StandardCategoryItemLabelGenerator;
 import org.jfree.chart.plot.CategoryPlot;
@@ -27,15 +19,9 @@ import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.renderer.category.BarRenderer;
 import org.jfree.chart.title.LegendTitle;
 import org.jfree.chart.title.TextTitle;
-import org.jfree.data.category.CategoryDataset;
 import org.jfree.data.category.DefaultCategoryDataset;
 
-import com.xdja.collectdata.CollectDataImpl;
 import com.xdja.collectdata.CCRDFile;
-import com.xdja.collectdata.FpsData;
-import com.xdja.collectdata.KpiData;
-import com.xdja.constant.Constants;
-import com.xdja.constant.GlobalConfig;
 
 public class BatteryView extends BaseChartView {
 
@@ -74,6 +60,7 @@ public class BatteryView extends BaseChartView {
 		CategoryPlot mPlot = mBarchart.getCategoryPlot();
 		// x轴
 		CategoryAxis mDomainAxis = mPlot.getDomainAxis();
+		mDomainAxis.setCategoryLabelPositions(CategoryLabelPositions.UP_45);
 		mDomainAxis.setLabelFont(new Font("宋体", Font.PLAIN, 15));
 		// 设置x轴坐标字体
 		mDomainAxis.setTickLabelFont(new Font("宋体", Font.PLAIN, 15));
