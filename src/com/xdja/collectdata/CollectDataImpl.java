@@ -534,7 +534,27 @@ public class CollectDataImpl {
 		}
 		return 0;
 	}
-
+	
+	/**
+	 *  清理电量数据
+	 */
+	public static boolean clearBatteryData(){
+		String enableBatteryCmd = "adb shell dumpsys batterystats --enable full-wake-history";
+		String getBatteryCmd = "adb shell dumpsys batterystats --reset";
+		boolean isTrue = false;
+		
+		try {
+			CollectDataUtil.execShellCommand(enableBatteryCmd, false);
+			CollectDataUtil.execShellCommand(getBatteryCmd, false);
+			isTrue = true;
+		} catch (Exception e) {
+			// TODO: handle exception
+			isTrue = false;
+		}
+		return isTrue;
+	}
+	
+	
 	/**
 	 * 将timeStr转成毫秒
 	 * 

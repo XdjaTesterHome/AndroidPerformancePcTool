@@ -67,7 +67,7 @@ public class SwingUiUtil {
 			cancel_text = "取消";
 		}
 		
-		Object[] options = { Constants.CONFIRM, Constants.CANCEL };
+		Object[] options = { ok_text, cancel_text };
 		JOptionPane warnPane = new JOptionPane(content,
 				JOptionPane.QUESTION_MESSAGE, JOptionPane.YES_NO_OPTION, null,
 				options, options[1]);
@@ -88,7 +88,7 @@ public class SwingUiUtil {
 	 * @param content
 	 * @param ok_text
 	 */
-	public void showTipsDialog(Component parentComponent, String title, String content, String ok_text) {
+	public void showTipsDialog(Component parentComponent, String title, String content, String ok_text, ClickDialogBtnListener listener) {
 		if (parentComponent == null) {
 			return;
 		}
@@ -105,7 +105,7 @@ public class SwingUiUtil {
 			ok_text = "确定";
 		}
 		
-		Object[] options = { Constants.CONFIRM};
+		Object[] options = { ok_text};
 		JOptionPane warnPane = new JOptionPane(content,
 				JOptionPane.YES_OPTION, JOptionPane.INFORMATION_MESSAGE, null,
 				options, options[0]);
@@ -113,7 +113,10 @@ public class SwingUiUtil {
 		JDialog dialog = warnPane.createDialog(parentComponent, title);
 		dialog.setVisible(true);
 		Object selectedValue = warnPane.getValue();
-		if (selectedValue != null) {
+		if (selectedValue == null || selectedValue == options[0]) {
+			if (listener != null) {
+				listener.clickOkBtn();
+			}
 			dialog.setVisible(false);
 			dialog.dispose();
 		}

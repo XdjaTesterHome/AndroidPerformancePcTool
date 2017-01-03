@@ -54,5 +54,6 @@ public abstract class BaseChartView extends JPanel{
 		chartTheme.setPlotOutlinePaint(Color.WHITE);
 		
 		ChartFactory.setChartTheme(chartTheme);
+		
 	}
 }

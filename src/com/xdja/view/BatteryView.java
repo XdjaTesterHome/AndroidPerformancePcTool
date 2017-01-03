@@ -2,10 +2,14 @@
 package com.xdja.view;
 
 import java.awt.Color;
+import java.awt.FlowLayout;
 import java.awt.Font;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.IOException;
 
 import javax.swing.BorderFactory;
+import javax.swing.JButton;
 
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
@@ -22,6 +26,12 @@ import org.jfree.chart.title.TextTitle;
 import org.jfree.data.category.DefaultCategoryDataset;
 
 import com.xdja.collectdata.CCRDFile;
+import com.xdja.collectdata.CollectDataImpl;
+import com.xdja.constant.Constants;
+import com.xdja.constant.GlobalConfig;
+import com.xdja.util.CommonUtil;
+import com.xdja.util.ProPertiesUtil;
+import com.xdja.util.SwingUiUtil;
 
 public class BatteryView extends BaseChartView {
 
@@ -29,11 +39,10 @@ public class BatteryView extends BaseChartView {
 	 * serial UID auto generated
 	 */
 	private static final long serialVersionUID = -9002331611054515951L;
-	private boolean stopFlag = false;
 	private Thread batteryThread;
 	private String[][] batteryData ;
 	
-	
+	private final static String  NOMESSGE = "收集电量数据，需要拔掉USB连接，然后执行自己的测试用例，再次连接USB并分析数据";
 	private CategoryPlot mPlot;
 	private DefaultCategoryDataset mDataset  = null;
 	
@@ -58,6 +67,8 @@ public class BatteryView extends BaseChartView {
 
 		// 设置柱状图轴
 		CategoryPlot mPlot = mBarchart.getCategoryPlot();
+		mPlot.setNoDataMessage(NOMESSGE);
+		mPlot.setNoDataMessageFont(new Font("粗体", Font.BOLD, 17));
 		// x轴
 		CategoryAxis mDomainAxis = mPlot.getDomainAxis();
 		mDomainAxis.setCategoryLabelPositions(CategoryLabelPositions.UP_45);
@@ -81,6 +92,52 @@ public class BatteryView extends BaseChartView {
 		ChartPanel chartPanel = new ChartPanel(mBarchart);
 		chartPanel.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4),
 				BorderFactory.createLineBorder(Color.black)));
+		chartPanel.setLayout(new FlowLayout(FlowLayout.RIGHT));
+		//添加【开始测试】、【分析数据】按钮
+		JButton startBtn = SwingUiUtil.getInstance().createBtnWithColor("开始测试", Color.green);
+		JButton parseBtn = SwingUiUtil.getInstance().createBtnWithColor("分析数据", Color.RED);
+		startBtn.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// TODO Auto-generated method stub
+				startBtn.setEnabled(false);
+				
+				//记录上一次测试的packageName
+				ProPertiesUtil.getInstance().writeProperties(Constants.LAST_PACKAGENAME, GlobalConfig.PackageName);
+				//清理数据
+				boolean isSuc = CollectDataImpl.clearBatteryData();
+				if (isSuc) {
+					//show dialog
+					SwingUiUtil.getInstance().showTipsDialog(BatteryView.this, "提示", "测试电量，请拔掉usb，然后执行自己的测试用例即可", "好的", null);
+				}
+			}
+		});
+		
+		parseBtn.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// TODO Auto-generated method stub
+				startBtn.setEnabled(true);
+				
+				try {
+					String lastPackageName = ProPertiesUtil.getInstance().getProperties(Constants.LAST_PACKAGENAME);
+					if (CommonUtil.strIsNull(lastPackageName) || !lastPackageName.equals(GlobalConfig.PackageName)) {
+						SwingUiUtil.getInstance().showTipsDialog(BatteryView.this, "提示", "请选择上次测试的应用包名之后再执行解析数据操作", "好的",null);
+						return;
+					}
+					start(lastPackageName);
+				} catch (InterruptedException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+			}
+		});
+		
+		
+		chartPanel.add(startBtn);
+		chartPanel.add(parseBtn);
 		add(chartPanel);
 	}
 
@@ -103,14 +160,12 @@ public class BatteryView extends BaseChartView {
 			@Override
 			public void run() {
 				// TODO Auto-generated method stub
-		        stopFlag = false;
 				try {
 					batteryData = CCRDFile.getpowerdata(packageName);
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-					System.out.println(batteryData);
 					if (batteryData != null) {
 						for (int i=0;i<batteryData.length;i++){
 						mDataset.addValue(Double.parseDouble((batteryData[i][2])), "uid",batteryData[i][0]);
@@ -124,8 +179,4 @@ public class BatteryView extends BaseChartView {
 		});
 		batteryThread.start();
 	}
-
-	public void stop() {
-		stopFlag = true;
-    }
 }

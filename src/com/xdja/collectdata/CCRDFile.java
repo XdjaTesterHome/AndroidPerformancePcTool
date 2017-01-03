@@ -202,10 +202,10 @@ public class CCRDFile {
 	public static CommandResult get_battery_data(String pkg_name){
         String cmd ;
         if (pkg_name ==null || pkg_name == ""){
-              cmd = "adb shell dumpsys batterystats";}
+              cmd = "shell dumpsys batterystats";}
             else{
-             cmd ="adb shell dumpsys batterystats "+ pkg_name;}
-        CommandResult data = CollectDataUtil.execCmdCommand(cmd, false, true);
+             cmd ="shell dumpsys batterystats "+ pkg_name;}
+        CommandResult data = CollectDataUtil.execShellCommand(cmd);
         if( (data != null) ){
             return data;}
         else{
@@ -284,16 +284,20 @@ public class CCRDFile {
 	public static String[][] handlepowerdata(String message){
 //		System.out.println(message);
 //		String resu = message.split("Estimated power use (mAh):")[1].trim();
+		String[] powerdata;
+		String[][] alldata={{}} ; 
 		String resu = handlere(message);
 //		System.out.println("resu:"+resu);
 		String resus = resu.trim();
+		if (CommonUtil.strIsNull(resus)) {
+			return alldata;
+		}
 //		System.out.println("resus:"+resus);
-		String[] powerdata;
-		String[][] alldata={{}} ; 
 		powerdata = resus.split("\n\n");
 //		System.out.println(Arrays.toString(powerdata));//
 		String pkg_name = "", compute_drain, actual_drain;
 		// 处理整体电流情况
+		powerdata = powerdata[0].split("\n");
 		for (int i=0 ;i< powerdata.length;i++){
 			if (i==0){
 				String battery_total_data;

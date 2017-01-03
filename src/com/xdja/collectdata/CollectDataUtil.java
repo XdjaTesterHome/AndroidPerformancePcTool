@@ -364,6 +364,42 @@ public class CollectDataUtil {
 		return new CommandResult(0, "", "");
 	}
 	
+	
+	/**
+	 * 能执行shell command，通过ddmlib
+	 * @param cmd
+	 * @param isResult 是否需要结果
+	 */
+	public static CommandResult execShellCommand(String cmd, boolean isResult){
+		
+		if (device == null) {
+			device = AdbManager.getInstance().getIDevice(GlobalConfig.DeviceName);
+		}
+		if (CommonUtil.strIsNull(cmd)) {
+			return new CommandResult(-1, "", "");
+		}
+		StringBuilder successMsg = new StringBuilder();
+		
+		// 处理cmd
+		cmd = cmd.substring(cmd.indexOf(" "));
+		if (isResult) {
+			List<String> results = executeShellCommandWithOutput(device, cmd);
+			if (results.size() > 1) {
+				for(String str:results){
+					successMsg.append(str).append("\n");
+				}
+				
+				return new CommandResult(0, successMsg.toString(), "");
+			}
+		}else {
+			executeShellCommandWithOutput(device, cmd);
+		}
+		
+		
+		return new CommandResult(0, "", "");
+	}
+	
+	
 	/**
 	 *  通过ddmblib执行cmd命令
 	 * @param device

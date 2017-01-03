@@ -187,25 +187,25 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 		viewCpu.setBounds(rect);
 		jTabbedPane.addTab(tabNames[1], viewCpu);
 
-		// 3.电量
-		viewBattery = new BatteryView(Constants.BATTERY, Constants.BATTERY, Constants.BATTERY_UNIT);
-		viewBattery.setBounds(rect);
-		jTabbedPane.addTab(tabNames[2], viewBattery);
-
-		// 4.kpiTest
+		// 3.kpiTest
 		kpiTestView = new KpiTestView(Constants.KPI,Constants.KPITITLE, Constants.KPI);
-		viewBattery.setBounds(rect);
+		kpiTestView.setBounds(rect);
 		jTabbedPane.addTab(tabNames[3], kpiTestView);
-
+		
+		// 4.流量
+		viewFlow = new FlowView(Constants.FLOW, Constants.FLOW, Constants.FLOW_UNIT);
+		viewFlow.setBounds(rect);
+		jTabbedPane.addTab(tabNames[5], viewFlow);
+		
 		// 5.帧率
 		viewFps = new FpsView(Constants.FPS, Constants.FPSTITLE, Constants.FPS_UNIT);
 		viewFps.setBounds(rect);
 		jTabbedPane.addTab(tabNames[4], viewFps);
 
-		// 6.流量
-		viewFlow = new FlowView(Constants.FLOW, Constants.FLOW, Constants.FLOW_UNIT);
-		viewFlow.setBounds(rect);
-		jTabbedPane.addTab(tabNames[5], viewFlow);
+		// 6.电量
+		viewBattery = new BatteryView(Constants.BATTERY, Constants.BATTERY, Constants.BATTERY_UNIT);
+		viewBattery.setBounds(rect);
+		jTabbedPane.addTab(tabNames[2], viewBattery);
 
 		frame.add(jTabbedPane);
 		rect = new Rectangle(20, 100, 1100, 600);
@@ -364,10 +364,6 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 		if (kpiTestView != null) {
 			kpiTestView.stop();
 		}
-		
-		if (viewBattery != null) {
-			viewBattery.stop();
-		}
 	}
 
 	/**
@@ -412,7 +408,7 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				// TODO Auto-generated method stub
-				SwingUiUtil.getInstance().showTipsDialog(LaunchView.this, "关于", Constants.ABOUT, "我知道了");
+				SwingUiUtil.getInstance().showTipsDialog(LaunchView.this, "关于", Constants.ABOUT, "我知道了", null);
 			}
 		});
 		JMenuItem helpItem = new JMenuItem("使用帮助");
@@ -421,7 +417,7 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				// TODO Auto-generated method stub
-				SwingUiUtil.getInstance().showTipsDialog(LaunchView.this, "使用帮助", Constants.HELP, "我知道了");
+				SwingUiUtil.getInstance().showTipsDialog(LaunchView.this, "使用帮助", Constants.HELP, "我知道了", null);
 			}
 		});
 		
