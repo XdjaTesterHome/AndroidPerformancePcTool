@@ -82,6 +82,45 @@ public class SwingUiUtil {
 	}
 	
 	/**
+	 *  展示提示性文案的对话框，只有一个确定按钮
+	 * @param parentComponent
+	 * @param title
+	 * @param content
+	 * @param ok_text
+	 */
+	public void showTipsDialog(Component parentComponent, String title, String content, String ok_text) {
+		if (parentComponent == null) {
+			return;
+		}
+		
+		if (title == null || "".equals(title)) {
+			title = "提醒";
+		}
+		
+		if (content == null || "".equals(content)) {
+			content = "你还没有设置文案";
+		}
+		
+		if (ok_text == null || "".equals(ok_text)) {
+			ok_text = "确定";
+		}
+		
+		Object[] options = { Constants.CONFIRM};
+		JOptionPane warnPane = new JOptionPane(content,
+				JOptionPane.YES_OPTION, JOptionPane.INFORMATION_MESSAGE, null,
+				options, options[0]);
+		
+		JDialog dialog = warnPane.createDialog(parentComponent, title);
+		dialog.setVisible(true);
+		Object selectedValue = warnPane.getValue();
+		if (selectedValue != null) {
+			dialog.setVisible(false);
+			dialog.dispose();
+		}
+		
+	}
+	
+	/**
 	 * 用于创建带图标的icon
 	 * @param text
 	 * @param icon

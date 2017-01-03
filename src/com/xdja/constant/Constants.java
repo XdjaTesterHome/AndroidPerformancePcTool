@@ -70,4 +70,7 @@ public class Constants {
 	public static final String KPITITLE = "kpi测试结果";
 	public static final String KPI = "页面加载时间";
 	public static final String KPI_UNIT = "ms";
+	
+	public static final String ABOUT = "用于测试Android性能";
+	public static final String HELP = "在使用工具之前，需要关掉其他的工具比如：AndroidStudio、Eclipse等 \n 不然会对工具的使用造成影响";
 }

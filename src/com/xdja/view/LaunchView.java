@@ -12,6 +12,9 @@ import java.util.TreeSet;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 
@@ -65,6 +68,7 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 		this.frame = new JPanel();
 		setTitle(String.format("%s v1.0", author));
 		setBounds(100, 50, 1249, 760);
+		createTopMenu();
 		add(frame);
 		setVisible(true);
 		AndroidDebugBridge.addDeviceChangeListener(this);
@@ -396,25 +400,38 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 		AdbManager.getInstance().init();
 	}
 	
-	/**
-	 *  设置设备选择框是否可以选择
-	 * @param isEnable
-	 */
-	public static void setComboxDevicesEnable(boolean isEnable){
-		if (comboDevices != null) {
-			comboDevices.setEnabled(isEnable);
-		}
+	private void createTopMenu(){
+		JMenuBar menuBar = new JMenuBar();
+		setJMenuBar(menuBar);
+		
+		// 添加菜单选项
+		JMenu aboutMenu = new JMenu("Help");
+		
+		JMenuItem aboutItem = new JMenuItem("关于");
+		aboutItem.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// TODO Auto-generated method stub
+				SwingUiUtil.getInstance().showTipsDialog(LaunchView.this, "关于", Constants.ABOUT, "我知道了");
+			}
+		});
+		JMenuItem helpItem = new JMenuItem("使用帮助");
+		helpItem.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// TODO Auto-generated method stub
+				SwingUiUtil.getInstance().showTipsDialog(LaunchView.this, "使用帮助", Constants.HELP, "我知道了");
+			}
+		});
+		
+		aboutMenu.add(aboutItem);
+		aboutMenu.add(helpItem);
+		
+		menuBar.add(aboutMenu);
 	}
 	
-	/**
-	 *  设置进程选择框是否可以使用
-	 * @param isEnable
-	 */
-	public static void setComboxProcessEnable(boolean isEnable){
-		if (comboProcess != null) {
-			comboProcess.setEnabled(isEnable);
-		}
-	}
 	
 	public static void main(String[] args) {
 		LaunchView launch = new LaunchView();
