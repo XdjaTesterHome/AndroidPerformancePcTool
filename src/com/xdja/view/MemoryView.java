@@ -27,6 +27,7 @@ import com.android.ddmlib.AndroidDebugBridge.IClientChangeListener;
 import com.android.ddmlib.Client;
 import com.android.ddmlib.ClientData;
 import com.xdja.adb.AdbManager;
+import com.xdja.constant.Constants;
 import com.xdja.constant.GlobalConfig;
 import com.xdja.util.SwingUiUtil;
 

@@ -554,6 +554,13 @@ public class CollectDataImpl {
 		return isTrue;
 	}
 	
+	/**
+	 * 抓取内存快照
+	 * @param packageName
+	 */
+	public static void dumpMemory(String packageName) {
+		
+	}
 	
 	/**
 	 * 将timeStr转成毫秒
