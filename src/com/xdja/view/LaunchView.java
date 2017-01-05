@@ -290,14 +290,6 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 				e.printStackTrace();
 			}
 		}
-		if (viewBattery != null) {
-			try {
-				viewBattery.start(GlobalConfig.PackageName);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
 	}
 
 	/**
@@ -315,7 +307,10 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 		if (viewFlow != null) {
 			viewFlow.stop();
 		}
-
+		
+		if (kpiTestView != null) {
+			kpiTestView.stop();
+		}
 	}
 
 	@Override
@@ -377,7 +372,7 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 		if (!CommonUtil.strIsNull(selectDevice)) {
 			String devicesid = AdbManager.getInstance().getSerialNumber(selectDevice);
 			IDevice dev = AdbManager.getInstance().getIDevice(selectDevice);
-			CollectDataUtil.setDevice(dev);
+			CollectDataUtil.getInstance().setDevice(dev);
 			List<String> respack = CollectDataImpl.getRunningProcess(devicesid);
 			if (respack.size() > 0 && comboProcess != null) {
 				comboProcess.removeAllItems();

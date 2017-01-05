@@ -1,17 +1,13 @@
 package com.xdja.collectdata;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.xdja.log.LoggerManager;
 import com.xdja.util.CommonUtil;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.Writer;
 
 import com.xdja.collectdata.CollectDataUtil;
 
@@ -177,7 +173,7 @@ public class CCRDFile {
 	public static String get_package_name_by_uid(String uid){
 		String packagename ="";
 		String cmd = "adb shell ps | findStr "+ uid;
-		CommandResult data = CollectDataUtil.execCmdCommand(cmd, false, true);
+		CommandResult data = CollectDataUtil.getInstance().execCmdCommand(cmd, false, true);
 		String result = null ;
 		if(data.successMsg!=null){
 			result = data.successMsg;
@@ -205,7 +201,7 @@ public class CCRDFile {
               cmd = "shell dumpsys batterystats";}
             else{
              cmd ="shell dumpsys batterystats "+ pkg_name;}
-        CommandResult data = CollectDataUtil.execShellCommand(cmd);
+        CommandResult data = CollectDataUtil.getInstance().execShellCommand(cmd);
         if( (data != null) ){
             return data;}
         else{

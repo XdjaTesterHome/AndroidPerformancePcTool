@@ -203,38 +203,38 @@ Charge step durations:
 
 Statistics since last charge:
 System starts: 4, currently on battery: true
-Time on battery: 27d 1h 53m 59s 777ms (98.8%) realtime, 2d 10h 8m 58s 384ms (8.8%) uptime
-Time on battery screen off: 26d 9h 20m 34s 630ms (96.3%) realtime, 1d 17h 35m 33s 234ms (6.3%) uptime
-Total run time: 27d 9h 30m 30s 833ms realtime, 2d 17h 45m 29s 442ms uptime
+Time on battery: 28d 19h 47m 12s 472ms (98.9%) realtime, 2d 21h 22m 14s 381ms (9.9%) uptime
+Time on battery screen off: 28d 2h 34m 44s 630ms (96.5%) realtime, 2d 4h 9m 46s 536ms (7.5%) uptime
+Total run time: 29d 3h 23m 43s 528ms realtime, 3d 4h 58m 45s 439ms uptime
 Battery time remaining: 9d 14h 32m 50s 988ms
 Start clock time: 2016-12-15-14-02-09
-Screen on: 16h 33m 25s 147ms (2.5%) 45x, Interactive: 16h 33m 39s 74ms (2.5%)
+Screen on: 17h 12m 27s 842ms (2.5%) 48x, Interactive: 17h 12m 42s 837ms (2.5%)
 Screen brightnesses:
-dark 16h 33m 25s 147ms (100.0%)
+dark 17h 12m 27s 842ms (100.0%)
 Total full wakelock time: 1m 58s 448ms
-Total partial wakelock time: 2h 11m 22s 463ms
+Total partial wakelock time: 2h 30m 28s 104ms
 Mobile total received: 0B, sent: 0B (packets received 0, sent 0)
 Phone signal levels:
-great 27d 1h 53m 59s 777ms (100.0%) 4x
+great 28d 19h 47m 12s 472ms (100.0%) 4x
 Signal scanning time: 0ms
 Radio types:
-none 27d 1h 53m 59s 777ms (100.0%) 4x
+none 28d 19h 47m 12s 472ms (100.0%) 4x
 Mobile radio active time: 0ms (0.0%) 0x
-Wi-Fi total received: 73.13MB, sent: 22.66MB (packets received 190064, sent 213185)
-Wifi on: 27d 1h 53m 57s 187ms (100.0%), Wifi running: 27d 1h 53m 55s 842ms (100.0%)
+Wi-Fi total received: 73.77MB, sent: 22.89MB (packets received 191608, sent 215072)
+Wifi on: 28d 19h 47m 9s 882ms (100.0%), Wifi running: 28d 19h 47m 8s 537ms (100.0%)
 Wifi states: (no activity)
 Wifi supplicant states:
-disconn 8d 3h 3m 27s 799ms (30.0%) 65x
-scanning 6d 11h 1m 57s 400ms (23.9%) 30x
-associating 37s 345ms (0.0%) 56x
-associated 16s 162ms (0.0%) 38x
-4-way-handshake 1s 155ms (0.0%) 37x
-group-handshake 3s 510ms (0.0%) 44x
-completed 12d 11h 47m 36s 406ms (46.1%) 50x
+disconn 9d 9h 47m 10s 525ms (32.6%) 69x
+scanning 6d 11h 38m 27s 607ms (22.5%) 31x
+associating 38s 197ms (0.0%) 59x
+associated 16s 276ms (0.0%) 41x
+4-way-handshake 1s 161ms (0.0%) 40x
+group-handshake 3s 760ms (0.0%) 47x
+completed 12d 22h 20m 34s 946ms (44.9%) 53x
 Wifi signal levels:
 level(0) 15s 236ms (0.0%) 5x
-level(3) 3m 2s 810ms (0.0%) 39x
-level(4) 27d 1h 50m 41s 731ms (100.0%) 51x
+level(3) 3m 15s 4ms (0.0%) 40x
+level(4) 28d 19h 43m 42s 232ms (100.0%) 52x
 Bluetooth on: 0ms (0.0%)
 Bluetooth states: (no activity)
 
@@ -245,152 +245,156 @@ Amount discharged while screen on: 0
 Amount discharged while screen off: 166
 
 Estimated power use (mAh):
-Capacity: 3000, Computed drain: 20837, actual drain: 4920-4980
-Wifi: 6499
-Idle: 3800
-Screen: 3543
-Cell standby: 3249
-Uid 0: 1692
-Uid u0a80: 1333
-Uid 1000: 515
-Uid u0a15: 128
-Uid u0a7: 30.3
-Uid 1013: 11.5
-Uid 1001: 7.59
-Uid u0a20: 6.24
-Uid u0a79: 5.81
-Uid u0a81: 2.76
-Uid 1027: 2.31
-Uid u0a23: 2.20
-Uid u0a11: 1.46
-Uid u0a5: 1.24
-Uid u0a26: 1.17
-Uid u0a61: 1.08
-Uid 1021: 0.856
-Uid u0a1: 0.525
-Uid u0a63: 0.468
-Uid u0a9: 0.467
-Uid u0a38: 0.424
-Uid u0a56: 0.419
-Uid u0a2: 0.232
-Uid u0a53: 0.113
-Uid u0a29: 0.0723
+Capacity: 3000, Computed drain: 22212, actual drain: 4920-4980
+Wifi: 6918
+Idle: 4047
+Screen: 3682
+Cell standby: 3459
+Uid 0: 2018
+Uid u0a80: 1361
+Uid 1000: 520
+Uid u0a15: 126
+Uid u0a7: 30.7
+Uid 1013: 12.5
+Uid 1001: 7.76
+Uid u0a20: 6.50
+Uid u0a79: 5.70
+Uid u0a81: 2.81
+Uid 1027: 2.42
+Uid u0a23: 2.34
+Uid u0a11: 1.51
+Uid u0a5: 1.30
+Uid u0a26: 1.18
+Uid u0a61: 1.14
+Uid 1021: 0.874
+Uid u0a1: 0.535
+Uid u0a63: 0.507
+Uid u0a9: 0.496
+Uid u0a56: 0.443
+Uid u0a38: 0.439
+Uid u0a2: 0.275
+Uid u0a53: 0.146
+Uid u0a29: 0.110
 Uid u0a44: 0.0435
+Uid u0a30: 0.0309
 Uid u0a6: 0.0273
 Uid u0a28: 0.0241
 Uid u0a34: 0.0217
 Uid u0a3: 0.0132
 Uid u0a10: 0.0112
 Uid u0a47: 0.00824
-Uid u0a30: 0.00610
+Uid u0a48: 0.00124
 Uid 1014: 0.00000430
-Over-counted: 15857
+Over-counted: 17232
 
 1000:
-Wi-Fi network: 27.05KB received, 102.72KB sent (packets 302 received, 506 sent)
-User activity: 148 other, 57 button, 1442 touch
-Wake lock SyncLoopWakeLock: 574ms partial (190 times) realtime
+Wi-Fi network: 30.89KB received, 113.20KB sent (packets 345 received, 572 sent)
+User activity: 151 other, 57 button, 1447 touch
+Wake lock SyncLoopWakeLock: 591ms partial (197 times) realtime
 Wake lock ActivityManager-Launch: 180ms partial (1 times) realtime
-Wake lock ConnectivityService: 22m 51s 833ms partial (31 times) realtime
+Wake lock ConnectivityService: 24m 51s 485ms partial (33 times) realtime
 Wake lock *job*/android/com.android.server.pm.BackgroundDexOptService realtime
 Wake lock ShutdownThread-cpu realtime
 Wake lock WindowManager realtime
 Wake lock *job*/android/com.android.server.backup.FullBackupJob realtime
-Wake lock GpsLocationProvider: 1s 666ms partial (82 times) realtime
+Wake lock GpsLocationProvider: 1s 719ms partial (88 times) realtime
 Wake lock DHCP: 22s 93ms partial (33 times) realtime
-Wake lock NetworkStats: 31s 673ms partial (1433 times) realtime
+Wake lock NetworkStats: 33s 539ms partial (1527 times) realtime
 Wake lock *vibrator* realtime
-Wake lock LocationService: 284ms partial (82 times) realtime
-Wake lock SyncManagerHandleSyncAlarm: 1s 128ms partial (150 times) realtime
+Wake lock LocationService: 312ms partial (88 times) realtime
+Wake lock SyncManagerHandleSyncAlarm: 1s 141ms partial (155 times) realtime
 Wake lock AudioMix realtime
 Wake lock ShutdownThread-screen: 703ms full (4 times) realtime
-Wake lock *alarm*: 1h 42m 53s 437ms partial (9718 times) realtime
+Wake lock *alarm*: 1h 59m 31s 581ms partial (10267 times) realtime
 Wake lock WiredAccessoryManager realtime
 Wake lock LocationManagerService realtime
-Wake lock WifiSuspend: 2s 903ms partial (38 times) realtime
-Wake lock ActivityManager-Sleep: 1s 464ms partial (29 times) realtime
-TOTAL wake: 703ms full, 2h 6m 47s 235ms partial realtime
+Wake lock WifiSuspend: 3s 84ms partial (41 times) realtime
+Wake lock ActivityManager-Sleep: 1s 522ms partial (31 times) realtime
+TOTAL wake: 703ms full, 2h 25m 27s 247ms partial realtime
 Job android/com.android.server.pm.BackgroundDexOptService: (not used)
 Job android/com.android.server.backup.FullBackupJob: (not used)
 Sensor 1: (not used)
 Sensor 4: 830ms realtime (8 times)
 Vibrator: 2s 440ms realtime (122 times)
-Foreground activities: 14d 2h 54m 54s 465ms realtime (9 times)
-Foreground for: 27d 1h 53m 59s 777ms
+Foreground activities: 15d 20h 48m 7s 160ms realtime (9 times)
+Foreground for: 28d 19h 47m 12s 472ms
 Proc com.qualcomm.display:
-CPU: 5s 20ms usr + 4s 570ms krn ; 0ms fg
+CPU: 5s 710ms usr + 4s 690ms krn ; 0ms fg
 1 proc starts
 Proc com.adups.fota.sysoper:
 CPU: 14s 390ms usr + 930ms krn ; 0ms fg
-100 proc starts
+106 proc starts
 Proc ATFWD-daemon:
-CPU: 460ms usr + 3s 480ms krn ; 0ms fg
+CPU: 460ms usr + 3s 530ms krn ; 0ms fg
 Proc com.qualcomm.qti.modemtestmode:
-CPU: 5s 200ms usr + 4s 210ms krn ; 0ms fg
+CPU: 5s 850ms usr + 4s 380ms krn ; 0ms fg
 1 proc starts
 Proc com.quicinc.cne.CNEService:
-CPU: 54s 530ms usr + 24s 760ms krn ; 0ms fg
+CPU: 55s 850ms usr + 25s 180ms krn ; 0ms fg
 Proc com.qualcomm.telephony:
-CPU: 12s 20ms usr + 10s 920ms krn ; 0ms fg
+CPU: 12s 780ms usr + 11s 160ms krn ; 0ms fg
 Proc ims_rtp_daemon:
-CPU: 680ms usr + 9s 930ms krn ; 0ms fg
+CPU: 680ms usr + 10s 80ms krn ; 0ms fg
 Proc com.adups.fota:
-CPU: 10s 70ms usr + 6s 540ms krn ; 0ms fg
-65 proc starts
+CPU: 10s 110ms usr + 6s 540ms krn ; 0ms fg
+71 proc starts
 Proc system:
-CPU: 1h 26m 50s 430ms usr + 1h 16m 55s 410ms krn ; 0ms fg
+CPU: 1h 30m 6s 860ms usr + 1h 18m 46s 40ms krn ; 0ms fg
 Proc android:
 CPU: 0ms usr + 0ms krn ; 280ms fg
 Proc com.qualcomm.wfd.service:wfd_service:
-CPU: 9s 810ms usr + 8s 530ms krn ; 0ms fg
+CPU: 10s 690ms usr + 8s 760ms krn ; 0ms fg
 Proc mm-pp-daemon:
-CPU: 470ms usr + 9s 580ms krn ; 0ms fg
+CPU: 470ms usr + 9s 680ms krn ; 0ms fg
 Proc surfaceflinger:
-CPU: 4m 25s 200ms usr + 5m 43s 280ms krn ; 0ms fg
+CPU: 4m 28s 980ms usr + 5m 49s 650ms krn ; 0ms fg
 Proc com.android.keychain:
 CPU: 550ms usr + 110ms krn ; 0ms fg
 2 proc starts
 Proc wcnss_service:
-CPU: 450ms usr + 6s 710ms krn ; 0ms fg
+CPU: 450ms usr + 6s 800ms krn ; 0ms fg
 Proc com.android.settings:
 CPU: 22s 570ms usr + 4s 10ms krn ; 17s 270ms fg
 1 proc starts
 Proc servicemanager:
-CPU: 21s 930ms usr + 42s 940ms krn ; 0ms fg
+CPU: 22s 560ms usr + 43s 890ms krn ; 0ms fg
 Proc com.qti.diagservices:
-CPU: 5s 860ms usr + 7s 960ms krn ; 0ms fg
+CPU: 6s 610ms usr + 8s 60ms krn ; 0ms fg
 1 proc starts
 Proc com.qualcomm.location.XT:
-CPU: 6s 40ms usr + 8s 350ms krn ; 0ms fg
+CPU: 6s 720ms usr + 8s 550ms krn ; 0ms fg
 1 proc starts
 Proc imsqmidaemon:
-CPU: 470ms usr + 3s 370ms krn ; 0ms fg
+CPU: 480ms usr + 3s 390ms krn ; 0ms fg
 Proc imsdatadaemon:
-CPU: 600ms usr + 3s 740ms krn ; 0ms fg
+CPU: 620ms usr + 3s 760ms krn ; 0ms fg
 Proc com.qualcomm.qti.services.secureui:sui_service:
-CPU: 6s 870ms usr + 9s 340ms krn ; 0ms fg
+CPU: 7s 620ms usr + 9s 550ms krn ; 0ms fg
 Proc com.qualcomm.qualcommsettings:
-CPU: 5s 360ms usr + 4s 80ms krn ; 0ms fg
+CPU: 6s 100ms usr + 4s 210ms krn ; 0ms fg
 1 proc starts
 Proc com.qualcomm.timeservice:
-CPU: 4s 920ms usr + 3s 210ms krn ; 0ms fg
-11 proc starts
+CPU: 5s 40ms usr + 3s 230ms krn ; 0ms fg
+13 proc starts
 Apk com.qualcomm.display:
 (nothing executed)
 Apk com.adups.fota.sysoper:
 Service com.adups.fota.sysoper.TaskService:
-Created for: 1m 29s 421ms uptime
-Starts: 96, launches: 96
+Created for: 1m 33s 96ms uptime
+Starts: 102, launches: 102
+Service com.adups.fota.sysoper.SysService:
+Created for: 0ms uptime
+Starts: 0, launches: 1
 Apk com.qualcomm.qti.modemtestmode:
 Service com.qualcomm.qti.modemtestmode.MbnTestService:
 Created for: 0ms uptime
 Starts: 0, launches: 5
 Service com.qualcomm.qti.modemtestmode.MbnSystemService:
-Created for: 2d 2h 6m 6s 929ms uptime
+Created for: 2d 13h 19m 22s 926ms uptime
 Starts: 4, launches: 5
 Apk com.qualcomm.svi:
 Service com.qualcomm.svi.SVIService:
-Created for: 2d 2h 6m 6s 929ms uptime
+Created for: 2d 13h 19m 22s 926ms uptime
 Starts: 4, launches: 5
 Apk com.adups.fota:
 7 wakeup alarms
@@ -399,10 +403,10 @@ Created for: 19s 370ms uptime
 Starts: 7, launches: 7
 Apk com.qualcomm.cabl:
 Service com.qualcomm.cabl.CABLService:
-Created for: 2d 2h 6m 6s 929ms uptime
+Created for: 2d 13h 19m 22s 926ms uptime
 Starts: 4, launches: 5
 Apk android:
-2862 wakeup alarms
+3044 wakeup alarms
 Service android.hardware.location.GeofenceHardwareService:
 Created for: 0ms uptime
 Starts: 0, launches: 4
@@ -419,65 +423,65 @@ Created for: 179ms uptime
 Starts: 2, launches: 2
 Apk com.dsi.ant.server:
 Service com.dsi.ant.server.AntService:
-Created for: 2d 2h 6m 6s 929ms uptime
+Created for: 2d 13h 19m 22s 926ms uptime
 Starts: 4, launches: 4
 Apk com.qualcomm.location:
 Service com.qualcomm.location.nlp.NlpProxyService:
 Created for: 0ms uptime
 Starts: 0, launches: 4
 Service com.qualcomm.location.LBSSystemMonitorService:
-Created for: 2d 2h 6m 6s 929ms uptime
+Created for: 2d 13h 19m 22s 926ms uptime
 Starts: 4, launches: 4
 Service com.qualcomm.location.ulp.UlpService:
 Created for: 0ms uptime
 Starts: 0, launches: 4
 Service com.qualcomm.location.LocationService:
-Created for: 2d 2h 6m 6s 929ms uptime
+Created for: 2d 13h 19m 22s 926ms uptime
 Starts: 4, launches: 4
 Service com.qualcomm.location.GeoFenceService:
 Created for: 0ms uptime
 Starts: 0, launches: 4
 Service com.qualcomm.lib.location.osagent.OsAgent:
-Created for: 2d 2h 6m 6s 929ms uptime
+Created for: 2d 13h 19m 22s 926ms uptime
 Starts: 4, launches: 4
 Apk com.qualcomm.simcontacts:
 Service com.qualcomm.simcontacts.SimContactsService:
-Created for: 2d 2h 6m 6s 929ms uptime
+Created for: 2d 13h 19m 22s 926ms uptime
 Starts: 4, launches: 4
 Apk com.qti.diagservices:
 Service com.qti.diagservices.QTIDiagServices:
-Created for: 2d 2h 6m 6s 929ms uptime
+Created for: 2d 13h 19m 22s 926ms uptime
 Starts: 4, launches: 5
 Apk com.qualcomm.qti.services.secureui:
 Service com.qualcomm.qti.services.secureui.SecureUIService:
-Created for: 2d 2h 6m 6s 929ms uptime
+Created for: 2d 13h 19m 22s 926ms uptime
 Starts: 4, launches: 4
 Apk com.qualcomm.location.XT:
 Service com.qualcomm.location.XT.XTSrv:
-Created for: 2d 2h 6m 6s 929ms uptime
+Created for: 2d 13h 19m 22s 926ms uptime
 Starts: 4, launches: 5
 Apk org.codeaurora.snapcam:
 (nothing executed)
 Apk com.qualcomm.qualcommsettings:
 Service com.qualcomm.qualcommsettings.DunService:
-Created for: 2d 2h 6m 6s 929ms uptime
+Created for: 2d 13h 19m 22s 926ms uptime
 Starts: 4, launches: 5
 Apk com.qualcomm.atfwd:
 Service com.qualcomm.atfwd.AtFwdService:
-Created for: 2d 2h 6m 6s 929ms uptime
+Created for: 2d 13h 19m 22s 926ms uptime
 Starts: 4, launches: 4
 u0a80:
-Wi-Fi network: 14.98MB received, 4.85MB sent (packets 36838 received, 42000 sent)
+Wi-Fi network: 15.59MB received, 5.05MB sent (packets 38192 received, 43487 sent)
 Wake lock WindowManager: 39s 756ms full (17 times) realtime
 Wake lock *vibrator* realtime
-Wake lock *alarm*: 225ms partial (90 times) realtime
-TOTAL wake: 39s 756ms full, 225ms partial realtime
+Wake lock *alarm*: 234ms partial (93 times) realtime
+TOTAL wake: 39s 756ms full, 234ms partial realtime
 Vibrator: 44ms realtime (4 times)
-Foreground activities: 8d 2h 29m 53s 43ms realtime (21 times)
-Foreground for: 16d 15h 31m 8s 731ms
-Active for: 17d 21h 21m 19s 410ms
+Foreground activities: 9d 20h 23m 5s 738ms realtime (21 times)
+Foreground for: 18d 9h 24m 21s 426ms
+Active for: 19d 15h 14m 32s 105ms
 Proc com.xdja.HDSafeEMailClient:
-CPU: 7h 34m 1s 400ms usr + 7m 44s 780ms krn ; 2h 19m 19s 900ms fg
+CPU: 8h 7m 11s 500ms usr + 7m 59s 100ms krn ; 2h 19m 19s 900ms fg
 4 proc starts
 Proc com.xdja.HDSafeEMailClient:leakcanary:
 CPU: 54m 11s 230ms usr + 12s 170ms krn ; 0ms fg
@@ -489,9 +493,9 @@ CPU: 54m 11s 230ms usr + 12s 170ms krn ; 0ms fg
 * Killed for cpu use: +10m1s650ms over +15m0s59ms (66%)
 * Killed for cpu use: +16m43s970ms over +15m0s32ms (111%)
 Apk com.xdja.HDSafeEMailClient:
-3948 wakeup alarms
+4368 wakeup alarms
 Service com.xdja.HDSafeEMailClient.presenter.service.MailControllerService:
-Created for: 11h 36m 46s 535ms uptime
+Created for: 22h 50m 2s 532ms uptime
 Starts: 1, launches: 1
 Service com.squareup.leakcanary.DisplayLeakService:
 Created for: 4s 62ms uptime
@@ -503,19 +507,19 @@ Service com.xdja.HDSafeEMailClient.presenter.service.SendMessageService:
 Created for: 2h 10m 0s 816ms uptime
 Starts: 1, launches: 1
 Service com.xdja.HDSafeEMailClient.VersionUpdate.VersionUpdateService:
-Created for: 1d 23h 18m 3s 469ms uptime
+Created for: 2d 10h 31m 19s 466ms uptime
 Starts: 5, launches: 9
 Service com.xdja.HDSafeEMailClient.presenter.service.SyncMailStateService:
-Created for: 2d 2h 3m 25s 610ms uptime
+Created for: 2d 13h 16m 41s 607ms uptime
 Starts: 2, launches: 6
 Service com.xdja.HDSafeEMailClient.presenter.service.DownloadAttachmentService:
 Created for: 2h 10m 0s 816ms uptime
 Starts: 1, launches: 1
 Service com.xdja.HDSafeEMailClient.presenter.service.CheckNewMailService:
-Created for: 2d 2h 3m 50s 975ms uptime
+Created for: 2d 13h 17m 6s 972ms uptime
 Starts: 4, launches: 8
 Service com.xdja.HDSafeEMailClient.presenter.service.SaveMessageService:
-Created for: 2d 2h 3m 50s 975ms uptime
+Created for: 2d 13h 17m 6s 972ms uptime
 Starts: 4, launches: 8
 
 

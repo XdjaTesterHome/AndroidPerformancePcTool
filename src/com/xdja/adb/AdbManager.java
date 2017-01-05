@@ -283,6 +283,7 @@ public class AdbManager implements IDebugBridgeChangeListener, IClientChangeList
 		}
 	}
 
+	
 	/**
 	 * 设置默认的debug的port
 	 * 

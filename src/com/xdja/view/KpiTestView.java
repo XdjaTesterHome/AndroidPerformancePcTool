@@ -137,6 +137,7 @@ public class KpiTestView extends BaseChartView {
 
 	public void stop() {
 		stopFlag = true;
+		CollectDataImpl.stopCollectKpiData();
 	}
 
 	public void clear() {

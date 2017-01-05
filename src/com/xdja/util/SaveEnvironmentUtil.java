@@ -3,9 +3,14 @@ package com.xdja.util;
 import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import com.xdja.adb.AndroidSdk;
+import com.xdja.collectdata.CollectDataImpl;
+import com.xdja.collectdata.LogRunnable;
 import com.xdja.constant.Constants;
+import com.xdja.constant.GlobalConfig;
 
 /***
  * 用于保存测试场景的工具类
@@ -15,6 +20,8 @@ import com.xdja.constant.Constants;
  */
 public class SaveEnvironmentUtil {
 	private static SaveEnvironmentUtil mInstance = null;
+	private static Thread mSaveLogThread;
+	private static LogRunnable mSaveLogRunnable;
 	
 	private SaveEnvironmentUtil(){}
 	
@@ -85,7 +92,49 @@ public class SaveEnvironmentUtil {
 		}
 	}
 	
+	/**
+	 * 保存当前的日志信息
+	 * @param type 测试的类型
+	 */
+	public void saveCurrentLog(int pid, String type){
+		
+		if (mSaveLogThread != null && mSaveLogThread.isAlive()) {
+			return;
+		}
+		mSaveLogRunnable = new LogRunnable(pid, Constants.ANDROID_LOG, type);
+		mSaveLogThread = new Thread(mSaveLogRunnable);
+		mSaveLogThread.start();
+		startTimer();
+	}
+	/**
+	 *  启动一个定时器检查是否停止进程
+	 */
+	public void startTimer(){
+		Timer timer = new Timer();
+		timer.schedule(new TimerTask() {
+			
+			@Override
+			public void run() {
+				// TODO Auto-generated method stub
+				// 销毁进程
+				if (mSaveLogRunnable != null) {
+					mSaveLogRunnable.destoryProcess();
+				}
+				
+				// 停止线程
+				if (mSaveLogThread != null) {
+					if (mSaveLogThread.isAlive()) {
+						System.out.println("mSaveLogThread isAlive");
+						mSaveLogThread.interrupt();
+						mSaveLogThread = null;
+					}
+				}
+			}
+		}, 30*1000);
+	}
+	
 	public static void main(String[] args) {
-		SaveEnvironmentUtil.getInstance().covertHprof("memorydump/battery_2017.01.04_15.25.53.hprof");
+		int pid = CollectDataImpl.getPid(GlobalConfig.PackageName);
+		SaveEnvironmentUtil.getInstance().saveCurrentLog(pid, Constants.TYPE_BATTERY);
 	}
 }
