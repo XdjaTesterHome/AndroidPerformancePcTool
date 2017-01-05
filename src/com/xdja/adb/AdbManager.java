@@ -4,26 +4,24 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.TreeSet;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 
 import javax.imageio.ImageIO;
 
 import com.android.ddmlib.AdbCommandRejectedException;
 import com.android.ddmlib.AndroidDebugBridge;
-import com.android.ddmlib.AndroidDebugBridge.IClientChangeListener;
 import com.android.ddmlib.AndroidDebugBridge.IDebugBridgeChangeListener;
 import com.android.ddmlib.Client;
-import com.android.ddmlib.ClientData;
 import com.android.ddmlib.DdmPreferences;
 import com.android.ddmlib.IDevice;
 import com.android.ddmlib.RawImage;
 import com.android.ddmlib.TimeoutException;
+import com.xdja.collectdata.SaveEnvironmentManager;
+import com.xdja.collectdata.thread.DumpMemoryThread;
+import com.xdja.collectdata.thread.TraceMethodThread;
 import com.xdja.constant.Constants;
 import com.xdja.constant.GlobalConfig;
-import com.xdja.log.LoggerManager;
 import com.xdja.util.CommonUtil;
-import com.xdja.util.SaveEnvironmentUtil;
+import com.xdja.util.ExecShellUtil;
 
 /***
  * 用于Adb相关的操作，用到了ddmlib
@@ -31,14 +29,13 @@ import com.xdja.util.SaveEnvironmentUtil;
  * @author zlw
  *
  */
-public class AdbManager implements IDebugBridgeChangeListener, IClientChangeListener {
+public class AdbManager implements IDebugBridgeChangeListener {
 	private final static String LOGTAG = AdbManager.class.getSimpleName();
 	private static AdbManager mInstance;
 	private TreeSet<AndroidDevice> devices = new TreeSet<>();
 	AndroidDebugBridge myBridge = null;
-	private CountDownLatch memoryCount;
-	private Client mCurClient;
-	private Thread dumpMemoryThread = null;
+	private DumpMemoryThread dumpMemoryThread = null;
+	private TraceMethodThread traceMethodThread = null;
 	
 	public static AdbManager getInstance() {
 		if (mInstance == null) {
@@ -209,33 +206,10 @@ public class AdbManager implements IDebugBridgeChangeListener, IClientChangeList
 	 * @param deviceName
 	 * @param packageName
 	 */
-	public void dumpMemory(String deviceName, String packageName) {
+	public void dumpMemory(String deviceName, String packageName, final String type) {
 		Client client = getClient(deviceName, packageName);
 		if (client != null) {
-			if (dumpMemoryThread != null && dumpMemoryThread.isAlive()) {
-				return;
-			}
-			mCurClient = client;
-			memoryCount = new CountDownLatch(1);
-			dumpMemoryThread = new Thread(new Runnable() {
-
-				@Override
-				public void run() {
-					// TODO Auto-generated method stub
-					AndroidDebugBridge.addClientChangeListener(AdbManager.this);
-					client.dumpHprof();
-
-					try {
-						memoryCount.await(1, TimeUnit.MINUTES);
-					} catch (InterruptedException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-
-					AndroidDebugBridge.removeClientChangeListener(AdbManager.this);
-				}
-			});
-
+			dumpMemoryThread = new DumpMemoryThread(client, type);
 			dumpMemoryThread.start();
 		}
 	}
@@ -262,7 +236,7 @@ public class AdbManager implements IDebugBridgeChangeListener, IClientChangeList
 						}
 					}
 
-					String fileName = SaveEnvironmentUtil.getInstance().getSuggestedName(type) + ".png";
+					String fileName = SaveEnvironmentManager.getInstance().getSuggestedName(type) + ".png";
 					File file = new File(Constants.SCREEN_SHOTS);
 					if (!file.exists()) {
 						file.mkdirs();
@@ -283,6 +257,36 @@ public class AdbManager implements IDebugBridgeChangeListener, IClientChangeList
 		}
 	}
 
+	/**
+	 *  对Method进行trace
+	 * @param deviceName
+	 * @param packageName
+	 * @param type 测试类型，为了标记结果数据
+	 */
+	public void memthodTracing(String deviceName, String packageName, String type){
+		Client client = getClient(deviceName, packageName);
+		if (client != null) {
+			traceMethodThread = new TraceMethodThread(type, client);
+			traceMethodThread.start();
+		}
+	}
+	
+	/**
+	 * 将sdcard中的文件copy到本地
+	 * @param srcPath
+	 * @param desPath
+	 */
+	public void copyFiles(String srcPath, String desPath){
+		if (CommonUtil.strIsNull(srcPath)) {
+			return;
+		}
+		
+		if (CommonUtil.strIsNull(desPath)) {
+			return;
+		}
+		String cmd = "cp "+ srcPath + " " + desPath;
+		ExecShellUtil.getInstance().execShellCommand(cmd, false);
+	}
 	
 	/**
 	 * 设置默认的debug的port
@@ -308,41 +312,5 @@ public class AdbManager implements IDebugBridgeChangeListener, IClientChangeList
 	 */
 	public void release() {
 		AndroidDebugBridge.removeDebugBridgeChangeListener(this);
-	}
-
-	public static void main(String[] args) {
-		File file = new File("screenshots");
-		if (!file.exists()) {
-			file.mkdirs();
-		}
-	}
-
-	@Override
-	public void clientChanged(Client client, int changeMask) {
-		// TODO Auto-generated method stub
-		if (changeMask == Client.CHANGE_HPROF && client == mCurClient) {
-			System.out.println("I am here");
-			final ClientData.HprofData data = client.getClientData().getHprofData();
-			if (data != null) {
-				switch (data.type) {
-				case FILE:
-					// TODO: older devices don't stream back the heap data.
-					// Instead they save results on the sdcard.
-					// We don't support this yet.
-					LoggerManager.logError(LOGTAG, "clientChanged", "dump heap memory File");
-					break;
-				case DATA:
-					//保存hprof
-					SaveEnvironmentUtil.getInstance().writeHprofToLocal(data.data, Constants.TYPE_BATTERY);
-					break;
-				}
-			} else {
-				LoggerManager.logError(LOGTAG, "clientChanged", "dump heap memory failure");
-			}
-			
-			if (memoryCount != null) {
-				memoryCount.countDown();
-			}
-		}
 	}
 }

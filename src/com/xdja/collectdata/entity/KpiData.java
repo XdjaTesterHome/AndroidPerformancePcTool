@@ -1,4 +1,4 @@
-package com.xdja.collectdata;
+package com.xdja.collectdata.entity;
 
 /**
  *  页面加载时间的封装类

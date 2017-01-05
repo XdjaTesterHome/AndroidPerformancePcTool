@@ -1,4 +1,4 @@
-package com.xdja.collectdata;
+package com.xdja.collectdata.entity;
 
 public class CommandResult {
 

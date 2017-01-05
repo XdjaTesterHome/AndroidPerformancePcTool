@@ -1,4 +1,4 @@
-package com.xdja.collectdata;
+package com.xdja.util;
 
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
@@ -7,12 +7,13 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
 
 import com.android.ddmlib.IDevice;
 import com.android.ddmlib.MultiLineReceiver;
 import com.xdja.adb.AdbManager;
+import com.xdja.collectdata.entity.CommandResult;
 import com.xdja.constant.GlobalConfig;
-import com.xdja.util.CommonUtil;
 
 /**
  * 和Adb命令进行交互的工具类
@@ -20,7 +21,7 @@ import com.xdja.util.CommonUtil;
  * @author zlw
  *
  */
-public class CollectDataUtil {
+public class ExecShellUtil {
 
 	public static final String COMMAND_SU = "su";
 	public static final String COMMAND_SH = "sh";
@@ -31,17 +32,17 @@ public class CollectDataUtil {
 	
 	//针对连续读取内容的Process，比如执行adb logcat等
 	private Process mReadInfoProcess;
-	private static CollectDataUtil mInstance = null;
+	private static ExecShellUtil mInstance = null;
 	
-	private CollectDataUtil() {
+	private ExecShellUtil() {
 	}
 	
 	
-	public static CollectDataUtil getInstance(){
+	public static ExecShellUtil getInstance(){
 		if (mInstance == null) {
-			synchronized (CollectDataUtil.class) {
+			synchronized (ExecShellUtil.class) {
 				if (mInstance == null) {
-					mInstance = new CollectDataUtil();
+					mInstance = new ExecShellUtil();
 				}
 			}
 		}
@@ -358,27 +359,7 @@ public class CollectDataUtil {
 	 * @param cmd
 	 */
 	public CommandResult execShellCommand(String cmd){
-		
-		if (device == null) {
-			device = AdbManager.getInstance().getIDevice(GlobalConfig.DeviceName);
-		}
-		if (CommonUtil.strIsNull(cmd)) {
-			return new CommandResult(-1, "", "");
-		}
-		StringBuilder successMsg = new StringBuilder();
-		
-		// 处理cmd
-		cmd = cmd.substring(cmd.indexOf(" "));
-		List<String> results = executeShellCommandWithOutput(device, cmd);
-		if (results.size() > 1) {
-			for(String str:results){
-				successMsg.append(str).append("\n");
-			}
-			
-			return new CommandResult(0, successMsg.toString(), "");
-		}
-		
-		return new CommandResult(0, "", "");
+		return execShellCommand(cmd, true);
 	}
 	
 	
@@ -398,7 +379,7 @@ public class CollectDataUtil {
 		StringBuilder successMsg = new StringBuilder();
 		
 		// 处理cmd
-		cmd = cmd.substring(cmd.indexOf(" "));
+//		cmd = cmd.substring(cmd.indexOf(" "));
 		if (isResult) {
 			List<String> results = executeShellCommandWithOutput(device, cmd);
 			if (results.size() > 1) {
@@ -455,17 +436,59 @@ public class CollectDataUtil {
 			mReadInfoProcess = null;
 		}
 	}
+	
+	
+	class WatchThread extends Thread {
+		Process p;
+		boolean over;
+		ArrayList<String> stream;
+
+		public WatchThread(Process p) {
+			this.p = p;
+			over = false;
+			stream = new ArrayList<String>();
+		}
+
+		public void run() {
+			try {
+				if (p == null)
+					return;
+				Scanner br = new Scanner(p.getInputStream());
+				while (true) {
+					if (p == null || over)
+						break;
+					while (br.hasNextLine()) {
+						String tempStream = br.nextLine();
+						if (tempStream.trim() == null || tempStream.trim().equals(""))
+							continue;
+						stream.add(tempStream);
+					}
+				}
+				br.close();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+
+		public void setOver(boolean over) {
+			this.over = over;
+		}
+
+		public ArrayList<String> getStream() {
+			return stream;
+		}
+	}
+	
+	
+	/**
+	 * 获取数据的监听
+	 * 
+	 * @author zlw
+	 *
+	 */
+	public interface GetDataInterface {
+		public void getString(String content);
+
+		public void getErrorString(String error);
+	}
 }
-
-/**
- * 获取数据的监听
- * 
- * @author zlw
- *
- */
-interface GetDataInterface {
-	public void getString(String content);
-
-	public void getErrorString(String error);
-}
-

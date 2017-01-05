@@ -8,8 +8,6 @@ import java.io.InputStreamReader;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import com.xdja.util.SaveEnvironmentUtil;
-
 public class LogRunnable implements Runnable {
 	private int curPid;
 	private String cmds;
@@ -25,7 +23,7 @@ public class LogRunnable implements Runnable {
 	public LogRunnable(int pid, String logPath, String testType) {
 		// TODO Auto-generated constructor stub
 		curPid = pid;
-		String fileName = SaveEnvironmentUtil.getInstance().getSuggestedName(testType);
+		String fileName = SaveEnvironmentManager.getInstance().getSuggestedName(testType);
 		mCurLogFile = new File(logPath, fileName + ".log");
 		if (!mCurLogFile.exists()) {
 			try {

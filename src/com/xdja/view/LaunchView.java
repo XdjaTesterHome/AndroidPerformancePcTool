@@ -26,11 +26,11 @@ import com.android.ddmlib.IDevice;
 import com.xdja.adb.AdbManager;
 import com.xdja.adb.AndroidDevice;
 import com.xdja.collectdata.CollectDataImpl;
-import com.xdja.collectdata.CollectDataUtil;
 import com.xdja.constant.Constants;
 import com.xdja.constant.GlobalConfig;
 import com.xdja.log.LoggerManager;
 import com.xdja.util.CommonUtil;
+import com.xdja.util.ExecShellUtil;
 import com.xdja.util.SwingUiUtil;
 import com.xdja.util.SwingUiUtil.ClickDialogBtnListener;
 
@@ -372,7 +372,7 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 		if (!CommonUtil.strIsNull(selectDevice)) {
 			String devicesid = AdbManager.getInstance().getSerialNumber(selectDevice);
 			IDevice dev = AdbManager.getInstance().getIDevice(selectDevice);
-			CollectDataUtil.getInstance().setDevice(dev);
+			ExecShellUtil.getInstance().setDevice(dev);
 			List<String> respack = CollectDataImpl.getRunningProcess(devicesid);
 			if (respack.size() > 0 && comboProcess != null) {
 				comboProcess.removeAllItems();

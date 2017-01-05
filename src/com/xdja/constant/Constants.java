@@ -80,6 +80,7 @@ public class Constants {
 	public static final String SCREEN_SHOTS = "screenshots";
 	public static final String MEMORY_DUMP  = "memorydump";
 	public static final String ANDROID_LOG  = "androidLog";
+	public static final String METHOD_TRACE = "methodTrace";
 	
 	// 保存截图等时需要指明的测试类型
 	public static final String TYPE_FPS = "fps";

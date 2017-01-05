@@ -1,4 +1,4 @@
-package com.xdja.util;
+package com.xdja.collectdata;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
@@ -7,10 +7,9 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import com.xdja.adb.AndroidSdk;
-import com.xdja.collectdata.CollectDataImpl;
-import com.xdja.collectdata.LogRunnable;
 import com.xdja.constant.Constants;
 import com.xdja.constant.GlobalConfig;
+import com.xdja.util.CommonUtil;
 
 /***
  * 用于保存测试场景的工具类
@@ -18,18 +17,18 @@ import com.xdja.constant.GlobalConfig;
  * @author zlw
  *
  */
-public class SaveEnvironmentUtil {
-	private static SaveEnvironmentUtil mInstance = null;
+public class SaveEnvironmentManager {
+	private static SaveEnvironmentManager mInstance = null;
 	private static Thread mSaveLogThread;
 	private static LogRunnable mSaveLogRunnable;
 	
-	private SaveEnvironmentUtil(){}
+	private SaveEnvironmentManager(){}
 	
-	public static SaveEnvironmentUtil getInstance(){
+	public static SaveEnvironmentManager getInstance(){
 		if (mInstance == null) {
-			synchronized (SaveEnvironmentUtil.class) {
+			synchronized (SaveEnvironmentManager.class) {
 				if (mInstance == null) {
-					mInstance = new SaveEnvironmentUtil();
+					mInstance = new SaveEnvironmentManager();
 				}
 			}
 		}
@@ -58,16 +57,43 @@ public class SaveEnvironmentUtil {
 	 * @param type
 	 *            测试类型
 	 */
-	public void writeHprofToLocal(byte[] data, String type) {
+	public String writeHprofToLocal(byte[] data, String type) {
 		if (data == null) {
-			return;
+			return "";
 		}
 
 		String fileName = getSuggestedName(type);
+		String filePath = Constants.MEMORY_DUMP + File.separator + fileName + ".hprof";
 		CommonUtil.writeDataToLocal(data, Constants.MEMORY_DUMP, fileName + ".hprof");
 		//转换hprof的格式
-		covertHprof(Constants.MEMORY_DUMP + File.separator + fileName + ".hprof");
+		covertHprof(filePath);
+		
+		return filePath;
 	}
+	
+	
+	/**
+	 * 抓取hprof
+	 * @param data
+	 *            抓取的hprof数据
+	 * @param type
+	 *            测试类型
+	 * @return 返回文件存放的路径
+	 */
+	public String writeTraceToLocal(byte[] data, String type) {
+		if (data == null) {
+			return "";
+		}
+
+		String fileName = getSuggestedName(type);
+		String filePath = Constants.METHOD_TRACE + File.separator + fileName + ".trace";
+		CommonUtil.writeDataToLocal(data, Constants.METHOD_TRACE, fileName + ".trace");
+		//转换hprof的格式
+		covertHprof(filePath);
+		
+		return filePath;
+	}
+	
 	
 	/**
 	 * 将hprofPath对应的hprof文件转换成MAT可识别的格式 
@@ -135,6 +161,6 @@ public class SaveEnvironmentUtil {
 	
 	public static void main(String[] args) {
 		int pid = CollectDataImpl.getPid(GlobalConfig.PackageName);
-		SaveEnvironmentUtil.getInstance().saveCurrentLog(pid, Constants.TYPE_BATTERY);
+		SaveEnvironmentManager.getInstance().saveCurrentLog(pid, Constants.TYPE_BATTERY);
 	}
 }

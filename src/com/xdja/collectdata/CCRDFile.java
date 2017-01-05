@@ -4,12 +4,13 @@ import java.util.Arrays;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.xdja.collectdata.entity.CommandResult;
 import com.xdja.util.CommonUtil;
+import com.xdja.util.ExecShellUtil;
+
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-
-import com.xdja.collectdata.CollectDataUtil;
 
 //创建新文件和目录
 public class CCRDFile {
@@ -173,7 +174,7 @@ public class CCRDFile {
 	public static String get_package_name_by_uid(String uid){
 		String packagename ="";
 		String cmd = "adb shell ps | findStr "+ uid;
-		CommandResult data = CollectDataUtil.getInstance().execCmdCommand(cmd, false, true);
+		CommandResult data = ExecShellUtil.getInstance().execShellCommand(cmd, true);
 		String result = null ;
 		if(data.successMsg!=null){
 			result = data.successMsg;
@@ -198,10 +199,10 @@ public class CCRDFile {
 	public static CommandResult get_battery_data(String pkg_name){
         String cmd ;
         if (pkg_name ==null || pkg_name == ""){
-              cmd = "shell dumpsys batterystats";}
+              cmd = "dumpsys batterystats";}
             else{
-             cmd ="shell dumpsys batterystats "+ pkg_name;}
-        CommandResult data = CollectDataUtil.getInstance().execShellCommand(cmd);
+             cmd ="dumpsys batterystats "+ pkg_name;}
+        CommandResult data = ExecShellUtil.getInstance().execShellCommand(cmd);
         if( (data != null) ){
             return data;}
         else{

@@ -27,6 +27,7 @@ import com.android.ddmlib.AndroidDebugBridge.IClientChangeListener;
 import com.android.ddmlib.Client;
 import com.android.ddmlib.ClientData;
 import com.xdja.adb.AdbManager;
+import com.xdja.constant.Constants;
 import com.xdja.constant.GlobalConfig;
 import com.xdja.util.SwingUiUtil;
 
@@ -89,7 +90,8 @@ public class MemoryView extends BaseChartView implements IClientChangeListener {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				// TODO Auto-generated method stub
-				AdbManager.getInstance().causeGC(GlobalConfig.PackageName);
+//				AdbManager.getInstance().causeGC(GlobalConfig.PackageName);
+				AdbManager.getInstance().memthodTracing(GlobalConfig.DeviceName, GlobalConfig.PackageName, Constants.TYPE_BATTERY);
 			}
 		});
 		chartPanel.add(gcButton);
