@@ -1,4 +1,4 @@
-package com.xdja.collectdata;
+package com.xdja.collectdata.entity;
 
 /**
  *  封装CPU相关的数据信息

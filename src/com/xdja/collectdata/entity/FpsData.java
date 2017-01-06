@@ -1,4 +1,4 @@
-package com.xdja.collectdata;
+package com.xdja.collectdata.entity;
 
 /**
  *  用于封装流量数据

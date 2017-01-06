@@ -21,7 +21,7 @@ import org.jfree.chart.title.TextTitle;
 import org.jfree.data.category.DefaultCategoryDataset;
 
 import com.xdja.collectdata.CollectDataImpl;
-import com.xdja.collectdata.KpiData;
+import com.xdja.collectdata.entity.KpiData;
 import com.xdja.constant.GlobalConfig;
 
 public class KpiTestView extends BaseChartView {
@@ -137,6 +137,7 @@ public class KpiTestView extends BaseChartView {
 
 	public void stop() {
 		stopFlag = true;
+		CollectDataImpl.stopCollectKpiData();
 	}
 
 	public void clear() {

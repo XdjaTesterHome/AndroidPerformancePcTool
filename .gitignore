@@ -4,3 +4,8 @@
 /bin/
 .classpath
 .project
+/androidLog/
+/screenshots/
+/memorydump/
+/powerresult/
+/methodTrace/

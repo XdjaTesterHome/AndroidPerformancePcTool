@@ -1,4 +1,4 @@
-package com.xdja.collectdata;
+package com.xdja.util;
 
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
@@ -7,12 +7,13 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
 
 import com.android.ddmlib.IDevice;
 import com.android.ddmlib.MultiLineReceiver;
 import com.xdja.adb.AdbManager;
+import com.xdja.collectdata.entity.CommandResult;
 import com.xdja.constant.GlobalConfig;
-import com.xdja.util.CommonUtil;
 
 /**
  * 和Adb命令进行交互的工具类
@@ -20,25 +21,40 @@ import com.xdja.util.CommonUtil;
  * @author zlw
  *
  */
-public class CollectDataUtil {
+public class ExecShellUtil {
 
 	public static final String COMMAND_SU = "su";
 	public static final String COMMAND_SH = "sh";
 	public static final String COMMAND_EXIT = "exit\n";
 	public static final String COMMAND_LINE_END = "\n";
-	private static IDevice device;
+	private IDevice device;
  //	private static DefaultHardwareDevice mDefaultHardwareDevice;
 	
-	private CollectDataUtil() {
-		throw new AssertionError();
+	//针对连续读取内容的Process，比如执行adb logcat等
+	private Process mReadInfoProcess;
+	private static ExecShellUtil mInstance = null;
+	
+	private ExecShellUtil() {
 	}
-
+	
+	
+	public static ExecShellUtil getInstance(){
+		if (mInstance == null) {
+			synchronized (ExecShellUtil.class) {
+				if (mInstance == null) {
+					mInstance = new ExecShellUtil();
+				}
+			}
+		}
+		
+		return mInstance;
+	}
 	/**
 	 * check whether has root permission
 	 *
 	 * @return
 	 */
-	public static boolean checkRootPermission() {
+	public boolean checkRootPermission() {
 		return execCommand("echo root", true, false).result == 0;
 	}
 
@@ -52,7 +68,7 @@ public class CollectDataUtil {
 	 * @return
 	 * @see ShellUtils#execCommand(Object[], boolean, boolean)
 	 */
-	public static CommandResult execCommand(String command, boolean isRoot) {
+	public CommandResult execCommand(String command, boolean isRoot) {
 		return execCommand(new String[] { command }, isRoot, true);
 	}
 
@@ -66,7 +82,7 @@ public class CollectDataUtil {
 	 * @return
 	 * @see ShellUtils#execCommand(Object[], boolean, boolean)
 	 */
-	public static CommandResult execCommand(List commands, boolean isRoot) {
+	public CommandResult execCommand(List commands, boolean isRoot) {
 		return execCommand(commands == null ? null : commands.toArray(new String[] {}), isRoot, true);
 	}
 
@@ -80,7 +96,7 @@ public class CollectDataUtil {
 	 * @return
 	 * @see ShellUtils#execCommand(Object[], boolean, boolean)
 	 */
-	public static CommandResult execCommand(String[] commands, boolean isRoot) {
+	public CommandResult execCommand(String[] commands, boolean isRoot) {
 		return execCommand(commands, isRoot, true);
 	}
 
@@ -96,7 +112,7 @@ public class CollectDataUtil {
 	 * @return
 	 * @see ShellUtils#execCommand(Object[], boolean, boolean)
 	 */
-	public static CommandResult execCommand(String command, boolean isRoot, boolean isNeedResultMsg) {
+	public CommandResult execCommand(String command, boolean isRoot, boolean isNeedResultMsg) {
 		return execCommand(new String[] { command }, isRoot, isNeedResultMsg);
 	}
 
@@ -112,7 +128,7 @@ public class CollectDataUtil {
 	 * @return
 	 * @see ShellUtils#execCommand(Object[], boolean, boolean)
 	 */
-	public static CommandResult execCommand(List commands, boolean isRoot, boolean isNeedResultMsg) {
+	public CommandResult execCommand(List commands, boolean isRoot, boolean isNeedResultMsg) {
 		return execCommand(commands == null ? null : commands.toArray(new String[] {}), isRoot, isNeedResultMsg);
 	}
 
@@ -134,7 +150,7 @@ public class CollectDataUtil {
 	 *         excepiton.
 	 *
 	 */
-	public static CommandResult execCommand(Object[] commands, boolean isRoot, boolean isNeedResultMsg) {
+	public  CommandResult execCommand(Object[] commands, boolean isRoot, boolean isNeedResultMsg) {
 		int result = -1;
 		if (commands == null || commands.length == 0) {
 			return new CommandResult(result, null, null);
@@ -226,7 +242,7 @@ public class CollectDataUtil {
 	 *         excepiton.
 	 *
 	 */
-	public static CommandResult execCmdCommand(String cmd, boolean isRoot, boolean isNeedResultMsg) {
+	public CommandResult execCmdCommand(String cmd, boolean isRoot, boolean isNeedResultMsg) {
 		int result = -1;
 		if (cmd == null || "" == cmd) {
 			return new CommandResult(result, null, null);
@@ -297,14 +313,14 @@ public class CollectDataUtil {
 	 * @param getDataListener
 	 *            获取数据的getDataListener
 	 */
-	public static void execCmdCommand(String cmd, GetDataInterface getDataListener) {
+	public void execCmdCommand(String cmd, GetDataInterface getDataListener) {
 
 		BufferedReader br = null;
 		try {
 
-			Process proc = Runtime.getRuntime().exec(cmd);
+			mReadInfoProcess = Runtime.getRuntime().exec(cmd);
 
-			InputStream in = proc.getInputStream();
+			InputStream in = mReadInfoProcess.getInputStream();
 
 			br = new BufferedReader(new InputStreamReader(in, "GBK"));
 			String line = null;
@@ -314,6 +330,8 @@ public class CollectDataUtil {
 					getDataListener.getString(line);
 				}
 			}
+			
+			System.out.println("I am over");
 
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -332,7 +350,7 @@ public class CollectDataUtil {
 	 * 将device传进来
 	 * @param dev
 	 */
-	public static void setDevice(IDevice dev){
+	public void setDevice(IDevice dev){
 		device = dev;
 	}
 	
@@ -340,28 +358,8 @@ public class CollectDataUtil {
 	 * 能执行shell command，通过ddmlib
 	 * @param cmd
 	 */
-	public static CommandResult execShellCommand(String cmd){
-		
-		if (device == null) {
-			device = AdbManager.getInstance().getIDevice(GlobalConfig.DeviceName);
-		}
-		if (CommonUtil.strIsNull(cmd)) {
-			return new CommandResult(-1, "", "");
-		}
-		StringBuilder successMsg = new StringBuilder();
-		
-		// 处理cmd
-		cmd = cmd.substring(cmd.indexOf(" "));
-		List<String> results = executeShellCommandWithOutput(device, cmd);
-		if (results.size() > 1) {
-			for(String str:results){
-				successMsg.append(str).append("\n");
-			}
-			
-			return new CommandResult(0, successMsg.toString(), "");
-		}
-		
-		return new CommandResult(0, "", "");
+	public CommandResult execShellCommand(String cmd){
+		return execShellCommand(cmd, true);
 	}
 	
 	
@@ -370,7 +368,7 @@ public class CollectDataUtil {
 	 * @param cmd
 	 * @param isResult 是否需要结果
 	 */
-	public static CommandResult execShellCommand(String cmd, boolean isResult){
+	public CommandResult execShellCommand(String cmd, boolean isResult){
 		
 		if (device == null) {
 			device = AdbManager.getInstance().getIDevice(GlobalConfig.DeviceName);
@@ -381,7 +379,7 @@ public class CollectDataUtil {
 		StringBuilder successMsg = new StringBuilder();
 		
 		// 处理cmd
-		cmd = cmd.substring(cmd.indexOf(" "));
+//		cmd = cmd.substring(cmd.indexOf(" "));
 		if (isResult) {
 			List<String> results = executeShellCommandWithOutput(device, cmd);
 			if (results.size() > 1) {
@@ -406,7 +404,7 @@ public class CollectDataUtil {
 	 * @param cmd
 	 * @return
 	 */
-	public static List<String> executeShellCommandWithOutput(IDevice device, String cmd) {
+	public List<String> executeShellCommandWithOutput(IDevice device, String cmd) {
 		final List<String> results = new ArrayList<String>();
 		try {
 			device.executeShellCommand(cmd, new MultiLineReceiver() {
@@ -428,17 +426,69 @@ public class CollectDataUtil {
 		}
 		return results;
 	}
+	
+	/**
+	 *  销毁process
+	 */
+	public void stopProcess(){
+		if (mReadInfoProcess != null) {
+			mReadInfoProcess.destroy();
+			mReadInfoProcess = null;
+		}
+	}
+	
+	
+	class WatchThread extends Thread {
+		Process p;
+		boolean over;
+		ArrayList<String> stream;
+
+		public WatchThread(Process p) {
+			this.p = p;
+			over = false;
+			stream = new ArrayList<String>();
+		}
+
+		public void run() {
+			try {
+				if (p == null)
+					return;
+				Scanner br = new Scanner(p.getInputStream());
+				while (true) {
+					if (p == null || over)
+						break;
+					while (br.hasNextLine()) {
+						String tempStream = br.nextLine();
+						if (tempStream.trim() == null || tempStream.trim().equals(""))
+							continue;
+						stream.add(tempStream);
+					}
+				}
+				br.close();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+
+		public void setOver(boolean over) {
+			this.over = over;
+		}
+
+		public ArrayList<String> getStream() {
+			return stream;
+		}
+	}
+	
+	
+	/**
+	 * 获取数据的监听
+	 * 
+	 * @author zlw
+	 *
+	 */
+	public interface GetDataInterface {
+		public void getString(String content);
+
+		public void getErrorString(String error);
+	}
 }
-
-/**
- * 获取数据的监听
- * 
- * @author zlw
- *
- */
-interface GetDataInterface {
-	public void getString(String content);
-
-	public void getErrorString(String error);
-}
-

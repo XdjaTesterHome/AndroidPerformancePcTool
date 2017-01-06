@@ -1,4 +1,4 @@
-package com.xdja.collectdata;
+package com.xdja.collectdata.entity;
 
 /**
  *  封装了内存的数据

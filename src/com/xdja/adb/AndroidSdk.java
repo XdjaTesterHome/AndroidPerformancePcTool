@@ -13,7 +13,20 @@ public class AndroidSdk {
 
 		return new File(platformToolsHome(), "adb" + platformExecutableSuffixExe());
 	}
-
+	
+	/***
+	 * 得到hprof-conv的路径
+	 * @return
+	 */
+	public static File hprofConv(){
+		return new File(platformToolsHome(), "hprof-conv" + platformExecutableSuffixExe()); 
+	}
+	
+	public static File traceview(){
+		return new File(toolsHome(), "traceview" + platformExecutableSuffixBat());
+	}
+	
+	
 	public static File aapt() {
 		StringBuffer command = new StringBuffer();
 		command.append("aapt");
@@ -70,7 +83,9 @@ public class AndroidSdk {
 		command.append(File.separator);
 		return new File(command.toString());
 	}
-
+	
+	
+	
 	public static String androidHome() {
 		String androidHome = System.getenv(ANDROID_HOME);
 

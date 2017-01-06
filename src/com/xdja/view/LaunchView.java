@@ -26,11 +26,11 @@ import com.android.ddmlib.IDevice;
 import com.xdja.adb.AdbManager;
 import com.xdja.adb.AndroidDevice;
 import com.xdja.collectdata.CollectDataImpl;
-import com.xdja.collectdata.CollectDataUtil;
 import com.xdja.constant.Constants;
 import com.xdja.constant.GlobalConfig;
 import com.xdja.log.LoggerManager;
 import com.xdja.util.CommonUtil;
+import com.xdja.util.ExecShellUtil;
 import com.xdja.util.SwingUiUtil;
 import com.xdja.util.SwingUiUtil.ClickDialogBtnListener;
 
@@ -50,11 +50,12 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 	private KpiTestView kpiTestView;
 	private FpsView viewFps;
 	private BatteryView viewBattery;
+	private ToolsView toolsView;
 	private static JComboBox<String> comboDevices;
 	private static JComboBox<String> comboProcess;
 	private JTabbedPane jTabbedPane = new JTabbedPane();
 	private String[] tabNames = { "   内    存   ", "     cpu    ", "   电   量   ", "    加载时间     ", "   帧   率   ",
-			"   流   量   " };
+			"   流   量   ", "    实用工具     " };
 
 	/**
 	 * constructor to init a LaunchView instance create a JPanel instance to put
@@ -206,7 +207,12 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 		viewBattery = new BatteryView(Constants.BATTERY, Constants.BATTERY, Constants.BATTERY_UNIT);
 		viewBattery.setBounds(rect);
 		jTabbedPane.addTab(tabNames[2], viewBattery);
-
+		
+		// 实用工具
+		toolsView = new ToolsView();
+		toolsView.setBounds(rect);
+		jTabbedPane.addTab(tabNames[6], toolsView);
+		
 		frame.add(jTabbedPane);
 		rect = new Rectangle(20, 100, 1100, 600);
 		jTabbedPane.setBounds(rect);
@@ -290,14 +296,6 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 				e.printStackTrace();
 			}
 		}
-		if (viewBattery != null) {
-			try {
-				viewBattery.start(GlobalConfig.PackageName);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
 	}
 
 	/**
@@ -315,7 +313,10 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 		if (viewFlow != null) {
 			viewFlow.stop();
 		}
-
+		
+		if (kpiTestView != null) {
+			kpiTestView.stop();
+		}
 	}
 
 	@Override
@@ -377,7 +378,7 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 		if (!CommonUtil.strIsNull(selectDevice)) {
 			String devicesid = AdbManager.getInstance().getSerialNumber(selectDevice);
 			IDevice dev = AdbManager.getInstance().getIDevice(selectDevice);
-			CollectDataUtil.setDevice(dev);
+			ExecShellUtil.getInstance().setDevice(dev);
 			List<String> respack = CollectDataImpl.getRunningProcess(devicesid);
 			if (respack.size() > 0 && comboProcess != null) {
 				comboProcess.removeAllItems();

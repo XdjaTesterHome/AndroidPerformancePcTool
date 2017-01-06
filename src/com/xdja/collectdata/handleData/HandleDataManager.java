@@ -1,10 +1,10 @@
 package com.xdja.collectdata.handleData;
 import java.util.Arrays;
-import com.xdja.collectdata.CpuData;
-import com.xdja.collectdata.FlowData;
-import com.xdja.collectdata.FpsData;
-import com.xdja.collectdata.KpiData;
-import com.xdja.collectdata.MemoryData;
+import com.xdja.collectdata.entity.CpuData;
+import com.xdja.collectdata.entity.FlowData;
+import com.xdja.collectdata.entity.FpsData;
+import com.xdja.collectdata.entity.KpiData;
+import com.xdja.collectdata.entity.MemoryData;
 import com.xdja.collectdata.handleData.HandleDataResult;
 
 /**
@@ -92,7 +92,8 @@ public class HandleDataManager {
 	
 	/**
 	 * 
-	 * @param handleCpuAll;针对通用测试的CPU的判断(非静默测试CPU数据)
+	 * @param handleCpuAll;针对通用测试的CPU的判断(非静默测试CPU数据);
+	 * 异常模型：当检测到连续的5次CPU占用居高的时候，则上报数据并分析；且不判断当前activity是否处于同一界面，因为限制太死了。
 	 * @return
 	 */
 	public HandleDataResult[] handleCpuAll(float[] cpuData){

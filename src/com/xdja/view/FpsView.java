@@ -25,7 +25,7 @@ import org.jfree.chart.title.TextTitle;
 import org.jfree.data.category.DefaultCategoryDataset;
 
 import com.xdja.collectdata.CollectDataImpl;
-import com.xdja.collectdata.FpsData;
+import com.xdja.collectdata.entity.FpsData;
 import com.xdja.constant.GlobalConfig;
 import com.xdja.util.SwingUiUtil;
 

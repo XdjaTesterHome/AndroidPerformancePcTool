@@ -19,7 +19,7 @@ import org.jfree.data.time.TimeSeriesCollection;
 import org.jfree.ui.RectangleInsets;
 
 import com.xdja.collectdata.CollectDataImpl;
-import com.xdja.collectdata.FlowData;
+import com.xdja.collectdata.entity.FlowData;
 import com.xdja.constant.GlobalConfig;
 
 public class FlowView extends BaseChartView {

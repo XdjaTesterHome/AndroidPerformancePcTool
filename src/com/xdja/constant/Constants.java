@@ -75,4 +75,18 @@ public class Constants {
 	public static final String HELP = "在使用工具之前，需要关掉其他的工具比如：AndroidStudio、Eclipse等 \n 不然会对工具的使用造成影响";
 	
 	public static final String LAST_PACKAGENAME = "lastPackageName";
+	
+	//存储截图和dump memory的路径
+	public static final String SCREEN_SHOTS = "screenshots";
+	public static final String MEMORY_DUMP  = "memorydump";
+	public static final String ANDROID_LOG  = "androidLog";
+	public static final String METHOD_TRACE = "methodTrace";
+	
+	// 保存截图等时需要指明的测试类型
+	public static final String TYPE_FPS = "fps";
+	public static final String TYPE_FLOW = "flow";
+	public static final String TYPE_CPU = "cpu";
+	public static final String TYPE_KPI = "kpi";
+	public static final String TYPE_MEMORY = "memory";
+	public static final String TYPE_BATTERY = "battery";
 }
