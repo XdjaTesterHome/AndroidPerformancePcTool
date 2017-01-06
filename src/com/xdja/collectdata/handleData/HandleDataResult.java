@@ -19,9 +19,26 @@ public class HandleDataResult{
 	public String memoryTracePath;
 	
 	
-	public HandleDataResult() {
+	public HandleDataResult(boolean result, String activityName, String screenshotsPath, String logPath) {
 		super();
+		this.result = result;
+		this.activityName = activityName;
+		this.screenshotsPath = screenshotsPath;
+		this.logPath = logPath;
 		// TODO Auto-generated constructor stub
+	}
+	
+	public HandleDataResult(boolean result) {
+		super();
+		this.result = result;
+		// TODO Auto-generated constructor stub
+	}
+	
+	@Override
+	public String toString() {
+		// TODO Auto-generated method stub
+		return "result = " + this.result + ", activityName = " + this.activityName + ", screenshotsPath = " + this.screenshotsPath + ", logPath =" + this.logPath;
+		
 	}
 	
 	public boolean isResult() {

@@ -7,6 +7,7 @@ import com.android.ddmlib.AndroidDebugBridge.IDebugBridgeChangeListener;
 import com.android.ddmlib.Client;
 import com.android.ddmlib.DdmPreferences;
 import com.android.ddmlib.IDevice;
+import com.xdja.adb.AndroidDevice;
 import com.xdja.constant.GlobalConfig;
 import com.xdja.util.CommonUtil;
 
