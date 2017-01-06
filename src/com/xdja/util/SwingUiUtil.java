@@ -5,10 +5,12 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Insets;
+import java.io.File;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JDialog;
+import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.plaf.basic.BasicButtonUI;
 
@@ -124,6 +126,41 @@ public class SwingUiUtil {
 	}
 	
 	/**
+	 *  当前的path路径
+	 * @param curPath
+	 */
+	public void showChooseFileDialog(Component component, String curPath, chooseFileListener listener){
+		JFileChooser fileChooser = null;
+		if (CommonUtil.strIsNull(curPath)) {
+			fileChooser = new JFileChooser();
+		} else {
+			fileChooser = new JFileChooser(curPath);
+		}
+		
+		fileChooser.showOpenDialog(component);
+		File selectFile = fileChooser.getSelectedFile();
+		if (listener != null) {
+			listener.chooseFile(selectFile);
+		}
+	}
+	
+	/**
+	 *  当前的path路径
+	 * @param curPath
+	 */
+	public void showSaveFileDialog(Component component, chooseFileListener listener){
+		JFileChooser fileChooser = null;
+		fileChooser = new JFileChooser();
+		
+		fileChooser.showSaveDialog(component);
+		File selectFile = fileChooser.getSelectedFile();
+		if (listener != null) {
+			listener.chooseFile(selectFile);
+		}
+	}
+	
+	
+	/**
 	 * 用于创建带图标的icon
 	 * @param text
 	 * @param icon
@@ -164,5 +201,10 @@ public class SwingUiUtil {
 	public interface ClickDialogBtnListener{
 		public void clickOkBtn();
 		public void clickCancelBtn();
+	}
+	
+	public interface chooseFileListener{
+		//选择文件
+		public void chooseFile(File chooseFile);
 	}
 }

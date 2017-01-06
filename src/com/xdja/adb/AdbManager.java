@@ -36,7 +36,7 @@ public class AdbManager implements IDebugBridgeChangeListener {
 	AndroidDebugBridge myBridge = null;
 	private DumpMemoryThread dumpMemoryThread = null;
 	private TraceMethodThread traceMethodThread = null;
-	
+
 	public static AdbManager getInstance() {
 		if (mInstance == null) {
 			synchronized (AdbManager.class) {
@@ -220,20 +220,26 @@ public class AdbManager implements IDebugBridgeChangeListener {
 	 * @param deviceName
 	 * @param type
 	 *            测试的类型
+	 * @param needSave
+	 *            是否需要自己保存
 	 */
-	public void screenCapture(String deviceName, String type) {
+	public BufferedImage screenCapture(String deviceName, String type, boolean needSave) {
 		IDevice device = getIDevice(deviceName);
+		BufferedImage myImage = null;
 		if (device != null) {
 			try {
 				RawImage rawImage = device.getScreenshot();
 				if (rawImage != null) {
-					BufferedImage myImage = new BufferedImage(rawImage.width, rawImage.height,
-							BufferedImage.TYPE_INT_ARGB);
+					myImage = new BufferedImage(rawImage.width, rawImage.height, BufferedImage.TYPE_INT_ARGB);
 					for (int y = 0; y < rawImage.height; y++) {
 						for (int x = 0; x < rawImage.width; x++) {
 							int argb = rawImage.getARGB((x + y * rawImage.width) * (rawImage.bpp / 8));
 							myImage.setRGB(x, y, argb);
 						}
+					}
+
+					if (needSave) {
+						return myImage;
 					}
 
 					String fileName = SaveEnvironmentManager.getInstance().getSuggestedName(type) + ".png";
@@ -255,39 +261,44 @@ public class AdbManager implements IDebugBridgeChangeListener {
 				e.printStackTrace();
 			}
 		}
+
+		return myImage;
 	}
 
 	/**
-	 *  对Method进行trace
+	 * 对Method进行trace
+	 * 
 	 * @param deviceName
 	 * @param packageName
-	 * @param type 测试类型，为了标记结果数据
+	 * @param type
+	 *            测试类型，为了标记结果数据
 	 */
-	public void memthodTracing(String deviceName, String packageName, String type){
+	public void memthodTracing(String deviceName, String packageName, String type) {
 		Client client = getClient(deviceName, packageName);
 		if (client != null) {
 			traceMethodThread = new TraceMethodThread(type, client);
 			traceMethodThread.start();
 		}
 	}
-	
+
 	/**
 	 * 将sdcard中的文件copy到本地
+	 * 
 	 * @param srcPath
 	 * @param desPath
 	 */
-	public void copyFiles(String srcPath, String desPath){
+	public void copyFiles(String srcPath, String desPath) {
 		if (CommonUtil.strIsNull(srcPath)) {
 			return;
 		}
-		
+
 		if (CommonUtil.strIsNull(desPath)) {
 			return;
 		}
-		String cmd = "cp "+ srcPath + " " + desPath;
+		String cmd = "cp " + srcPath + " " + desPath;
 		ExecShellUtil.getInstance().execShellCommand(cmd, false);
 	}
-	
+
 	/**
 	 * 设置默认的debug的port
 	 * 

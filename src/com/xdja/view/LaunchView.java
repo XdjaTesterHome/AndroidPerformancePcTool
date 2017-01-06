@@ -50,11 +50,12 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 	private KpiTestView kpiTestView;
 	private FpsView viewFps;
 	private BatteryView viewBattery;
+	private ToolsView toolsView;
 	private static JComboBox<String> comboDevices;
 	private static JComboBox<String> comboProcess;
 	private JTabbedPane jTabbedPane = new JTabbedPane();
 	private String[] tabNames = { "   内    存   ", "     cpu    ", "   电   量   ", "    加载时间     ", "   帧   率   ",
-			"   流   量   " };
+			"   流   量   ", "    实用工具     " };
 
 	/**
 	 * constructor to init a LaunchView instance create a JPanel instance to put
@@ -206,7 +207,12 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 		viewBattery = new BatteryView(Constants.BATTERY, Constants.BATTERY, Constants.BATTERY_UNIT);
 		viewBattery.setBounds(rect);
 		jTabbedPane.addTab(tabNames[2], viewBattery);
-
+		
+		// 实用工具
+		toolsView = new ToolsView();
+		toolsView.setBounds(rect);
+		jTabbedPane.addTab(tabNames[6], toolsView);
+		
 		frame.add(jTabbedPane);
 		rect = new Rectangle(20, 100, 1100, 600);
 		jTabbedPane.setBounds(rect);

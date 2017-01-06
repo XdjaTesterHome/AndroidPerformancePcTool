@@ -47,7 +47,7 @@ public class SaveEnvironmentManager {
 		if (!CommonUtil.strIsNull(type)) {
 			return type + "_" + timestamp;
 		}
-		return "unkonw" + "_" + timestamp;
+		return "default" + "_" + timestamp;
 	}
 
 	/**
@@ -88,8 +88,6 @@ public class SaveEnvironmentManager {
 		String fileName = getSuggestedName(type);
 		String filePath = Constants.METHOD_TRACE + File.separator + fileName + ".trace";
 		CommonUtil.writeDataToLocal(data, Constants.METHOD_TRACE, fileName + ".trace");
-		//转换hprof的格式
-		covertHprof(filePath);
 		
 		return filePath;
 	}

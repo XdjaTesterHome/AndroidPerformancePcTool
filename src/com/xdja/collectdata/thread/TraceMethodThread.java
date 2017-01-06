@@ -64,6 +64,7 @@ public class TraceMethodThread extends Thread implements IMethodProfilingHandler
 	public void onSuccess(byte[] data, Client client) {
 		// TODO Auto-generated method stub
 		if (data != null) {
+			System.out.println("I am ok ");
 			SaveEnvironmentManager.getInstance().writeTraceToLocal(data, mType);
 		}
 	}
