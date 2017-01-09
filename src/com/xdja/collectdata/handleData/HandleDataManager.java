@@ -1,6 +1,8 @@
 package com.xdja.collectdata.handleData;
-import java.util.Arrays;
-import com.xdja.collectdata.entity.CpuData;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
 import com.xdja.collectdata.entity.FlowData;
 import com.xdja.collectdata.entity.FpsData;
 import com.xdja.collectdata.entity.KpiData;
@@ -13,7 +15,16 @@ import com.xdja.collectdata.handleData.HandleDataResult;
  *
  */
 public class HandleDataManager {
-	public static HandleDataManager mInstance = null;
+	private static HandleDataManager mInstance = null;
+	// 用于判定内存是否存在抖动。
+	private long memoryInterval = 10 * 1000;
+	// 记录内存变动的次数
+	private int memoryShakeCount = 0;
+	// 标记是否在测试内存
+	private boolean memoryTestNow = false;
+	//用于存放10s内收集的memory数据
+	private List<MemoryData> memoryList = new ArrayList<>(24);
+	private HandleDataResult memoryResult = null;
 	
     private HandleDataManager(){
 		
@@ -201,13 +212,72 @@ public class HandleDataManager {
 		return null;
 	}
 	/**
+	 * 处理得到的内存数据
+	 * 内存的问题暂时有如下几种 待扩展：
+	 * 一、对当前版本的内存数据进行判定
+	 * 1.内存抖动。（暂定的标准是10s内超过5次内存波动），我们只记录判定为内存抖动时的页面。
+	 * 2.内存泄露。通过工具不太好判定内存泄露，准备用LeakCanary + monkey跑
+	 * 
+	 * 二、版本间进行数据对比
+	 * 1.每次启动应用后，Heap内存相比之前版本稳定增长。这通常是因为增加了新的功能或者代码造成的。
+	 * 2.对比版本数据，Heap Alloc的变化不大，但进程的Dalvik Heap pss 内存明显增加，这主要是因为分配了大量小对象造成的内存碎片。
+	 * 上面两种情况，暂时还不能抽象
+	 * 
 	 * 
 	 * @param cpuData
-	 * @return
+	 * @return null 就跳过这个结果数据不处理
 	 */
 	public HandleDataResult handleMemoryData(MemoryData memoryData){
-		return null;
+		if (memoryData == null) {
+			return null;
+		}
+		long lastTime = 0;
+		long nowTime = 0;
+		if (!memoryTestNow) {
+			lastTime = System.currentTimeMillis();
+			memoryTestNow = true;
+		}
+		
+		nowTime = System.currentTimeMillis();
+		/**
+		 * 如果超过10s，清空条件，重新开始。
+		 */
+		if (nowTime - lastTime > memoryInterval) {
+			memoryTestNow = false;
+			lastTime = 0;
+			nowTime = 0;
+			memoryList.clear();
+			int shakeCount = getShakeCount();
+			if (shakeCount > 5) {
+				memoryResult = new HandleDataResult(false);
+				//获取Allocation Info
+				return memoryResult;
+			}
+		}else {
+			memoryList.add(memoryData);
+		}
+		memoryResult = new HandleDataResult(true);
+		return memoryResult;
 	}
-
+	
+	/**
+	 *  获取shakeCount的次数
+	 * @return
+	 */
+	private int getShakeCount(){
+		int num = 0;
+		if (memoryList.size() > 1) {
+			for(int i=0; i< memoryList.size() -1; i++){
+				float nowData = memoryList.get(i).memAlloc;
+				float nextData = memoryList.get(i + 1).memAlloc;
+				// 这里的单位都是M
+				if (Math.abs(nowData - nextData) > 2) {
+					num += 1;
+				}
+			}
+		}
+		
+		return num;
+	}
 	
 }
