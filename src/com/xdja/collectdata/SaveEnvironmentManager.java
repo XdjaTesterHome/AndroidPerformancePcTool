@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import com.xdja.adb.AdbManager;
 import com.xdja.adb.AndroidSdk;
 import com.xdja.constant.Constants;
 import com.xdja.constant.GlobalConfig;
@@ -133,7 +134,7 @@ public class SaveEnvironmentManager {
 	/**
 	 *  启动一个定时器检查是否停止进程
 	 */
-	public void startTimer(){
+	private void startTimer(){
 		Timer timer = new Timer();
 		timer.schedule(new TimerTask() {
 			
@@ -156,6 +157,53 @@ public class SaveEnvironmentManager {
 			}
 		}, 30*1000);
 	}
+	
+	
+	/**
+	 *  用于保存当前的测试日志
+	 * @param packageName
+	 * @param testType 测试的类型
+	 */
+	public void saveCurrentLog(String packageName, String testType){
+		int pid = 0;
+		if (CommonUtil.strIsNull(packageName)) {
+			pid = 0;
+		}
+		pid = CollectDataImpl.getPid(packageName);
+		
+		saveCurrentLog(pid, testType);
+	}
+	
+	
+	/**
+	 * 截图
+	 * @param deviceName  当前设备的名称
+	 * @param testType
+	 */
+	public void screenShots(String deviceName, String testType){
+		AdbManager.getInstance().screenCapture(deviceName, testType, false);
+	}
+	
+	/**
+	 *  dump memory
+	 * @param deviceName
+	 * @param packageName
+	 * @param type
+	 */
+	public void dumpMemory(String deviceName, String packageName,  String type){
+		AdbManager.getInstance().dumpMemory(deviceName, packageName, type);
+	}
+	
+	/**
+	 *  抓取当前的方法栈
+	 * @param deviceName
+	 * @param packageName
+	 * @param type
+	 */
+	public void methodTracing(String deviceName, String packageName, String type){
+		AdbManager.getInstance().memthodTracing(deviceName, packageName, type);
+	}
+	
 	
 	public static void main(String[] args) {
 		int pid = CollectDataImpl.getPid(GlobalConfig.PackageName);
