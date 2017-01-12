@@ -6,6 +6,7 @@ import java.util.List;
 import com.xdja.collectdata.entity.FlowData;
 import com.xdja.collectdata.entity.FpsData;
 import com.xdja.collectdata.entity.KpiData;
+import com.xdja.collectdata.entity.CpuData;
 import com.xdja.collectdata.entity.MemoryData;
 import com.xdja.collectdata.handleData.HandleDataResult;
 
@@ -25,7 +26,7 @@ public class HandleDataManager {
 	//用于存放10s内收集的memory数据
 	private List<MemoryData> memoryList = new ArrayList<>(24);
 	private HandleDataResult memoryResult = null;
-	
+	private List<Float> cpuList = new ArrayList<Float>();//用于存放CPU数据
     private HandleDataManager(){
 		
 	}
@@ -76,6 +77,78 @@ public class HandleDataManager {
 			uploadcpu = inserthandle(uploadcpu, upcpu);
 		}
 		return uploadcpu;
+	}
+	
+	
+	//处理静默CPU数据，异常捕获模型，返回处理后认为有问题的数据,修改传入参数;//
+	//以下是对问题模型的处理，简单的问题模型，默认只要CPU的数据大于1%，就认为可能存在异常;//
+	public HandleDataResult handleCpusilence(CpuData cpuData){
+		//静默测试数据的判断//
+		boolean result;
+		String activityName;
+		String screenshotsPath;
+		String logPath;
+		HandleDataResult upcpu = null;
+		if (cpuData.cpuUsage>1){
+				result =false;
+				activityName = "";
+				screenshotsPath= "";
+				logPath= "";
+				upcpu =new HandleDataResult(result, activityName, screenshotsPath,logPath);
+			}else{
+				result =true;
+				upcpu =new HandleDataResult(result);
+			}
+	
+		return upcpu;
+	}
+	
+	//handleCpu处理非静默测试的数据模型,原则上2点：其一大于50%；其二连续三次数据大于30%//
+	public HandleDataResult handleCpu(CpuData cpuData){
+		//静默测试数据的判断//
+		boolean result;
+		String activityName;
+		String screenshotsPath;
+		String logPath;
+		HandleDataResult upcpu = null;
+		if (cpuData.cpuUsage>50){
+				result =false;
+				activityName = "";
+				screenshotsPath= "";
+				logPath= "";
+				upcpu =new HandleDataResult(result, activityName, screenshotsPath,logPath);
+			}else{
+				int i= cpuList.size();
+				if (i==3){
+					if(cpuList.get(0)>30&&cpuList.get(1)>30&&cpuList.get(2)>30){
+						result =false;
+						activityName = "";
+						screenshotsPath= "";
+						logPath= "";
+						upcpu =new HandleDataResult(result, activityName, screenshotsPath,logPath);
+					}else{
+						result =true;
+				        upcpu =new HandleDataResult(result);
+					}
+				}
+				
+			}
+	
+		return upcpu;
+	}
+	
+	//cpuList列表中依次添加元素，直到添加长度为3的元素后，每次只更新列表元素，删除第一个和添加最后一个，列表长度适中为3//
+	public List<Float> cpuList (CpuData cpuData){
+		if (cpuData!=null){
+			int i= cpuList.size();
+			if (i<3){
+				cpuList.add(cpuData.cpuUsage);
+			}else{
+				cpuList.remove(0);
+				cpuList.add(cpuData.cpuUsage);
+			}
+		}
+		return cpuList;
 	}
 	
   //insert动态向一维HandleDataResult数组中插入元素//	
@@ -246,13 +319,13 @@ public class HandleDataManager {
 			memoryTestNow = false;
 			lastTime = 0;
 			nowTime = 0;
-			memoryList.clear();
 			int shakeCount = getShakeCount();
 			if (shakeCount > 5) {
 				memoryResult = new HandleDataResult(false);
 				//获取Allocation Info
 				return memoryResult;
 			}
+			memoryList.clear();
 		}else {
 			memoryList.add(memoryData);
 		}
