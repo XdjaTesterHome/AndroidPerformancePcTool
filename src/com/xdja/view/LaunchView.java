@@ -338,6 +338,7 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 	public void deviceDisconnected(IDevice device) {
 		// TODO Auto-generated method stub
 		updateDeviceList();
+		//
 	}
 
 	@Override

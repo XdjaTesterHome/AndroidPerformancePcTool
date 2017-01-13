@@ -198,5 +198,8 @@ public class MemoryView extends BaseChartView implements IClientChangeListener {
 		
 		//在界面上展示问题数据
 		
+		
 	}
+	
+	
 }

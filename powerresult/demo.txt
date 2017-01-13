@@ -1,525 +1,261 @@
 Discharge step durations:
-#0: +4h19m59s88ms to 2 (screen-off, power-save-off)
-#1: +6h29m39s156ms to 3 (screen-off, power-save-off)
-#2: +12h40m21s268ms to 4 (screen-off, power-save-off)
-#3: +7m36s972ms to 5 (screen-off, power-save-off)
-#4: +4h2m22s124ms to 6 (screen-off, power-save-off)
-#5: +11h0m1s78ms to 7 (screen-off, power-save-off)
-#6: +7h10m0s139ms to 8 (screen-off, power-save-off)
-#7: +2h10m0s22ms to 9 (power-save-off)
-#8: +5h9m59s121ms to 10 (screen-off, power-save-off)
-#9: +2h20m0s62ms to 11 (screen-off, power-save-off)
-#10: +7h20m0s173ms to 12 (screen-off, power-save-off)
-#11: +3h20m0s77ms to 13 (screen-off, power-save-off)
-#12: +6m44s3ms to 14 (screen-off, power-save-off)
-#13: +2h23m16s31ms to 15 (screen-off, power-save-off)
-#14: +2h27m37s26ms to 16 (screen-off, power-save-off)
-#15: +2h39m10s178ms to 17 (screen-off, power-save-off)
-#16: +3h0m1s294ms to 18 (screen-off, power-save-off)
-#17: +5h23m11s794ms to 19 (power-save-off)
-#18: +8h32m9s538ms to 20 (screen-off, power-save-off)
-#19: +1h50m10s275ms to 21 (screen-off, power-save-off)
-#20: +1h27m51s333ms to 22 (screen-off, power-save-off)
-#21: +1h29m58s885ms to 23 (screen-off, power-save-off)
-#22: +55m1s24ms to 24 (screen-off, power-save-off)
-#23: +44m52s948ms to 25 (screen-off, power-save-off)
-#24: +1h9m56s235ms to 26 (screen-off, power-save-off)
-#25: +47m11s670ms to 27 (screen-off, power-save-off)
-#26: +12m48s358ms to 28 (screen-off, power-save-off)
-#27: +3h5m10s51ms to 29 (screen-off, power-save-off)
-#28: +2h12m27s44ms to 30 (screen-off, power-save-off)
-#29: +2h32m22s72ms to 31 (screen-off, power-save-off)
-#30: +3h45m11s53ms to 32 (screen-off, power-save-off)
-#31: +4h24m49s131ms to 33 (screen-off, power-save-off)
-#32: +1h5m10s46ms to 34 (screen-off, power-save-off)
-#33: +1h34m33s853ms to 35 (screen-off, power-save-off)
-#34: +2h10m16s193ms to 36 (screen-off, power-save-off)
-#35: +1h55m11s27ms to 37 (screen-off, power-save-off)
-#36: +1h2m3s49ms to 38 (screen-off, power-save-off)
-#37: +1h12m46s23ms to 39 (screen-off, power-save-off)
-#38: +4h50m0s98ms to 40 (screen-off, power-save-off)
-#39: +9h27m34s446ms to 41 (screen-off, power-save-off)
-#40: +2h37m32s13ms to 42 (screen-off, power-save-off)
-#41: +2h52m29s790ms to 43 (screen-off, power-save-off)
-#42: +1h30m1s46ms to 44 (screen-off, power-save-off)
-#43: +1h47m32s165ms to 45 (screen-off, power-save-off)
-#44: +1h5m0s900ms to 46 (screen-off, power-save-off)
-#45: +5h25m0s101ms to 47 (screen-off, power-save-off)
-#46: +5h35m0s133ms to 48 (screen-off, power-save-off)
-#47: +5h30m0s122ms to 49 (screen-off, power-save-off)
-#48: +6h37m26s134ms to 50 (screen-off, power-save-off)
-#49: +7h13m35s291ms to 51 (screen-off, power-save-off)
-#50: +3h3m58s945ms to 52 (screen-off, power-save-off)
-#51: +3h17m33s604ms to 53 (screen-off, power-save-off)
-#52: +8h37m15s626ms to 54 (screen-off, power-save-off)
-#53: +3h45m10s42ms to 55 (screen-off, power-save-off)
-#54: +12h45m0s288ms to 56 (screen-off, power-save-off)
-#55: +4m13s984ms to 57 (screen-off, power-save-off)
-#56: +4m13s983ms to 57 (screen-off, power-save-off)
-#57: +2h11m21s93ms to 59 (screen-off, power-save-off)
-#58: +1h5m11s10ms to 60 (screen-off, power-save-off)
-#59: +1h4m49s51ms to 61 (screen-off, power-save-off)
-#60: +1h15m11s5ms to 62 (screen-off, power-save-off)
-#61: +1h32m25s885ms to 63 (screen-off, power-save-off)
-#62: +60m0s27ms to 64 (screen-off, power-save-off)
-#63: +1h30m0s163ms to 65 (screen-off, power-save-off)
-#64: +3h12m23s89ms to 66 (screen-off, power-save-off)
-#65: +6h17m37s118ms to 67 (screen-off, power-save-off)
-#66: +20m37s661ms to 1 (screen-off, power-save-off)
-#67: +20m37s661ms to 1 (screen-off, power-save-off)
-#68: +2h42m41s743ms to 3 (screen-off, power-save-off)
-#69: +4h29m22s146ms to 4 (screen-off, power-save-off)
-#70: +5h5m51s563ms to 5 (screen-off, power-save-off)
-#71: +5s513ms to 6 (screen-off, power-save-off)
-#72: +34m51s442ms to 7 (screen-off, power-save-off)
-#73: +6h10m21s676ms to 8 (screen-off, power-save-off)
-#74: +2h45m31s60ms to 9 (power-save-off)
-#75: +2h3m18s60ms to 10 (screen-off, power-save-off)
-#76: +1h35m30s519ms to 11 (screen-off, power-save-off)
-#77: +1h35m30s518ms to 11 (screen-off, power-save-off)
-#78: +60m0s50ms to 13 (screen-off, power-save-off)
-#79: +48m59s8ms to 14 (screen-off, power-save-off)
-#80: +1h47m34s649ms to 15 (screen-off, power-save-off)
-#81: +49m43s406ms to 16 (screen-off, power-save-off)
-#82: +1h16m14s385ms to 17 (screen-off, power-save-off)
-#83: +1h8m57s546ms to 18 (screen-off, power-save-off)
-#84: +1h58m45s30ms to 19 (screen-off, power-save-off)
-#85: +1h58m45s30ms to 19 (screen-off, power-save-off)
-#86: +3h14m36s61ms to 21 (screen-off, power-save-off)
-#87: +5h20m35s307ms to 22 (screen-off, power-save-off)
-#88: +10s947ms to 23 (screen-off, power-save-off)
-#89: +1h25m39s45ms to 24 (screen-off, power-save-off)
-#90: +1h25m39s45ms to 24 (screen-off, power-save-off)
-#91: +8m40s994ms to 26 (screen-off, power-save-off)
-#92: +8m40s994ms to 26 (screen-off, power-save-off)
-#93: +27m9s12ms to 28 (screen-off, power-save-off)
-#94: +2h3m4s445ms to 29 (screen-off, power-save-off)
-#95: +39m6s884ms to 30 (screen-off, power-save-off)
-#96: +39m6s884ms to 30 (screen-off, power-save-off)
-#97: +39m6s883ms to 30 (screen-off, power-save-off)
-#98: +1h41m32s367ms to 33 (screen-off, power-save-off)
-#99: +3m7s656ms to 34 (screen-off, power-save-off)
-#100: +2h0m0s48ms to 35 (screen-off, power-save-off)
-#101: +1h35m43s23ms to 36 (screen-off, power-save-off)
-#102: +5h42m16s214ms to 37 (screen-off, power-save-off)
-#103: +1h59m49s881ms to 38 (screen-off, power-save-off)
-#104: +3h42m26s70ms to 39 (screen-off, power-save-off)
-#105: +3h24m8s73ms to 40 (screen-off, power-save-off)
-#106: +1h39m20s42ms to 41 (screen-off, power-save-off)
-#107: +1h53m39s48ms to 42 (screen-off, power-save-off)
-#108: +2h38m35s911ms to 43 (screen-off, power-save-off)
-#109: +3h14m36s64ms to 44 (screen-off, power-save-off)
-#110: +1h39m50s54ms to 45 (screen-off, power-save-off)
-#111: +3h30m1s53ms to 46 (screen-off, power-save-off)
-#112: +2h3m20s528ms to 47 (screen-off, power-save-off)
-#113: +2h40m50s584ms to 48 (screen-off, power-save-off)
-#114: +3h9m31s57ms to 49 (screen-off, power-save-off)
-#115: +7h30m15s175ms to 50 (screen-off, power-save-off)
-#116: +1h8m38s121ms to 51 (screen-off, power-save-off)
-#117: +1h8m38s120ms to 51 (screen-off, power-save-off)
-#118: +3h19m13s959ms to 53 (screen-off, power-save-off)
-#119: +2h49m42s977ms to 54 (screen-off, power-save-off)
-#120: +2h15m28s754ms to 55 (screen-off, power-save-off)
-#121: +4h39m49s395ms to 56 (screen-off, power-save-off)
-#122: +3h50m6s80ms to 57 (screen-off, power-save-off)
-#123: +2h17m43s56ms to 58 (screen-off, power-save-off)
-#124: +2h57m24s59ms to 59 (screen-off, power-save-off)
-#125: +1h33m15s29ms to 60 (screen-off, power-save-off)
-#126: +1h22m12s21ms to 61 (screen-off, power-save-off)
-#127: +1h22m12s20ms to 61 (screen-off, power-save-off)
-#128: +1h6m29s40ms to 63 (screen-off, power-save-off)
-#129: +1h35m50s24ms to 64 (screen-off, power-save-off)
-#130: +1h44m51s50ms to 65 (screen-off, power-save-off)
-#131: +2h15m12s40ms to 66 (screen-off, power-save-off)
-#132: +1h37m35s411ms to 67 (screen-off, power-save-off)
-#133: +2h22m20s675ms to 68 (screen-off, power-save-off)
-#134: +1h24m14s43ms to 69 (screen-off, power-save-off)
-#135: +2h18m25s52ms to 70 (screen-off, power-save-off)
-#136: +1h56m40s156ms to 71 (screen-off, power-save-off)
-#137: +2h30m36s925ms to 72 (screen-off, power-save-off)
-#138: +2h36m24s69ms to 73 (screen-off, power-save-off)
-#139: +1h0m47s18ms to 74 (screen-off, power-save-off)
-#140: +1h0m47s17ms to 74 (screen-off, power-save-off)
-#141: +2h9m2s36ms to 76 (screen-off, power-save-off)
-#142: +4h17m41s86ms to 77 (screen-off, power-save-off)
-#143: +2h59m58s502ms to 78 (screen-off, power-save-off)
-#144: +4h9m31s991ms to 79 (screen-off, power-save-off)
-#145: +8m30s818ms to 80 (screen-off, power-save-off)
-#146: +2h57m14s20ms to 81 (screen-off, power-save-off)
-#147: +2h23m43s69ms to 82 (screen-off, power-save-off)
-#148: +1h45m43s26ms to 83 (screen-off, power-save-off)
-#149: +2h50m53s486ms to 84 (screen-off, power-save-off)
-#150: +2h44m31s637ms to 85 (screen-off, power-save-off)
-#151: +2h47m44s72ms to 86 (screen-off, power-save-off)
-#152: +2h57m35s63ms to 87 (screen-off, power-save-off)
-#153: +2h47m56s43ms to 88 (screen-off, power-save-off)
-#154: +2h44m40s79ms to 89 (screen-off, power-save-off)
-#155: +2h42m7s56ms to 90 (screen-off, power-save-off)
-#156: +1h15m31s22ms to 91 (screen-off, power-save-off)
-#157: +2h45m20s107ms to 92 (screen-off, power-save-off)
-#158: +3h23m2s29ms to 93 (screen-off, power-save-off)
-#159: +2h50m52s55ms to 94 (screen-off, power-save-off)
-#160: +3h49m4s71ms to 95 (screen-off, power-save-off)
-#161: +3h41m13s398ms to 96 (screen-off, power-save-off)
-#162: +4h57m18s765ms to 97 (screen-off, power-save-off)
-#163: +11m35s581ms to 98 (screen-off, power-save-off)
-Estimated discharge time remaining: +9d14h32m50s988ms
-
-Charge step durations:
-#0: +6m25s581ms to 84 (screen-on, power-save-off)
-#1: +5m37s357ms to 83 (screen-on, power-save-off)
-#2: +5m37s367ms to 82 (screen-on, power-save-off)
-#3: +5m37s370ms to 81 (screen-on, power-save-off)
-#4: +6m25s853ms to 80 (screen-on, power-save-off)
-#5: +4m49s355ms to 79 (power-save-off)
-#6: +4m49s233ms to 78 (screen-off, power-save-off)
-#7: +3m40s944ms to 77 (screen-off, power-save-off)
-#8: +20s19ms to 76 (screen-off, power-save-off)
-#9: +5m37s338ms to 75 (screen-off, power-save-off)
-#10: +4m0s970ms to 74 (screen-off, power-save-off)
-#11: +4m49s256ms to 73 (screen-off, power-save-off)
-#12: +4m1s111ms to 72 (screen-off, power-save-off)
-#13: +4m1s442ms to 71 (screen-off, power-save-off)
-#14: +2m24s584ms to 70 (screen-off, power-save-off)
-#15: +4m0s968ms to 69 (screen-off, power-save-off)
-#16: +4m49s176ms to 68 (screen-off, power-save-off)
-#17: +4m0s959ms to 67 (screen-off, power-save-off)
-#18: +4m0s972ms to 66 (screen-off, power-save-off)
-#19: +4m49s178ms to 65 (screen-off, power-save-off)
-#20: +4m49s183ms to 64 (screen-off, power-save-off)
-#21: +4m50s117ms to 63 (screen-off, power-save-off)
-#22: +4m50s818ms to 62 (power-save-off)
-#23: +4m50s750ms to 61 (screen-off, power-save-off)
-#24: +6m27s707ms to 60 (screen-off, power-save-off)
-#25: +4m50s793ms to 59 (screen-off, power-save-off)
-#26: +6m25s542ms to 58 (power-save-off)
-#27: +5m37s459ms to 57 (screen-on, power-save-off)
-#28: +6m25s657ms to 56 (screen-on, power-save-off)
-#29: +4m49s185ms to 55 (screen-on, power-save-off)
-#30: +4m49s176ms to 54 (screen-on, power-save-off)
-#31: +6m25s827ms to 53 (screen-on, power-save-off)
-#32: +5m37s367ms to 52 (screen-on, power-save-off)
-#33: +4m29s87ms to 51 (screen-on, power-save-off)
+#0: +16m47s292ms to 27 (power-save-off)
+#1: +7m13s744ms to 28 (screen-on, power-save-off)
+#2: +5m37s365ms to 29 (screen-on, power-save-off)
+#3: +5m17s384ms to 30 (screen-on, power-save-off)
+#4: +20s29ms to 31 (screen-on, power-save-off)
+#5: +8m1s959ms to 32 (screen-on, power-save-off)
+#6: +4m49s214ms to 33 (screen-on, power-save-off)
+#7: +4h16m38s575ms to 34 (power-save-off)
+#8: +13m56s883ms to 35 (screen-off, power-save-off)
+#9: +9m12s4ms to 36 (screen-off, power-save-off)
+#10: +9m12s3ms to 36 (screen-off, power-save-off)
+#11: +3h33m52s316ms to 38 (screen-off, power-save-off)
+#12: +6h46m45s465ms to 39 (screen-off, power-save-off)
+#13: +2m10s628ms to 40 (screen-off, power-save-off)
+#14: +30m32s510ms to 41 (power-save-off)
+#15: +7m13s698ms to 42 (screen-on, power-save-off)
+#16: +6m25s787ms to 43 (screen-on, power-save-off)
+#17: +5m37s349ms to 44 (screen-on, power-save-off)
+#18: +19m46s490ms to 45 (power-save-off)
+#19: +6m25s696ms to 46 (screen-on, power-save-off)
+#20: +8m2s65ms to 47 (screen-on, power-save-off)
+#21: +5m37s397ms to 48 (screen-on, power-save-off)
+#22: +6m25s558ms to 49 (screen-on, power-save-off)
+#23: +8m40s71ms to 50 (power-save-off)
+#24: +7m13s755ms to 51 (screen-on, power-save-off)
+#25: +7m13s923ms to 52 (screen-on, power-save-off)
+#26: +4m49s416ms to 53 (screen-on, power-save-off)
+#27: +26m26s337ms to 54 (power-save-off)
+#28: +5m44s569ms to 55 (power-save-off)
+#29: +6m25s589ms to 56 (screen-on, power-save-off)
+#30: +4m49s175ms to 57 (screen-on, power-save-off)
+#31: +8m1s930ms to 58 (screen-on, power-save-off)
+#32: +4m49s838ms to 59 (screen-on, power-save-off)
+#33: +5m37s656ms to 60 (screen-on, power-save-off)
+#34: +5m37s506ms to 61 (screen-on, power-save-off)
+#35: +4m49s667ms to 62 (screen-on, power-save-off)
+#36: +6m25s987ms to 63 (screen-on, power-save-off)
+#37: +4m0s959ms to 64 (screen-on, power-save-off)
+#38: +4m49s157ms to 65 (screen-on, power-save-off)
+#39: +5m37s365ms to 66 (screen-on, power-save-off)
+#40: +4m49s600ms to 67 (screen-on, power-save-off)
+#41: +1h46m21s605ms to 68 (power-save-off)
+#42: +15m39s239ms to 69 (power-save-off)
+#43: +5m37s337ms to 70 (screen-on, power-save-off)
+#44: +4m49s182ms to 71 (screen-on, power-save-off)
+#45: +4m49s166ms to 72 (screen-on, power-save-off)
+#46: +6m5s452ms to 73 (screen-on, power-save-off)
+#47: +20s80ms to 74 (screen-on, power-save-off)
+#48: +1h18m10s275ms to 75 (power-save-off)
+#49: +4m49s157ms to 76 (screen-on, power-save-off)
+#50: +4m1s142ms to 77 (screen-on, power-save-off)
+#51: +3m12s917ms to 78 (screen-on, power-save-off)
+#52: +4m0s968ms to 79 (screen-on, power-save-off)
+#53: +3m12s773ms to 80 (screen-on, power-save-off)
+#54: +3m40s922ms to 81 (screen-on, power-save-off)
+#55: +20s75ms to 82 (screen-on, power-save-off)
+#56: +2m24s555ms to 83 (screen-on, power-save-off)
+#57: +3m12s786ms to 84 (screen-on, power-save-off)
+#58: +2m24s590ms to 85 (screen-on, power-save-off)
+#59: +2m24s582ms to 86 (screen-on, power-save-off)
+#60: +39m25s472ms to 87 (power-save-off)
+#61: +1h18m38s626ms to 88 (screen-off, power-save-off)
+#62: +1h31m58s105ms to 89 (screen-off, power-save-off)
+#63: +1h40m0s29ms to 90 (screen-off, power-save-off)
+#64: +1h49m48s95ms to 91 (screen-off, power-save-off)
+#65: +1h55m10s986ms to 92 (screen-off, power-save-off)
+#66: +2h16m17s939ms to 93 (screen-off, power-save-off)
+#67: +3h33m38s685ms to 94 (screen-off, power-save-off)
+#68: +50m7s92ms to 95 (power-save-off)
+#69: +8m50s138ms to 96 (screen-on, power-save-off)
+#70: +8m1s996ms to 97 (screen-on, power-save-off)
+#71: +8m50s197ms to 98 (screen-on, power-save-off)
 
 Statistics since last charge:
-System starts: 4, currently on battery: true
-Time on battery: 28d 19h 47m 12s 472ms (98.9%) realtime, 2d 21h 22m 14s 381ms (9.9%) uptime
-Time on battery screen off: 28d 2h 34m 44s 630ms (96.5%) realtime, 2d 4h 9m 46s 536ms (7.5%) uptime
-Total run time: 29d 3h 23m 43s 528ms realtime, 3d 4h 58m 45s 439ms uptime
-Battery time remaining: 9d 14h 32m 50s 988ms
-Start clock time: 2016-12-15-14-02-09
-Screen on: 17h 12m 27s 842ms (2.5%) 48x, Interactive: 17h 12m 42s 837ms (2.5%)
+System starts: 0, currently on battery: false
+Time on battery: 1d 17h 9m 33s 638ms (99.9%) realtime, 6h 46m 34s 578ms (16.4%) uptime
+Time on battery screen off: 1d 12h 16m 41s 232ms (88.0%) realtime, 1h 53m 42s 173ms (4.6%) uptime
+Total run time: 1d 17h 12m 55s 986ms realtime, 6h 49m 56s 927ms uptime
+Start clock time: 2017-01-11-17-31-07
+Screen on: 4h 52m 52s 406ms (11.9%) 9x, Interactive: 4h 52m 55s 527ms (11.9%)
 Screen brightnesses:
-dark 17h 12m 27s 842ms (100.0%)
-Total full wakelock time: 1m 58s 448ms
-Total partial wakelock time: 2h 30m 28s 104ms
+dark 57s 405ms (0.3%)
+dim 4h 51m 55s 1ms (99.7%)
+Total full wakelock time: 19s 760ms
+Total partial wakelock time: 15m 54s 486ms
 Mobile total received: 0B, sent: 0B (packets received 0, sent 0)
 Phone signal levels:
-great 28d 19h 47m 12s 472ms (100.0%) 4x
+great 1d 17h 9m 33s 638ms (100.0%) 0x
 Signal scanning time: 0ms
 Radio types:
-none 28d 19h 47m 12s 472ms (100.0%) 4x
+none 1d 17h 9m 33s 638ms (100.0%) 0x
 Mobile radio active time: 0ms (0.0%) 0x
-Wi-Fi total received: 73.77MB, sent: 22.89MB (packets received 191608, sent 215072)
-Wifi on: 28d 19h 47m 9s 882ms (100.0%), Wifi running: 28d 19h 47m 8s 537ms (100.0%)
+Wi-Fi total received: 10.17MB, sent: 5.38MB (packets received 38195, sent 57912)
+Wifi on: 1d 17h 9m 33s 638ms (100.0%), Wifi running: 1d 17h 9m 33s 638ms (100.0%)
 Wifi states: (no activity)
 Wifi supplicant states:
-disconn 9d 9h 47m 10s 525ms (32.6%) 69x
-scanning 6d 11h 38m 27s 607ms (22.5%) 31x
-associating 38s 197ms (0.0%) 59x
-associated 16s 276ms (0.0%) 41x
-4-way-handshake 1s 161ms (0.0%) 40x
-group-handshake 3s 760ms (0.0%) 47x
-completed 12d 22h 20m 34s 946ms (44.9%) 53x
+disconn 1s 733ms (0.0%) 2x
+associating 316ms (0.0%) 2x
+associated 46ms (0.0%) 2x
+4-way-handshake 422ms (0.0%) 2x
+group-handshake 303ms (0.0%) 9x
+completed 1d 17h 9m 30s 818ms (100.0%) 9x
 Wifi signal levels:
-level(0) 15s 236ms (0.0%) 5x
-level(3) 3m 15s 4ms (0.0%) 40x
-level(4) 28d 19h 43m 42s 232ms (100.0%) 52x
+level(0) 12s 196ms (0.0%) 4x
+level(2) 3s 54ms (0.0%) 1x
+level(3) 2h 12m 15s 154ms (5.4%) 160x
+level(4) 1d 14h 57m 3s 234ms (94.6%) 158x
 Bluetooth on: 0ms (0.0%)
 Bluetooth states: (no activity)
 
 Device battery use since last full charge
-Amount discharged (lower bound): 164
-Amount discharged (upper bound): 166
-Amount discharged while screen on: 0
-Amount discharged while screen off: 166
+Amount discharged (lower bound): 72
+Amount discharged (upper bound): 73
+Amount discharged while screen on: 55
+Amount discharged while screen off: 18
 
 Estimated power use (mAh):
-Capacity: 3000, Computed drain: 22212, actual drain: 4920-4980
-Wifi: 6918
-Idle: 4047
-Screen: 3682
-Cell standby: 3459
-Uid 0: 2018
-Uid u0a80: 1361
-Uid 1000: 520
-Uid u0a15: 126
-Uid u0a7: 30.7
-Uid 1013: 12.5
-Uid 1001: 7.76
-Uid u0a20: 6.50
-Uid u0a79: 5.70
-Uid u0a81: 2.81
-Uid 1027: 2.42
-Uid u0a23: 2.34
-Uid u0a11: 1.51
-Uid u0a5: 1.30
-Uid u0a26: 1.18
-Uid u0a61: 1.14
-Uid 1021: 0.874
-Uid u0a1: 0.535
-Uid u0a63: 0.507
-Uid u0a9: 0.496
-Uid u0a56: 0.443
-Uid u0a38: 0.439
-Uid u0a2: 0.275
-Uid u0a53: 0.146
-Uid u0a29: 0.110
-Uid u0a44: 0.0435
-Uid u0a30: 0.0309
-Uid u0a6: 0.0273
-Uid u0a28: 0.0241
-Uid u0a34: 0.0217
-Uid u0a3: 0.0132
-Uid u0a10: 0.0112
-Uid u0a47: 0.00824
-Uid u0a48: 0.00124
-Uid 1014: 0.00000430
-Over-counted: 17232
+Capacity: 3000, Computed drain: 3067, actual drain: 2160-2190
+Screen: 1473
+Wifi: 412
+Uid 1000: 242
+Idle: 218
+Cell standby: 206
+Uid 0: 200
+Uid u0a87: 70.8
+Uid u0a103: 58.3
+Uid u0a104: 42.7
+Uid u0a67: 32.9
+Uid u0a105: 23.9
+Uid u0a68: 23.6
+Uid u0a15: 23.0
+Uid u0a97: 18.7
+Uid u0a7: 6.21
+Uid u0a98: 4.27
+Uid u0a78: 3.41
+Uid 1001: 3.16
+Uid u0a20: 0.826
+Uid u0a11: 0.677
+Uid 1013: 0.665
+Uid u0a66: 0.559
+Uid 1006: 0.545
+Uid 1021: 0.352
+Uid 1027: 0.304
+Uid u0a61: 0.202
+Uid u0a23: 0.181
+Uid u0a4: 0.166
+Uid u0a26: 0.142
+Uid u0a5: 0.125
+Uid u0a2: 0.0988
+Uid u0a3: 0.0941
+Uid u0a56: 0.0936
+Uid u0a72: 0.0816
+Uid u0a1: 0.0630
+Uid u0a63: 0.0625
+Uid u0a38: 0.0491
+Uid u0a9: 0.0485
+Uid u0a71: 0.0346
+Uid 1014: 0.00000506
+Over-counted: 877
 
 1000:
-Wi-Fi network: 30.89KB received, 113.20KB sent (packets 345 received, 572 sent)
-User activity: 151 other, 57 button, 1447 touch
-Wake lock SyncLoopWakeLock: 591ms partial (197 times) realtime
-Wake lock ActivityManager-Launch: 180ms partial (1 times) realtime
-Wake lock ConnectivityService: 24m 51s 485ms partial (33 times) realtime
-Wake lock *job*/android/com.android.server.pm.BackgroundDexOptService realtime
-Wake lock ShutdownThread-cpu realtime
-Wake lock WindowManager realtime
-Wake lock *job*/android/com.android.server.backup.FullBackupJob realtime
-Wake lock GpsLocationProvider: 1s 719ms partial (88 times) realtime
-Wake lock DHCP: 22s 93ms partial (33 times) realtime
-Wake lock NetworkStats: 33s 539ms partial (1527 times) realtime
+Wi-Fi network: 4.17KB received, 14.12KB sent (packets 41 received, 61 sent)
+User activity: 15 other, 10 button, 136 touch
+Wake lock SyncLoopWakeLock: 5s 890ms partial (804 times) realtime
+Wake lock ActivityManager-Launch realtime
+Wake lock ConnectivityService: 2s 762ms partial (2 times) realtime
+Wake lock WindowManager: 19s 760ms full (1 times) realtime
+Wake lock GpsLocationProvider: 108ms partial (5 times) realtime
+Wake lock DHCP: 18s 986ms partial (38 times) realtime
+Wake lock NetworkStats: 3s 821ms partial (82 times) realtime
 Wake lock *vibrator* realtime
-Wake lock LocationService: 312ms partial (88 times) realtime
-Wake lock SyncManagerHandleSyncAlarm: 1s 141ms partial (155 times) realtime
+Wake lock LocationService: 5ms partial (6 times) realtime
+Wake lock SyncManagerHandleSyncAlarm: 5s 220ms partial (361 times) realtime
 Wake lock AudioMix realtime
-Wake lock ShutdownThread-screen: 703ms full (4 times) realtime
-Wake lock *alarm*: 1h 59m 31s 581ms partial (10267 times) realtime
-Wake lock WiredAccessoryManager realtime
+Wake lock *alarm*: 5m 35s 959ms partial (2503 times) realtime
 Wake lock LocationManagerService realtime
-Wake lock WifiSuspend: 3s 84ms partial (41 times) realtime
-Wake lock ActivityManager-Sleep: 1s 522ms partial (31 times) realtime
-TOTAL wake: 703ms full, 2h 25m 27s 247ms partial realtime
-Job android/com.android.server.pm.BackgroundDexOptService: (not used)
-Job android/com.android.server.backup.FullBackupJob: (not used)
-Sensor 1: (not used)
-Sensor 4: 830ms realtime (8 times)
-Vibrator: 2s 440ms realtime (122 times)
-Foreground activities: 15d 20h 48m 7s 160ms realtime (9 times)
-Foreground for: 28d 19h 47m 12s 472ms
+Wake lock WifiSuspend: 1s 454ms partial (8 times) realtime
+Wake lock ActivityManager-Sleep: 580ms partial (8 times) realtime
+TOTAL wake: 19s 760ms full, 6m 14s 785ms partial realtime
+Sensor 1: 20s 569ms realtime (1 times)
+Sensor 4: 3h 40m 57s 619ms realtime (10 times)
+Vibrator: 840ms realtime (42 times)
+Foreground activities: 21s 344ms realtime (1 times)
+Foreground for: 1d 17h 9m 33s 638ms
 Proc com.qualcomm.display:
-CPU: 5s 710ms usr + 4s 690ms krn ; 0ms fg
-1 proc starts
+CPU: 680ms usr + 560ms krn ; 0ms fg
 Proc com.adups.fota.sysoper:
-CPU: 14s 390ms usr + 930ms krn ; 0ms fg
-106 proc starts
+CPU: 4s 830ms usr + 140ms krn ; 0ms fg
+4 proc starts
 Proc ATFWD-daemon:
-CPU: 460ms usr + 3s 530ms krn ; 0ms fg
+CPU: 40ms usr + 530ms krn ; 0ms fg
 Proc com.qualcomm.qti.modemtestmode:
-CPU: 5s 850ms usr + 4s 380ms krn ; 0ms fg
-1 proc starts
+CPU: 620ms usr + 590ms krn ; 0ms fg
 Proc com.quicinc.cne.CNEService:
-CPU: 55s 850ms usr + 25s 180ms krn ; 0ms fg
+CPU: 15s 780ms usr + 6s 840ms krn ; 0ms fg
 Proc com.qualcomm.telephony:
-CPU: 12s 780ms usr + 11s 160ms krn ; 0ms fg
+CPU: 1s 400ms usr + 1s 560ms krn ; 0ms fg
 Proc ims_rtp_daemon:
-CPU: 680ms usr + 10s 80ms krn ; 0ms fg
+CPU: 50ms usr + 1s 660ms krn ; 0ms fg
 Proc com.adups.fota:
-CPU: 10s 110ms usr + 6s 540ms krn ; 0ms fg
-71 proc starts
-Proc system:
-CPU: 1h 30m 6s 860ms usr + 1h 18m 46s 40ms krn ; 0ms fg
-Proc android:
-CPU: 0ms usr + 0ms krn ; 280ms fg
-Proc com.qualcomm.wfd.service:wfd_service:
-CPU: 10s 690ms usr + 8s 760ms krn ; 0ms fg
-Proc mm-pp-daemon:
-CPU: 470ms usr + 9s 680ms krn ; 0ms fg
-Proc surfaceflinger:
-CPU: 4m 28s 980ms usr + 5m 49s 650ms krn ; 0ms fg
-Proc com.android.keychain:
-CPU: 550ms usr + 110ms krn ; 0ms fg
+CPU: 450ms usr + 310ms krn ; 0ms fg
 2 proc starts
+Proc system:
+CPU: 56m 3s 130ms usr + 19m 27s 450ms krn ; 0ms fg
+Proc com.qualcomm.wfd.service:wfd_service:
+CPU: 1s 200ms usr + 1s 140ms krn ; 0ms fg
+Proc mm-pp-daemon:
+CPU: 90ms usr + 1s 380ms krn ; 0ms fg
+Proc surfaceflinger:
+CPU: 1m 58s 40ms usr + 3m 5s 230ms krn ; 0ms fg
 Proc wcnss_service:
-CPU: 450ms usr + 6s 800ms krn ; 0ms fg
-Proc com.android.settings:
-CPU: 22s 570ms usr + 4s 10ms krn ; 17s 270ms fg
-1 proc starts
+CPU: 90ms usr + 880ms krn ; 0ms fg
 Proc servicemanager:
-CPU: 22s 560ms usr + 43s 890ms krn ; 0ms fg
+CPU: 3s 790ms usr + 7s 250ms krn ; 0ms fg
 Proc com.qti.diagservices:
-CPU: 6s 610ms usr + 8s 60ms krn ; 0ms fg
-1 proc starts
+CPU: 820ms usr + 1s 250ms krn ; 0ms fg
 Proc com.qualcomm.location.XT:
-CPU: 6s 720ms usr + 8s 550ms krn ; 0ms fg
-1 proc starts
+CPU: 780ms usr + 1s 250ms krn ; 0ms fg
 Proc imsqmidaemon:
-CPU: 480ms usr + 3s 390ms krn ; 0ms fg
-Proc imsdatadaemon:
-CPU: 620ms usr + 3s 760ms krn ; 0ms fg
-Proc com.qualcomm.qti.services.secureui:sui_service:
-CPU: 7s 620ms usr + 9s 550ms krn ; 0ms fg
-Proc com.qualcomm.qualcommsettings:
-CPU: 6s 100ms usr + 4s 210ms krn ; 0ms fg
+CPU: 40ms usr + 500ms krn ; 0ms fg
+Proc org.codeaurora.snapcam:
+CPU: 2s 280ms usr + 870ms krn ; 6s 290ms fg
 1 proc starts
+Proc imsdatadaemon:
+CPU: 100ms usr + 690ms krn ; 0ms fg
+Proc com.qualcomm.qti.services.secureui:sui_service:
+CPU: 900ms usr + 1s 410ms krn ; 0ms fg
+Proc com.qualcomm.qualcommsettings:
+CPU: 450ms usr + 760ms krn ; 0ms fg
 Proc com.qualcomm.timeservice:
-CPU: 5s 40ms usr + 3s 230ms krn ; 0ms fg
-13 proc starts
-Apk com.qualcomm.display:
-(nothing executed)
+CPU: 370ms usr + 290ms krn ; 0ms fg
+2 proc starts
 Apk com.adups.fota.sysoper:
 Service com.adups.fota.sysoper.TaskService:
-Created for: 1m 33s 96ms uptime
-Starts: 102, launches: 102
-Service com.adups.fota.sysoper.SysService:
+Created for: 18s 128ms uptime
+Starts: 4, launches: 4
+Apk com.adups.fota:
+1 wakeup alarms
+Service com.adups.fota.GoogleOtaService:
+Created for: 566ms uptime
+Starts: 1, launches: 1
+Apk android:
+655 wakeup alarms
+Apk org.codeaurora.snapcam:
+Service com.android.camera.MediaSaveService:
 Created for: 0ms uptime
 Starts: 0, launches: 1
-Apk com.qualcomm.qti.modemtestmode:
-Service com.qualcomm.qti.modemtestmode.MbnTestService:
-Created for: 0ms uptime
-Starts: 0, launches: 5
-Service com.qualcomm.qti.modemtestmode.MbnSystemService:
-Created for: 2d 13h 19m 22s 926ms uptime
-Starts: 4, launches: 5
-Apk com.qualcomm.svi:
-Service com.qualcomm.svi.SVIService:
-Created for: 2d 13h 19m 22s 926ms uptime
-Starts: 4, launches: 5
-Apk com.adups.fota:
-7 wakeup alarms
-Service com.adups.fota.GoogleOtaService:
-Created for: 19s 370ms uptime
-Starts: 7, launches: 7
-Apk com.qualcomm.cabl:
-Service com.qualcomm.cabl.CABLService:
-Created for: 2d 13h 19m 22s 926ms uptime
-Starts: 4, launches: 5
-Apk android:
-3044 wakeup alarms
-Service android.hardware.location.GeofenceHardwareService:
-Created for: 0ms uptime
-Starts: 0, launches: 4
-Service com.android.internal.backup.LocalTransportService:
-Created for: 0ms uptime
-Starts: 0, launches: 4
-Apk com.qualcomm.wfd.service:
-Service com.qualcomm.wfd.service.WfdService:
-Created for: 0ms uptime
-Starts: 0, launches: 4
-Apk com.android.keychain:
-Service com.android.keychain.KeyChainService:
-Created for: 179ms uptime
-Starts: 2, launches: 2
-Apk com.dsi.ant.server:
-Service com.dsi.ant.server.AntService:
-Created for: 2d 13h 19m 22s 926ms uptime
-Starts: 4, launches: 4
-Apk com.qualcomm.location:
-Service com.qualcomm.location.nlp.NlpProxyService:
-Created for: 0ms uptime
-Starts: 0, launches: 4
-Service com.qualcomm.location.LBSSystemMonitorService:
-Created for: 2d 13h 19m 22s 926ms uptime
-Starts: 4, launches: 4
-Service com.qualcomm.location.ulp.UlpService:
-Created for: 0ms uptime
-Starts: 0, launches: 4
-Service com.qualcomm.location.LocationService:
-Created for: 2d 13h 19m 22s 926ms uptime
-Starts: 4, launches: 4
-Service com.qualcomm.location.GeoFenceService:
-Created for: 0ms uptime
-Starts: 0, launches: 4
-Service com.qualcomm.lib.location.osagent.OsAgent:
-Created for: 2d 13h 19m 22s 926ms uptime
-Starts: 4, launches: 4
-Apk com.qualcomm.simcontacts:
-Service com.qualcomm.simcontacts.SimContactsService:
-Created for: 2d 13h 19m 22s 926ms uptime
-Starts: 4, launches: 4
-Apk com.qti.diagservices:
-Service com.qti.diagservices.QTIDiagServices:
-Created for: 2d 13h 19m 22s 926ms uptime
-Starts: 4, launches: 5
-Apk com.qualcomm.qti.services.secureui:
-Service com.qualcomm.qti.services.secureui.SecureUIService:
-Created for: 2d 13h 19m 22s 926ms uptime
-Starts: 4, launches: 4
-Apk com.qualcomm.location.XT:
-Service com.qualcomm.location.XT.XTSrv:
-Created for: 2d 13h 19m 22s 926ms uptime
-Starts: 4, launches: 5
-Apk org.codeaurora.snapcam:
-(nothing executed)
-Apk com.qualcomm.qualcommsettings:
-Service com.qualcomm.qualcommsettings.DunService:
-Created for: 2d 13h 19m 22s 926ms uptime
-Starts: 4, launches: 5
-Apk com.qualcomm.atfwd:
-Service com.qualcomm.atfwd.AtFwdService:
-Created for: 2d 13h 19m 22s 926ms uptime
-Starts: 4, launches: 4
-u0a80:
-Wi-Fi network: 15.59MB received, 5.05MB sent (packets 38192 received, 43487 sent)
-Wake lock WindowManager: 39s 756ms full (17 times) realtime
-Wake lock *vibrator* realtime
-Wake lock *alarm*: 234ms partial (93 times) realtime
-TOTAL wake: 39s 756ms full, 234ms partial realtime
-Vibrator: 44ms realtime (4 times)
-Foreground activities: 9d 20h 23m 5s 738ms realtime (21 times)
-Foreground for: 18d 9h 24m 21s 426ms
-Active for: 19d 15h 14m 32s 105ms
+u0a104:
+Wi-Fi network: 3.96MB received, 1.77MB sent (packets 13387 received, 15868 sent)
+Wake lock *alarm*: 1s 232ms partial (98 times) realtime
+Foreground for: 1d 17h 9m 33s 638ms
 Proc com.xdja.HDSafeEMailClient:
-CPU: 8h 7m 11s 500ms usr + 7m 59s 100ms krn ; 2h 19m 19s 900ms fg
-4 proc starts
-Proc com.xdja.HDSafeEMailClient:leakcanary:
-CPU: 54m 11s 230ms usr + 12s 170ms krn ; 0ms fg
-6 proc starts
-* Killed for cpu use: +5m49s120ms over +15m0s35ms (38%)
-* Killed for cpu use: +6m21s960ms over +15m0s150ms (42%)
-* Killed for cpu use: +6m20s530ms over +15m0s40ms (42%)
-* Killed for cpu use: +4m11s780ms over +15m0s44ms (27%)
-* Killed for cpu use: +10m1s650ms over +15m0s59ms (66%)
-* Killed for cpu use: +16m43s970ms over +15m0s32ms (111%)
+CPU: 13m 37s 460ms usr + 39s 360ms krn ; 0ms fg
 Apk com.xdja.HDSafeEMailClient:
-4368 wakeup alarms
-Service com.xdja.HDSafeEMailClient.presenter.service.MailControllerService:
-Created for: 22h 50m 2s 532ms uptime
-Starts: 1, launches: 1
-Service com.squareup.leakcanary.DisplayLeakService:
-Created for: 4s 62ms uptime
-Starts: 7, launches: 7
-Service com.squareup.leakcanary.internal.HeapAnalyzerService:
-Created for: 1h 1m 5s 453ms uptime
-Starts: 8, launches: 8
-Service com.xdja.HDSafeEMailClient.presenter.service.SendMessageService:
-Created for: 2h 10m 0s 816ms uptime
-Starts: 1, launches: 1
+497 wakeup alarms
 Service com.xdja.HDSafeEMailClient.VersionUpdate.VersionUpdateService:
-Created for: 2d 10h 31m 19s 466ms uptime
-Starts: 5, launches: 9
-Service com.xdja.HDSafeEMailClient.presenter.service.SyncMailStateService:
-Created for: 2d 13h 16m 41s 607ms uptime
-Starts: 2, launches: 6
-Service com.xdja.HDSafeEMailClient.presenter.service.DownloadAttachmentService:
-Created for: 2h 10m 0s 816ms uptime
+Created for: 0ms uptime
 Starts: 1, launches: 1
-Service com.xdja.HDSafeEMailClient.presenter.service.CheckNewMailService:
-Created for: 2d 13h 17m 6s 972ms uptime
-Starts: 4, launches: 8
-Service com.xdja.HDSafeEMailClient.presenter.service.SaveMessageService:
-Created for: 2d 13h 17m 6s 972ms uptime
-Starts: 4, launches: 8
 
 
