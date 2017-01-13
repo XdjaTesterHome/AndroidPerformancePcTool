@@ -18,14 +18,14 @@ import com.xdja.log.LoggerManager;
 public class DumpMemoryThread extends Thread implements IClientChangeListener{
 	private final static String LOGTAG = DumpMemoryThread.class.getSimpleName();
 	private Client mClient;
-	private String type;
+	private String filePath;
 	private CountDownLatch memoryCount;
 	
-	public DumpMemoryThread(Client mClient, String type) {
+	public DumpMemoryThread(Client mClient, String fPath) {
 		super();
 		this.mClient = mClient;
-		this.type = type;
-		setName("DumpMemoryThread---" + type + "---");
+		this.filePath = fPath;
+		setName("DumpMemoryThread---" + fPath + "---");
 	}
 	
 	@Override
@@ -62,7 +62,7 @@ public class DumpMemoryThread extends Thread implements IClientChangeListener{
 						break;
 					case DATA:
 						//±£´æhprof
-						SaveEnvironmentManager.getInstance().writeHprofToLocal(data.data, type);
+						SaveEnvironmentManager.getInstance().writeHprofToLocal(data.data, filePath);
 						break;
 					}
 				} else {

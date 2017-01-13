@@ -5,6 +5,7 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Insets;
+import java.awt.Toolkit;
 import java.io.File;
 
 import javax.swing.ImageIcon;
@@ -192,6 +193,16 @@ public class SwingUiUtil {
 		button.setBackground(color);
 		return button;
 	}
+	
+	/**
+	 *  获取屏幕的尺寸
+	 * @return
+	 */
+	public Dimension getScreenSize(){
+		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+		return screenSize;
+	}
+	
 	
 	/**
 	 *  点击对话框按钮的监听事件

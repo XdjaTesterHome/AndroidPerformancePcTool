@@ -1,6 +1,5 @@
 package com.xdja.util;
 
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -63,25 +62,10 @@ public class CommonUtil {
 	 * @param path
 	 * @param fileName
 	 */
-	public static void writeDataToLocal(byte[] data, String path, String fileName){
+	public static void writeDataToLocal(byte[] data, String filePath){
 		if (data == null) {
 			return;
 		}
-		
-		if (strIsNull(path)) {
-			path = "default";
-		}
-		
-		if (strIsNull(fileName)) {
-			path = "unkonw";
-		}
-		
-		File file = new File(path);
-		if (!file.exists()) {
-			file.mkdirs();
-		}
-		
-		String filePath = path + File.separator + fileName;
 		FileOutputStream foStream = null;
 		try {
 			foStream = new FileOutputStream(filePath);

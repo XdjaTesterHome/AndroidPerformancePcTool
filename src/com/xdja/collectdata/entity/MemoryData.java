@@ -6,14 +6,14 @@ package com.xdja.collectdata.entity;
  *
  */
 public class MemoryData {
-	public long memAlloc;
-	public long memFree;
+	public float memAlloc;
+	public float memFree;
 	
 	public MemoryData() {
 		// TODO Auto-generated constructor stub
 	}
 
-	public MemoryData(long memAlloc, long memFree) {
+	public MemoryData(float memAlloc, float memFree) {
 		super();
 		this.memAlloc = memAlloc;
 		this.memFree = memFree;

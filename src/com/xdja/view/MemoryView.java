@@ -10,6 +10,7 @@ import java.awt.event.ActionListener;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 
+import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.DateAxis;
@@ -27,7 +28,9 @@ import com.android.ddmlib.AndroidDebugBridge.IClientChangeListener;
 import com.android.ddmlib.Client;
 import com.android.ddmlib.ClientData;
 import com.xdja.adb.AdbManager;
-import com.xdja.constant.Constants;
+import com.xdja.collectdata.entity.MemoryData;
+import com.xdja.collectdata.handleData.HandleDataManager;
+import com.xdja.collectdata.handleData.HandleDataResult;
 import com.xdja.constant.GlobalConfig;
 import com.xdja.util.SwingUiUtil;
 
@@ -42,6 +45,8 @@ public class MemoryView extends BaseChartView implements IClientChangeListener {
 	private boolean stopFlag = false;
 	protected Client mCurClient = null;
 	private Thread memoryThread;
+	private MemoryData mMemoryData = null;
+	private HandleDataResult mHandleDataResult = null;
 	
 	public MemoryView(String chartContent, String title, String yaxisName) {
 		super();
@@ -75,8 +80,9 @@ public class MemoryView extends BaseChartView implements IClientChangeListener {
 		domain.setTickLabelsVisible(true);
 
 		range.setStandardTickUnits(NumberAxis.createIntegerTickUnits());
-
-		JFreeChart chart = new JFreeChart("应用内存分配情况", new Font("SansSerif", Font.BOLD, 24), plot, true);
+		
+		JFreeChart chart = ChartFactory.createTimeSeriesChart("应用内存分配情况", 
+				"时间(s)", "内存值(MB)", dataset, true, true, false);
 		chart.setBackgroundPaint(Color.white);
 		ChartPanel chartPanel = new ChartPanel(chart);
 		chartPanel.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4),
@@ -90,8 +96,7 @@ public class MemoryView extends BaseChartView implements IClientChangeListener {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				// TODO Auto-generated method stub
-//				AdbManager.getInstance().causeGC(GlobalConfig.PackageName);
-				AdbManager.getInstance().memthodTracing(GlobalConfig.DeviceName, GlobalConfig.PackageName, Constants.TYPE_BATTERY);
+				AdbManager.getInstance().causeGC(GlobalConfig.PackageName);
 			}
 		});
 		chartPanel.add(gcButton);
@@ -169,11 +174,29 @@ public class MemoryView extends BaseChartView implements IClientChangeListener {
 					if (m != null) {
 						allocMb = m.bytesAllocated / (1024.f * 1024.f);
 						freeMb = m.sizeInBytes / (1024.f * 1024.f) - allocMb;
+						mMemoryData = new MemoryData(allocMb, freeMb);
+						//处理有问题的数据
+						mHandleDataResult = HandleDataManager.getInstance().handleMemoryData(mMemoryData);
+						handleResult(mHandleDataResult);
 						addTotalObservation(allocMb,freeMb);
 					}
 				}
 			}
 			// }
 		}
+	}
+	
+	
+	/**
+	 *  处理问题模型返回的结果。有问题进行展示
+	 * @param result
+	 */
+	private void handleResult(HandleDataResult result){
+		if (result == null || result.result) {
+			return ;
+		}
+		
+		//在界面上展示问题数据
+		
 	}
 }

@@ -3,13 +3,11 @@ package com.xdja.collectdata;
 import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Timer;
-import java.util.TimerTask;
 
 import com.xdja.adb.AdbManager;
 import com.xdja.adb.AndroidSdk;
+import com.xdja.collectdata.thread.SaveLogThread;
 import com.xdja.constant.Constants;
-import com.xdja.constant.GlobalConfig;
 import com.xdja.util.CommonUtil;
 
 /***
@@ -21,7 +19,6 @@ import com.xdja.util.CommonUtil;
 public class SaveEnvironmentManager {
 	private static SaveEnvironmentManager mInstance = null;
 	private static Thread mSaveLogThread;
-	private static LogRunnable mSaveLogRunnable;
 	
 	private SaveEnvironmentManager(){}
 	
@@ -50,7 +47,37 @@ public class SaveEnvironmentManager {
 		}
 		return "default" + "_" + timestamp;
 	}
-
+	
+	
+	/**
+	 * 
+	 * @param pathType 生成哪种数据的path
+	 * @param testtype 进行的哪种测试
+	 * @param regx  保存文件的后缀
+	 * @return
+	 */
+	public String getSuggestedPath(String pathType,  String testtype, String regx){
+		String seggestName = getSuggestedName(testtype);
+		if (CommonUtil.strIsNull(pathType)) {
+			pathType = "commonFile";
+		}
+		
+		// 默认用这个.zip暂时
+		if (CommonUtil.strIsNull(regx)) {
+			regx = ".zip";
+		}
+		
+		// 判断path是否存在，不存在要new
+		File file = new File(pathType);
+		if (!file.exists()) {
+			file.mkdirs();
+		}
+		
+		String filePath = pathType + File.separator + seggestName + regx;
+		
+		return filePath;
+	}
+	
 	/**
 	 * 抓取hprof
 	 * @param data
@@ -58,14 +85,12 @@ public class SaveEnvironmentManager {
 	 * @param type
 	 *            测试类型
 	 */
-	public String writeHprofToLocal(byte[] data, String type) {
+	public String writeHprofToLocal(byte[] data, String filePath) {
 		if (data == null) {
 			return "";
 		}
 
-		String fileName = getSuggestedName(type);
-		String filePath = Constants.MEMORY_DUMP + File.separator + fileName + ".hprof";
-		CommonUtil.writeDataToLocal(data, Constants.MEMORY_DUMP, fileName + ".hprof");
+		CommonUtil.writeDataToLocal(data, filePath);
 		//转换hprof的格式
 		covertHprof(filePath);
 		
@@ -81,14 +106,12 @@ public class SaveEnvironmentManager {
 	 *            测试类型
 	 * @return 返回文件存放的路径
 	 */
-	public String writeTraceToLocal(byte[] data, String type) {
+	public String writeTraceToLocal(byte[] data, String filePath) {
 		if (data == null) {
 			return "";
 		}
 
-		String fileName = getSuggestedName(type);
-		String filePath = Constants.METHOD_TRACE + File.separator + fileName + ".trace";
-		CommonUtil.writeDataToLocal(data, Constants.METHOD_TRACE, fileName + ".trace");
+		CommonUtil.writeDataToLocal(data, filePath);
 		
 		return filePath;
 	}
@@ -120,68 +143,29 @@ public class SaveEnvironmentManager {
 	/**
 	 * 保存当前的日志信息
 	 * @param type 测试的类型
+	 * @return 文件路径  不过有可能出现错误之后，文件保存是null的
 	 */
-	public void saveCurrentLog(int pid, String type){
-		
-		if (mSaveLogThread != null && mSaveLogThread.isAlive()) {
-			return;
-		}
-		mSaveLogRunnable = new LogRunnable(pid, Constants.ANDROID_LOG, type);
-		mSaveLogThread = new Thread(mSaveLogRunnable);
+	public String saveCurrentLog(String deviceName, String packageName, String type){
+		String filePath = getSuggestedPath(Constants.ANDROID_LOG, type, ".log");
+		mSaveLogThread = new SaveLogThread(deviceName, packageName, type);
 		mSaveLogThread.start();
-		startTimer();
-	}
-	/**
-	 *  启动一个定时器检查是否停止进程
-	 */
-	private void startTimer(){
-		Timer timer = new Timer();
-		timer.schedule(new TimerTask() {
-			
-			@Override
-			public void run() {
-				// TODO Auto-generated method stub
-				// 销毁进程
-				if (mSaveLogRunnable != null) {
-					mSaveLogRunnable.destoryProcess();
-				}
-				
-				// 停止线程
-				if (mSaveLogThread != null) {
-					if (mSaveLogThread.isAlive()) {
-						System.out.println("mSaveLogThread isAlive");
-						mSaveLogThread.interrupt();
-						mSaveLogThread = null;
-					}
-				}
-			}
-		}, 30*1000);
-	}
-	
-	
-	/**
-	 *  用于保存当前的测试日志
-	 * @param packageName
-	 * @param testType 测试的类型
-	 */
-	public void saveCurrentLog(String packageName, String testType){
-		int pid = 0;
-		if (CommonUtil.strIsNull(packageName)) {
-			pid = 0;
-		}
-		pid = CollectDataImpl.getPid(packageName);
 		
-		saveCurrentLog(pid, testType);
+		return filePath;
 	}
+	
 	
 	
 	/**
 	 * 截图
 	 * @param deviceName  当前设备的名称
 	 * @param testType
+	 * @return 保存文件的路径
 	 */
-	public void screenShots(String deviceName, String testType){
-		AdbManager.getInstance().screenCapture(deviceName, testType, false);
+	public String screenShots(String deviceName, String testType){
+		String filePath = getSuggestedPath(Constants.SCREEN_SHOTS, testType, ".png");
+		AdbManager.getInstance().screenCapture(deviceName, filePath, false);
+		
+		return filePath;
 	}
 	
 	/**
@@ -190,8 +174,11 @@ public class SaveEnvironmentManager {
 	 * @param packageName
 	 * @param type
 	 */
-	public void dumpMemory(String deviceName, String packageName,  String type){
-		AdbManager.getInstance().dumpMemory(deviceName, packageName, type);
+	public String dumpMemory(String deviceName, String packageName,  String type){
+		String filePath = getSuggestedPath(Constants.MEMORY_DUMP, type, ".hprof");
+		AdbManager.getInstance().dumpMemory(deviceName, packageName, filePath);
+		
+		return filePath;
 	}
 	
 	/**
@@ -200,13 +187,10 @@ public class SaveEnvironmentManager {
 	 * @param packageName
 	 * @param type
 	 */
-	public void methodTracing(String deviceName, String packageName, String type){
-		AdbManager.getInstance().memthodTracing(deviceName, packageName, type);
-	}
-	
-	
-	public static void main(String[] args) {
-		int pid = CollectDataImpl.getPid(GlobalConfig.PackageName);
-		SaveEnvironmentManager.getInstance().saveCurrentLog(pid, Constants.TYPE_BATTERY);
+	public String methodTracing(String deviceName, String packageName, String type){
+		String filePath = getSuggestedPath(Constants.METHOD_TRACE, type, ".trace");
+		AdbManager.getInstance().memthodTracing(deviceName, packageName, filePath);
+		
+		return filePath;
 	}
 }

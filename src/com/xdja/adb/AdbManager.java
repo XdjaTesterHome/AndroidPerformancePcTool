@@ -15,10 +15,8 @@ import com.android.ddmlib.DdmPreferences;
 import com.android.ddmlib.IDevice;
 import com.android.ddmlib.RawImage;
 import com.android.ddmlib.TimeoutException;
-import com.xdja.collectdata.SaveEnvironmentManager;
 import com.xdja.collectdata.thread.DumpMemoryThread;
 import com.xdja.collectdata.thread.TraceMethodThread;
-import com.xdja.constant.Constants;
 import com.xdja.constant.GlobalConfig;
 import com.xdja.util.CommonUtil;
 import com.xdja.util.ExecShellUtil;
@@ -206,10 +204,10 @@ public class AdbManager implements IDebugBridgeChangeListener {
 	 * @param deviceName
 	 * @param packageName
 	 */
-	public void dumpMemory(String deviceName, String packageName, final String type) {
+	public void dumpMemory(String deviceName, String packageName, String filePath) {
 		Client client = getClient(deviceName, packageName);
 		if (client != null) {
-			dumpMemoryThread = new DumpMemoryThread(client, type);
+			dumpMemoryThread = new DumpMemoryThread(client, filePath);
 			dumpMemoryThread.start();
 		}
 	}
@@ -223,7 +221,7 @@ public class AdbManager implements IDebugBridgeChangeListener {
 	 * @param needSave
 	 *            是否需要自己保存
 	 */
-	public BufferedImage screenCapture(String deviceName, String type, boolean needSave) {
+	public BufferedImage screenCapture(String deviceName, String filePath, boolean needSave) {
 		IDevice device = getIDevice(deviceName);
 		BufferedImage myImage = null;
 		if (device != null) {
@@ -242,13 +240,7 @@ public class AdbManager implements IDebugBridgeChangeListener {
 						return myImage;
 					}
 
-					String fileName = SaveEnvironmentManager.getInstance().getSuggestedName(type) + ".png";
-					File file = new File(Constants.SCREEN_SHOTS);
-					if (!file.exists()) {
-						file.mkdirs();
-					}
-
-					ImageIO.write(myImage, "PNG", new File(Constants.SCREEN_SHOTS + File.separator + fileName));
+					ImageIO.write(myImage, "PNG", new File(filePath));
 				}
 			} catch (TimeoutException e) {
 				// TODO Auto-generated catch block
@@ -270,13 +262,13 @@ public class AdbManager implements IDebugBridgeChangeListener {
 	 * 
 	 * @param deviceName
 	 * @param packageName
-	 * @param type
+	 * @param filePath
 	 *            测试类型，为了标记结果数据
 	 */
-	public void memthodTracing(String deviceName, String packageName, String type) {
+	public void memthodTracing(String deviceName, String packageName, String filePath) {
 		Client client = getClient(deviceName, packageName);
 		if (client != null) {
-			traceMethodThread = new TraceMethodThread(type, client);
+			traceMethodThread = new TraceMethodThread(filePath, client);
 			traceMethodThread.start();
 		}
 	}

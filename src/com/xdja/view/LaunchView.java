@@ -1,5 +1,6 @@
 package com.xdja.view;
 
+import java.awt.Dimension;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -56,6 +57,8 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 	private JTabbedPane jTabbedPane = new JTabbedPane();
 	private String[] tabNames = { "   内    存   ", "     cpu    ", "   电   量   ", "    加载时间     ", "   帧   率   ",
 			"   流   量   ", "    实用工具     " };
+	private final static int WIDTH = 1248;
+	private final static int HEIGHT = 760;
 
 	/**
 	 * constructor to init a LaunchView instance create a JPanel instance to put
@@ -68,7 +71,7 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 		this.author = Constants.PRODUCT_NAME;
 		this.frame = new JPanel();
 		setTitle(String.format("%s v1.0", author));
-		setBounds(100, 50, 1249, 760);
+		setBounds(100, 50, WIDTH, HEIGHT);
 		createTopMenu();
 		add(frame);
 		setVisible(true);
@@ -214,6 +217,12 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 		jTabbedPane.addTab(tabNames[6], toolsView);
 		
 		frame.add(jTabbedPane);
+		// 根据屏幕宽度调整界面大小
+		Dimension screenSize = SwingUiUtil.getInstance().getScreenSize();
+		int width = screenSize.width;
+		int height = screenSize.height;
+//		width = 
+		
 		rect = new Rectangle(20, 100, 1100, 600);
 		jTabbedPane.setBounds(rect);
 	}
