@@ -122,7 +122,7 @@ public class FpsView extends BaseChartView {
 		
 		chartPanel.add(startBtn);
 		chartPanel.add(pauseBtn);
-		add(chartPanel);
+		addJpanel(chartPanel);
 	}
 	
 	/**

@@ -80,7 +80,7 @@ public class KpiTestView extends BaseChartView {
 		ChartPanel chartPanel = new ChartPanel(mBarchart);
 		chartPanel.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4),
 				BorderFactory.createLineBorder(Color.black)));
-		add(chartPanel);
+		addJpanel(chartPanel);
 	}
 
 	/**

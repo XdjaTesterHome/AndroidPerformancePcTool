@@ -66,7 +66,7 @@ public class FlowView extends BaseChartView {
 		ChartPanel chartPanel = new ChartPanel(chart);
 		chartPanel.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4),
 				BorderFactory.createLineBorder(Color.black)));
-		add(chartPanel);
+		addJpanel(chartPanel);
 	}
 
 	/**

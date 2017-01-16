@@ -5,11 +5,13 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.xdja.collectdata.entity.BaseTestInfo;
 import com.xdja.collectdata.entity.CommandResult;
 import com.xdja.collectdata.entity.CpuData;
 import com.xdja.collectdata.entity.FlowData;
 import com.xdja.collectdata.entity.FpsData;
 import com.xdja.collectdata.entity.KpiData;
+import com.xdja.constant.GlobalConfig;
 import com.xdja.log.LoggerManager;
 import com.xdja.util.CommonUtil;
 import com.xdja.util.ExecShellUtil;
@@ -566,7 +568,31 @@ public class CollectDataImpl {
 		}
 		return isTrue;
 	}
-
+	
+	/**
+	 *  获取基本的测试信息
+	 *  这里可能会有GlobalConfig没有设置的情况存在。
+	 */
+	public static BaseTestInfo getBaseTestInfo() {
+//		String packageName = GlobalConfig.PackageName;
+		String packageName = "com.xdja.HDSafeEMailClient";
+		if (CommonUtil.strIsNull(packageName)) {
+			return null;
+		}
+		String cmd = "adb shell dumpsys package " + packageName;
+		CommandResult packageInfo = ExecShellUtil.getInstance().execCmdCommand(cmd, false, true);
+		if (packageInfo != null && !CommonUtil.strIsNull(packageInfo.successMsg)) {
+			Pattern pattern = Pattern.compile("versionName=(\\d.+)");
+			Matcher matcher = pattern.matcher(packageInfo.successMsg);
+			if (matcher.find()) {
+				String result = matcher.group(0);
+				BaseTestInfo baseTestInfo = new BaseTestInfo(packageName, result);
+				return baseTestInfo;
+			}
+		}
+		
+		return null;
+	}
 	/**
 	 * 将timeStr转成毫秒
 	 * 
@@ -603,6 +629,7 @@ public class CollectDataImpl {
 	}
 
 	public static void main(String[] args) {
+		CollectDataImpl.getBaseTestInfo();
 	}
 
 }

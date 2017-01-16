@@ -101,7 +101,7 @@ public class MemoryView extends BaseChartView implements IClientChangeListener {
 		});
 		chartPanel.add(gcButton);
 		
-		add(chartPanel);
+		addJpanel(chartPanel);
 	}
 
 	/**
@@ -128,6 +128,15 @@ public class MemoryView extends BaseChartView implements IClientChangeListener {
 			mCurClient.setHeapInfoUpdateEnabled(true);
 			AndroidDebugBridge.addClientChangeListener(this);
 		}
+		//清空数据
+		if (mHandleDataList != null) {
+			mHandleDataList.clear();
+		}
+		
+		if (mShowMessageView != null) {
+			mShowMessageView.setText("");
+		}
+		
 		memoryThread = new Thread(new Runnable() {
 			
 			@Override
@@ -177,7 +186,7 @@ public class MemoryView extends BaseChartView implements IClientChangeListener {
 						mMemoryData = new MemoryData(allocMb, freeMb);
 						//处理有问题的数据
 						mHandleDataResult = HandleDataManager.getInstance().handleMemoryData(mMemoryData);
-						handleResult(mHandleDataResult);
+						handleResult(mHandleDataResult, allocMb);
 						addTotalObservation(allocMb,freeMb);
 					}
 				}
@@ -191,15 +200,15 @@ public class MemoryView extends BaseChartView implements IClientChangeListener {
 	 *  处理问题模型返回的结果。有问题进行展示
 	 * @param result
 	 */
-	private void handleResult(HandleDataResult result){
+	private void handleResult(HandleDataResult result, float memoryValue){
 		if (result == null || result.result) {
 			return ;
 		}
 		
 		//在界面上展示问题数据
-		
+		if (mShowMessageView != null) {
+			mShowMessageView.append(formatErrorInfo(result, String.valueOf(memoryValue) + "MB"));
+		}
 		
 	}
-	
-	
 }

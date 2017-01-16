@@ -4,12 +4,18 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
+import java.util.List;
 
+import javax.swing.Box;
 import javax.swing.JPanel;
 import javax.swing.Timer;
 
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.StandardChartTheme;
+
+import com.xdja.collectdata.entity.CpuData;
+import com.xdja.collectdata.handleData.HandleDataResult;
 
 public abstract class BaseChartView extends JPanel{
 
@@ -20,7 +26,9 @@ public abstract class BaseChartView extends JPanel{
 	private static Font FONT = new Font("宋体", Font.PLAIN, 12);
 	protected Timer mTaskTimer;
 	protected ActionListener mActionListener;
-
+	protected List<HandleDataResult> mHandleDataList = new ArrayList<>();
+	protected ShowMessageView mShowMessageView;
+	
 	public BaseChartView() {
 		super(new BorderLayout());
 		// TODO Auto-generated constructor stub
@@ -56,4 +64,42 @@ public abstract class BaseChartView extends JPanel{
 		ChartFactory.setChartTheme(chartTheme);
 		
 	}
+	
+	/**
+	 * 设置JPanel的布局
+	 * 
+	 */
+	protected void addJpanel(JPanel jpanel) {
+		Box horizontalBox = Box.createHorizontalBox();
+		horizontalBox.add(jpanel);
+		horizontalBox.add(Box.createHorizontalStrut(50));
+		mShowMessageView = new ShowMessageView();
+		horizontalBox.add(mShowMessageView);
+		add(horizontalBox);
+	}
+	
+    /**
+     *  获取处理过的数据
+     * @return
+     */
+    public List<HandleDataResult> getHandleResult(){
+    	return mHandleDataList;
+    }
+    
+    
+    /**
+     *  格式化错误信息
+     * @param result
+     * @return
+     */
+    protected String formatErrorInfo(HandleDataResult result, String value){
+    	StringBuilder sbBuilder = new StringBuilder("===================== \n");
+    	sbBuilder.append("ActivityName = ").append(result.activityName).append("\n");
+    	sbBuilder.append("当前测试值              = ").append(value).append("\n");
+    	sbBuilder.append("Logfile      = ").append(result.logPath).append("\n");
+    	sbBuilder.append("截屏路径                  = ").append(result.screenshotsPath).append("\n");
+    	sbBuilder.append("methodTrace  = ").append(result.methodTracePath).append("\n");
+    	sbBuilder.append("===================== \n\n\n\n");
+    	return sbBuilder.toString();
+    }
 }

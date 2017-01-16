@@ -30,7 +30,11 @@ public class HandleDataManager {
 	private List<MemoryData> memoryList = new ArrayList<>(24);
 	private HandleDataResult memoryResult = null;
 	private List<Float> cpuList = new ArrayList<Float>();// 用于存放CPU数据
-
+	
+	// 各个测试项值的标准
+	private final static int CPU_MAX = 50;
+	private final static int CPU_CONTINUE_MAX = 10;
+	
 	private HandleDataManager() {
 
 	}
@@ -68,12 +72,12 @@ public class HandleDataManager {
 		boolean result;
 		HandleDataResult upcpu = null;
 		cpuList(cpuData);
-		if (cpuData.cpuUsage > 50) {
+		if (cpuData.cpuUsage > CPU_MAX) {
 			upcpu = saveCpuEnvironment(false);
 		} else {
 			int i = cpuList.size();
 			if (i == 3) {
-				if (cpuList.get(0) > 30 && cpuList.get(1) > 30 && cpuList.get(2) > 30) {
+				if (cpuList.get(0) > CPU_CONTINUE_MAX && cpuList.get(1) > CPU_CONTINUE_MAX && cpuList.get(2) > CPU_CONTINUE_MAX) {
 					upcpu = saveCpuEnvironment(false);
 				} else {
 					result = true;

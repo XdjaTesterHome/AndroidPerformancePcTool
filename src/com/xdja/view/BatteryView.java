@@ -138,7 +138,7 @@ public class BatteryView extends BaseChartView {
 		
 		chartPanel.add(startBtn);
 		chartPanel.add(parseBtn);
-		add(chartPanel);
+		addJpanel(chartPanel);
 	}
 
 	/**

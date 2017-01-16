@@ -1,6 +1,5 @@
 package com.xdja.view;
 
-import java.awt.Dimension;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -179,7 +178,7 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 	 * 用来摆放tab的组件 tabNames = {"内存", "cpu", "电量", "kpitest", "帧率", "流量"};
 	 */
 	private void layoutTabComponents() {
-		Rectangle rect = new Rectangle(100, 100, 800, 200);
+		Rectangle rect = new Rectangle(100, 100, 600, 200);
 		// 1.内存
 		// memory chart view
 		viewMemory = new MemoryView(Constants.MEMORY, Constants.MEMORYContent, Constants.MEMORY_UNIT);
@@ -217,13 +216,8 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 		jTabbedPane.addTab(tabNames[6], toolsView);
 		
 		frame.add(jTabbedPane);
-		// 根据屏幕宽度调整界面大小
-		Dimension screenSize = SwingUiUtil.getInstance().getScreenSize();
-		int width = screenSize.width;
-		int height = screenSize.height;
-//		width = 
 		
-		rect = new Rectangle(20, 100, 1100, 600);
+		rect = new Rectangle(20, 100, WIDTH - 50, 550);
 		jTabbedPane.setBounds(rect);
 	}
 
