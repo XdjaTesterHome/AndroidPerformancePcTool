@@ -29,13 +29,14 @@ public class HandleDataManager {
 	// 用于存放10s内收集的memory数据
 	private List<MemoryData> memoryList = new ArrayList<>(24);
 	private HandleDataResult memoryResult = null;
-	private List<Float> cpuList = new ArrayList<Float>();// 用于存放CPU数据
+	public HandleDataResult upcpu = null;//用于存放CPU的处理结果
+	private List<Float> cpuList = new ArrayList<Float>();// 用于存放采集来做数据模型监测的CPU数据
 	
 	// 各个测试项值的标准
 	private final static int CPU_MAX = 50;
 	private final static int CPU_CONTINUE_MAX = 10;
 	
-	private HandleDataManager() {
+	public HandleDataManager() {
 
 	}
 
@@ -55,12 +56,17 @@ public class HandleDataManager {
 	public HandleDataResult handleCpusilence(CpuData cpuData) {
 		// 静默测试数据的判断//
 		boolean result;
-		HandleDataResult upcpu = null;
 		if (cpuData.cpuUsage > 1) {
-			upcpu = saveCpuEnvironment(false);
+			upcpu = saveCpuEnvironment(false,cpuData.cpuUsage);
 		} else {
 			result = true;
 			upcpu = new HandleDataResult(result);
+			upcpu.setActivityName("none");//none表示当前cpu的值正常，无需保存log等环境
+			upcpu.setLogPath("none");
+			upcpu.setMethodTracePath("none");
+			upcpu.setScreenshotsPath("none");
+			upcpu.setMemoryTracePath("none");
+			upcpu.setCPU(cpuData.cpuUsage);
 		}
 
 		return upcpu;
@@ -68,20 +74,25 @@ public class HandleDataManager {
 
 	// handleCpu处理非静默测试的数据模型,原则上2点：其一大于50%；其二连续三次数据大于30%//
 	public HandleDataResult handleCpu(CpuData cpuData) {
-		// 静默测试数据的判断//
+		// 静默测试数据的判断,返回TRUE无异常，返回FALSE,则数据是有问题的。//
 		boolean result;
-		HandleDataResult upcpu = null;
 		cpuList(cpuData);
 		if (cpuData.cpuUsage > CPU_MAX) {
-			upcpu = saveCpuEnvironment(false);
+			upcpu = saveCpuEnvironment(false,cpuData.cpuUsage);
 		} else {
 			int i = cpuList.size();
 			if (i == 3) {
 				if (cpuList.get(0) > CPU_CONTINUE_MAX && cpuList.get(1) > CPU_CONTINUE_MAX && cpuList.get(2) > CPU_CONTINUE_MAX) {
-					upcpu = saveCpuEnvironment(false);
+					upcpu = saveCpuEnvironment(false,cpuList.get(2));
 				} else {
 					result = true;
 					upcpu = new HandleDataResult(result);
+					upcpu.setActivityName("none");//none表示当前cpu的值正常，无需保存log等环境
+					upcpu.setLogPath("none");
+					upcpu.setMethodTracePath("none");
+					upcpu.setScreenshotsPath("none");
+					upcpu.setMemoryTracePath("none");
+					upcpu.setCPU(cpuList.get(2));
 				}
 			}
 
@@ -95,7 +106,8 @@ public class HandleDataManager {
 	 * 
 	 * @param result
 	 */
-	private HandleDataResult saveCpuEnvironment(boolean result) {
+	private HandleDataResult saveCpuEnvironment(boolean result,float cpu) {
+		String memoryTracePath = "";
 		String activityName = CollectDataImpl.getCurActivity();
 		String screenshotsPath = SaveEnvironmentManager.getInstance().screenShots(GlobalConfig.DeviceName,
 				Constants.TYPE_CPU);
@@ -108,10 +120,13 @@ public class HandleDataManager {
 		handleResult.setLogPath(logPath);
 		handleResult.setMethodTracePath(methodTrace);
 		handleResult.setScreenshotsPath(screenshotsPath);
+		handleResult.setMemoryTracePath(memoryTracePath);//添加methodTracePath
+		handleResult.setCPU(cpu);//添加保存CPU数据
 		return handleResult;
 	}
 
 	// cpuList列表中依次添加元素，直到添加长度为3的元素后，每次只更新列表元素，删除第一个和添加最后一个，列表长度适中为3//
+	//每隔500ms采集一次数据，理论上我们采集异常数据，需要5s采集一次并判断异常数据//
 	public List<Float> cpuList(CpuData cpuData) {
 		if (cpuData != null) {
 			int i = cpuList.size();
