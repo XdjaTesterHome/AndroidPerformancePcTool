@@ -48,14 +48,15 @@ public class MemoryView extends BaseChartView implements IClientChangeListener {
 	private MemoryData mMemoryData = null;
 	private HandleDataResult mHandleDataResult = null;
 	
+
 	public MemoryView(String chartContent, String title, String yaxisName) {
 		super();
 		this.totalAlloc = new TimeSeries("Alloc memory");
-		this.freeAlloc  = new TimeSeries("Free memory");
+		this.freeAlloc = new TimeSeries("Free memory");
 		TimeSeriesCollection dataset = new TimeSeriesCollection();
 		dataset.addSeries(this.totalAlloc);
 		dataset.addSeries(this.freeAlloc);
-		
+
 		DateAxis domain = new DateAxis("Time");
 		NumberAxis range = new NumberAxis("Memory(MB)");
 		domain.setTickLabelFont(new Font("SansSerif", Font.PLAIN, 12));
@@ -80,19 +81,19 @@ public class MemoryView extends BaseChartView implements IClientChangeListener {
 		domain.setTickLabelsVisible(true);
 
 		range.setStandardTickUnits(NumberAxis.createIntegerTickUnits());
-		
-		JFreeChart chart = ChartFactory.createTimeSeriesChart("应用内存分配情况", 
-				"时间(s)", "内存值(MB)", dataset, true, true, false);
+
+		JFreeChart chart = ChartFactory.createTimeSeriesChart("应用内存分配情况", "时间(s)", "内存值(MB)", dataset, true, true,
+				false);
 		chart.setBackgroundPaint(Color.white);
 		ChartPanel chartPanel = new ChartPanel(chart);
 		chartPanel.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4),
 				BorderFactory.createLineBorder(Color.black)));
 		chartPanel.setLayout(new FlowLayout(FlowLayout.RIGHT));
-		//添加单独的图标
+		// 添加单独的图标
 		JButton gcButton = SwingUiUtil.getInstance().createBtnWithColor("GC", Color.green);
 		gcButton.setLocation(0, 30);
 		gcButton.addActionListener(new ActionListener() {
-			
+
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				// TODO Auto-generated method stub
@@ -100,7 +101,7 @@ public class MemoryView extends BaseChartView implements IClientChangeListener {
 			}
 		});
 		chartPanel.add(gcButton);
-		
+
 		addJpanel(chartPanel);
 	}
 
@@ -128,17 +129,13 @@ public class MemoryView extends BaseChartView implements IClientChangeListener {
 			mCurClient.setHeapInfoUpdateEnabled(true);
 			AndroidDebugBridge.addClientChangeListener(this);
 		}
-		//清空数据
+		// 清空数据
 		if (mHandleDataList != null) {
 			mHandleDataList.clear();
 		}
-		
-		if (mShowMessageView != null) {
-			mShowMessageView.setText("");
-		}
-		
+
 		memoryThread = new Thread(new Runnable() {
-			
+
 			@Override
 			public void run() {
 				// TODO Auto-generated method stub
@@ -147,7 +144,7 @@ public class MemoryView extends BaseChartView implements IClientChangeListener {
 					if (stopFlag) {
 						break;
 					}
-					
+
 					AdbManager.getInstance().getAllocInfo(GlobalConfig.DeviceName, packageName);
 					try {
 						Thread.sleep(GlobalConfig.collectInterval);
@@ -184,31 +181,42 @@ public class MemoryView extends BaseChartView implements IClientChangeListener {
 						allocMb = m.bytesAllocated / (1024.f * 1024.f);
 						freeMb = m.sizeInBytes / (1024.f * 1024.f) - allocMb;
 						mMemoryData = new MemoryData(allocMb, freeMb);
-						//处理有问题的数据
+						System.out.println("allocMb = " + allocMb);
+						addTotalObservation(allocMb, freeMb);
+						// 处理有问题的数据
 						mHandleDataResult = HandleDataManager.getInstance().handleMemoryData(mMemoryData);
 						handleResult(mHandleDataResult, allocMb);
-						addTotalObservation(allocMb,freeMb);
 					}
 				}
 			}
-			// }
 		}
 	}
-	
-	
+
 	/**
-	 *  处理问题模型返回的结果。有问题进行展示
+	 * 处理问题模型返回的结果。有问题进行展示
+	 * 
 	 * @param result
 	 */
-	private void handleResult(HandleDataResult result, float memoryValue){
+	private void handleResult(HandleDataResult result, float memoryValue) {
 		if (result == null || result.result) {
-			return ;
+			return;
 		}
-		
-		//在界面上展示问题数据
-		if (mShowMessageView != null) {
-			mShowMessageView.append(formatErrorInfo(result, String.valueOf(memoryValue) + "MB"));
-		}
-		
+
+		// 在界面上展示问题数据
+		appendErrorInfo(formatErrorInfo(result, String.valueOf(memoryValue) + "MB"));
+
+	}
+	
+	@Override
+	protected String formatErrorInfo(HandleDataResult result, String value) {
+		// TODO Auto-generated method stub
+		StringBuilder sbBuilder = new StringBuilder("===================== \n");
+    	sbBuilder.append("ActivityName = ").append(result.activityName).append("\n");
+    	sbBuilder.append("当前测试值= ").append(value).append("\n");
+    	sbBuilder.append("Logfile= ").append(result.logPath).append("\n");
+    	sbBuilder.append("截屏路径= ").append(result.screenshotsPath).append("\n");
+    	sbBuilder.append("memoryTrace=").append(result.memoryTracePath).append("\n");
+    	sbBuilder.append("===================== \n\n\n\n");
+    	return sbBuilder.toString();
 	}
 }

@@ -17,7 +17,7 @@ public class SaveLogThread extends Thread{
 	private String cmds = "";
 	private Process mProcess;
 	private int mCurPid;
-	private final static long GetLogTime = 30 * 1000; // 采集log时间，30s
+	private final static long GetLogTime = 10 * 1000; // 采集log时间，30s
 	/**
 	 * 
 	 * @param deviceName 
@@ -58,8 +58,8 @@ public class SaveLogThread extends Thread{
 			mProcess = Runtime.getRuntime().exec(cmds);
 			mReader = new BufferedReader(new InputStreamReader(mProcess.getInputStream()), 1024);
 			String line;
+			System.out.println("begin line = ");
 			while ((line = mReader.readLine()) != null) {
-				System.out.println("line = " + line);
 				if (line.length() == 0) {
 					continue;
 				}
@@ -74,6 +74,7 @@ public class SaveLogThread extends Thread{
 					}
 				}
 			}
+			System.out.println("end line = ");
 		} catch (Exception e) {
 			// TODO: handle exception
 		}finally {

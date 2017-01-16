@@ -5,7 +5,6 @@ import java.awt.FlowLayout;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 
@@ -16,6 +15,7 @@ import javax.swing.JPanel;
 import com.xdja.adb.AdbManager;
 import com.xdja.adb.AndroidSdk;
 import com.xdja.collectdata.SaveEnvironmentManager;
+import com.xdja.collectdata.thread.ScreenCaptureThread;
 import com.xdja.constant.Constants;
 import com.xdja.constant.GlobalConfig;
 import com.xdja.util.ExecShellUtil;
@@ -92,21 +92,24 @@ public class ToolsView extends JPanel implements ActionListener {
 			});
 			break;
 		case SCREENSHOT:
-			BufferedImage image = AdbManager.getInstance().screenCapture(GlobalConfig.DeviceName, "", true);
+			ScreenCaptureThread screenCaptureThread = AdbManager.getInstance().screenCapture(GlobalConfig.DeviceName, "", true);
 			SwingUiUtil.getInstance().showSaveFileDialog(this, new chooseFileListener() {
 
 				@Override
 				public void chooseFile(File chooseFile) {
 					// TODO Auto-generated method stub
+					if (screenCaptureThread.getBufferedImage() == null) {
+						return;
+					}
 					if (chooseFile != null) {
 						System.out.println("chooseFile = " + chooseFile.getAbsolutePath());
 						try {
 							if (chooseFile.isDirectory()) {
 
-								ImageIO.write(image, "PNG", new File(chooseFile,
+								ImageIO.write(screenCaptureThread.getBufferedImage(), "PNG", new File(chooseFile,
 										SaveEnvironmentManager.getInstance().getSuggestedName("") + ".png"));
 							} else{
-								ImageIO.write(image, "PNG", chooseFile);
+								ImageIO.write(screenCaptureThread.getBufferedImage(), "PNG", chooseFile);
 							}
 						} catch (IOException e) {
 							// TODO Auto-generated catch block

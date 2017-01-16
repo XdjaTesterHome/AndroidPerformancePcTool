@@ -106,12 +106,12 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				// TODO Auto-generated method stub
-				String packageNameold = GlobalConfig.PackageName ;
+				String packageNameold = GlobalConfig.PackageName;
 				String packageName = (String) comboProcess.getSelectedItem();
 				if (packageName != null) {
 					GlobalConfig.PackageName = packageName;
 				}
-				if (packageNameold !=GlobalConfig.PackageName){
+				if (packageNameold != GlobalConfig.PackageName) {
 					kpiTestView.clear();
 				}
 			}
@@ -191,15 +191,15 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 		jTabbedPane.addTab(tabNames[1], viewCpu);
 
 		// 3.kpiTest
-		kpiTestView = new KpiTestView(Constants.KPI,Constants.KPITITLE, Constants.KPI);
+		kpiTestView = new KpiTestView(Constants.KPI, Constants.KPITITLE, Constants.KPI);
 		kpiTestView.setBounds(rect);
 		jTabbedPane.addTab(tabNames[3], kpiTestView);
-		
+
 		// 4.流量
 		viewFlow = new FlowView(Constants.FLOW, Constants.FLOW, Constants.FLOW_UNIT);
 		viewFlow.setBounds(rect);
 		jTabbedPane.addTab(tabNames[5], viewFlow);
-		
+
 		// 5.帧率
 		viewFps = new FpsView(Constants.FPS, Constants.FPSTITLE, Constants.FPS_UNIT);
 		viewFps.setBounds(rect);
@@ -209,14 +209,14 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 		viewBattery = new BatteryView(Constants.BATTERY, Constants.BATTERY, Constants.BATTERY_UNIT);
 		viewBattery.setBounds(rect);
 		jTabbedPane.addTab(tabNames[2], viewBattery);
-		
+
 		// 实用工具
 		toolsView = new ToolsView();
 		toolsView.setBounds(rect);
 		jTabbedPane.addTab(tabNames[6], toolsView);
-		
+
 		frame.add(jTabbedPane);
-		
+
 		rect = new Rectangle(20, 100, WIDTH - 50, 550);
 		jTabbedPane.setBounds(rect);
 	}
@@ -278,6 +278,7 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 			}
 		});
 	}
+
 	private void startTest() {
 		if (viewCpu != null) {
 			viewCpu.start(GlobalConfig.PackageName);
@@ -290,7 +291,7 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 		if (viewFlow != null) {
 			viewFlow.start(GlobalConfig.PackageName);
 		}
-		
+
 		if (kpiTestView != null) {
 			try {
 				kpiTestView.start(GlobalConfig.PackageName);
@@ -316,7 +317,7 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 		if (viewFlow != null) {
 			viewFlow.stop();
 		}
-		
+
 		if (kpiTestView != null) {
 			kpiTestView.stop();
 		}
@@ -350,7 +351,7 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 	 */
 	private void updateDeviceList() {
 		if (comboDevices != null && !comboDevices.isEnabled()) {
-			return ;
+			return;
 		}
 		TreeSet<AndroidDevice> devices = AdbManager.getInstance().getDevices();
 		System.out.println("updateDeviceList = " + devices.size());
@@ -365,7 +366,7 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 		for (String sn : snList) {
 			comboDevices.addItem(sn);
 		}
-		
+
 		if (kpiTestView != null) {
 			kpiTestView.stop();
 		}
@@ -376,7 +377,7 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 	 */
 	private void updateClientList() {
 		if (comboProcess != null && !comboProcess.isEnabled()) {
-			return ;
+			return;
 		}
 		String selectDevice = getdevice();
 		if (!CommonUtil.strIsNull(selectDevice)) {
@@ -392,24 +393,24 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 			}
 		}
 	}
-	
+
 	/**
-	 *  初始化AdbManager
+	 * 初始化AdbManager
 	 */
-	private void initAdbManager(){
+	private void initAdbManager() {
 		AdbManager.getInstance().init();
 	}
-	
-	private void createTopMenu(){
+
+	private void createTopMenu() {
 		JMenuBar menuBar = new JMenuBar();
 		setJMenuBar(menuBar);
-		
+
 		// 添加菜单选项
 		JMenu aboutMenu = new JMenu("Help");
-		
+
 		JMenuItem aboutItem = new JMenuItem("关于");
 		aboutItem.addActionListener(new ActionListener() {
-			
+
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				// TODO Auto-generated method stub
@@ -418,21 +419,20 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 		});
 		JMenuItem helpItem = new JMenuItem("使用帮助");
 		helpItem.addActionListener(new ActionListener() {
-			
+
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				// TODO Auto-generated method stub
 				SwingUiUtil.getInstance().showTipsDialog(LaunchView.this, "使用帮助", Constants.HELP, "我知道了", null);
 			}
 		});
-		
+
 		aboutMenu.add(aboutItem);
 		aboutMenu.add(helpItem);
-		
+
 		menuBar.add(aboutMenu);
 	}
-	
-	
+
 	public static void main(String[] args) {
 		LaunchView launch = new LaunchView();
 		launch.createParts();

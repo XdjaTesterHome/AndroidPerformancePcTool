@@ -30,11 +30,22 @@ public class HandleDataManager {
 	private List<MemoryData> memoryList = new ArrayList<>(24);
 	private HandleDataResult memoryResult = null;
 	private List<Float> cpuList = new ArrayList<Float>();// 用于存放CPU数据
-	
-	// 各个测试项值的标准
+
+	// CPU相关配置常量
 	private final static int CPU_MAX = 50;
-	private final static int CPU_CONTINUE_MAX = 10;
+	private final static int CPU_CONTINUE_MAX = 30;
+
+	// 内存相关配置常量
+	// 默认内存上下波动不超过2M
+	private final static int MEMORY_STANDARD = 2;
+	// 内存抖动不超过2次
+	private final static int MEMORY_SHAKECOUNT = 2;
 	
+	// 公共配置常量
+
+	private long lastTime = 0;
+	private long nowTime = 0;
+
 	private HandleDataManager() {
 
 	}
@@ -77,7 +88,8 @@ public class HandleDataManager {
 		} else {
 			int i = cpuList.size();
 			if (i == 3) {
-				if (cpuList.get(0) > CPU_CONTINUE_MAX && cpuList.get(1) > CPU_CONTINUE_MAX && cpuList.get(2) > CPU_CONTINUE_MAX) {
+				if (cpuList.get(0) > CPU_CONTINUE_MAX && cpuList.get(1) > CPU_CONTINUE_MAX
+						&& cpuList.get(2) > CPU_CONTINUE_MAX) {
 					upcpu = saveCpuEnvironment(false);
 				} else {
 					result = true;
@@ -149,13 +161,14 @@ public class HandleDataManager {
 
 	/**
 	 * 处理得到的内存数据 内存的问题暂时有如下几种 待扩展： 一、对当前版本的内存数据进行判定
-	 * 1.内存抖动。（暂定的标准是10s内超过5次内存波动），我们只记录判定为内存抖动时的页面。
+	 * 1.内存抖动。（暂定的标准是10s内超过2次内存波动），我们只记录判定为内存抖动时的页面。
 	 * 2.内存泄露。通过工具不太好判定内存泄露，准备用LeakCanary + monkey跑
 	 * 
 	 * 二、版本间进行数据对比 1.每次启动应用后，Heap内存相比之前版本稳定增长。这通常是因为增加了新的功能或者代码造成的。
 	 * 2.对比版本数据，Heap Alloc的变化不大，但进程的Dalvik Heap pss
 	 * 内存明显增加，这主要是因为分配了大量小对象造成的内存碎片。 上面两种情况，暂时还不能抽象
 	 * 
+	 * 修改，采集数据的时间间隔换成5s。内存泄露数据采集改为30s
 	 * 
 	 * @param cpuData
 	 * @return null 就跳过这个结果数据不处理
@@ -164,8 +177,6 @@ public class HandleDataManager {
 		if (memoryData == null) {
 			return null;
 		}
-		long lastTime = 0;
-		long nowTime = 0;
 		if (!memoryTestNow) {
 			lastTime = System.currentTimeMillis();
 			memoryTestNow = true;
@@ -173,44 +184,55 @@ public class HandleDataManager {
 
 		nowTime = System.currentTimeMillis();
 		/**
-		 * 如果超过10s，清空条件，重新开始。
+		 * 如果超过30s，清空条件，重新开始。
 		 */
 		if (nowTime - lastTime > memoryInterval) {
 			memoryTestNow = false;
 			lastTime = 0;
 			nowTime = 0;
 			int shakeCount = getShakeCount();
-			if (shakeCount > 5) {
+			System.out.println("shakeCount = " + shakeCount);
+			memoryList.clear();
+			if (shakeCount > MEMORY_SHAKECOUNT) {
 				memoryResult = saveMemoryEnvironment(false);
 				return memoryResult;
 			}
-			memoryList.clear();
 		} else {
 			memoryList.add(memoryData);
 		}
 		memoryResult = new HandleDataResult(true);
 		return memoryResult;
 	}
-	
+
 	/**
 	 * memory测试保存结果
+	 * 
 	 * @param result
 	 * @return
 	 */
-	private HandleDataResult saveMemoryEnvironment(boolean result){
+	private HandleDataResult saveMemoryEnvironment(boolean result) {
 		HandleDataResult memoryResult = new HandleDataResult(false);
 		// dumpsys memory
 		String filePath = SaveEnvironmentManager.getInstance().dumpMemory(GlobalConfig.DeviceName,
 				GlobalConfig.PackageName, Constants.TYPE_MEMORY);
+		System.out.println("filePath = " + filePath);
 		String logPath = SaveEnvironmentManager.getInstance().saveCurrentLog(GlobalConfig.DeviceName,
 				GlobalConfig.PackageName, Constants.TYPE_MEMORY);
-		String screenPath = SaveEnvironmentManager.getInstance().screenShots(GlobalConfig.DeviceName, Constants.TYPE_MEMORY);
+		System.out.println("logPath = " + logPath);
+		String screenPath = SaveEnvironmentManager.getInstance().screenShots(GlobalConfig.DeviceName,
+				Constants.TYPE_MEMORY);
+		System.out.println("screenPath = " + screenPath);
+		String activityName = CollectDataImpl.getCurActivity();
+		System.out.println("save environment finish");
+		
 		memoryResult.setMemoryTracePath(filePath);
 		memoryResult.setLogPath(logPath);
 		memoryResult.setScreenshotsPath(screenPath);
-		
+		memoryResult.setActivityName(activityName);
+
 		return memoryResult;
 	}
+
 	/**
 	 * 获取shakeCount的次数
 	 * 
@@ -222,8 +244,9 @@ public class HandleDataManager {
 			for (int i = 0; i < memoryList.size() - 1; i++) {
 				float nowData = memoryList.get(i).memAlloc;
 				float nextData = memoryList.get(i + 1).memAlloc;
+				System.out.println("nextData - nowData= " + (nowData - nextData));
 				// 这里的单位都是M
-				if (Math.abs(nowData - nextData) > 2) {
+				if (Math.abs(nowData - nextData) > MEMORY_STANDARD) {
 					num += 1;
 				}
 			}

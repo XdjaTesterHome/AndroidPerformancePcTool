@@ -62,7 +62,13 @@ public class DumpMemoryThread extends Thread implements IClientChangeListener{
 						break;
 					case DATA:
 						//±£´æhprof
-						SaveEnvironmentManager.getInstance().writeHprofToLocal(data.data, filePath);
+						new Thread(){
+							@Override
+							public void run() {
+								// TODO Auto-generated method stub
+								SaveEnvironmentManager.getInstance().writeHprofToLocal(data.data, filePath);
+							}
+						}.start();
 						break;
 					}
 				} else {

@@ -93,9 +93,7 @@ public class CpuView extends BaseChartView {
 		mHandleDataList.add(handleDataResult);
 		if (handleDataResult != null && !handleDataResult.result) {
 			// 填充错误信息
-			if (mShowMessageView != null) {
-				mShowMessageView.append(formatErrorInfo(handleDataResult, cpuData));
-			}
+			appendErrorInfo(formatErrorInfo(handleDataResult, cpuData));
 		}
 	}
 
@@ -107,12 +105,12 @@ public class CpuView extends BaseChartView {
 	 */
 	private String formatErrorInfo(HandleDataResult result, CpuData cpuData) {
 		StringBuilder sbBuilder = new StringBuilder("===================== \n");
-		sbBuilder.append("ActivityName = ").append(result.activityName);
-		sbBuilder.append("当前测试值              = ").append(cpuData.cpuUsage);
-		sbBuilder.append("Logfile      = ").append(result.logPath);
-		sbBuilder.append("截屏路径                  = ").append(result.screenshotsPath);
-		sbBuilder.append("methodTrace  = ").append(result.methodTracePath);
-		sbBuilder.append("===================== \n\n\n\n");
+		sbBuilder.append("ActivityName = ").append(result.activityName).append("\n");
+		sbBuilder.append("当前测试值              = ").append(cpuData.cpuUsage).append("\n");
+		sbBuilder.append("Logfile      = ").append(result.logPath).append("\n");
+		sbBuilder.append("截屏路径                  = ").append(result.screenshotsPath).append("\n");
+		sbBuilder.append("methodTrace  = ").append(result.methodTracePath).append("\n");
+		sbBuilder.append("===================== \n\n\n");
 		return sbBuilder.toString();
 	}
 

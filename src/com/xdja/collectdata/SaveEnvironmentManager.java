@@ -147,7 +147,7 @@ public class SaveEnvironmentManager {
 	 */
 	public String saveCurrentLog(String deviceName, String packageName, String type){
 		String filePath = getSuggestedPath(Constants.ANDROID_LOG, type, ".log");
-		mSaveLogThread = new SaveLogThread(deviceName, packageName, type);
+		mSaveLogThread = new SaveLogThread(deviceName, packageName, filePath);
 		mSaveLogThread.start();
 		
 		return filePath;
