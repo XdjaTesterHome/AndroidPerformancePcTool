@@ -3,6 +3,8 @@ package com.xdja.view;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Font;
+import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.BorderFactory;
@@ -24,6 +26,7 @@ import com.xdja.collectdata.entity.CpuData;
 import com.xdja.collectdata.handleData.HandleDataManager;
 import com.xdja.collectdata.handleData.HandleDataResult;
 import com.xdja.constant.GlobalConfig;
+import com.xdja.database.performancedata;
 
 public class CpuView extends BaseChartView {
 
@@ -35,7 +38,11 @@ public class CpuView extends BaseChartView {
 	private Thread cpuThread;
 	private boolean stopFlag = false;
 	private CpuData mCurCpuData = null;
-
+	public static int i =0;  //添加静态计数器，用作条件判断，何时采集CPU数据用于数据模型的判断
+	public static HandleDataResult errorRe ;//定义一个数据处理对象，用于接收和处理数据模型中的数据
+	public static ArrayList<ArrayList<String>> cpudbdata;//定义二维数组列表，用于接收测试数据并存储，后续批量插入数据库
+	public static ArrayList<String> cpudbd;//定义一维数组列表，用于接收测试数据并存储，后续批量插入数据库
+	
 	public CpuView(String chartContent, String title, String yaxisName) {
 		super();
 		this.totalcpu = new TimeSeries("应用CPU占用率");
@@ -129,6 +136,9 @@ public class CpuView extends BaseChartView {
 			mShowMessageView.setText("");
 		}
 		
+		
+		
+		
 		cpuThread = new Thread(new Runnable() {
 
 			@Override
@@ -149,8 +159,19 @@ public class CpuView extends BaseChartView {
 					mCurCpuData = CollectDataImpl.getCpuUsage(packageName, mCurCpuData.lastProcTotal,
 							mCurCpuData.lastProcPid);
 
-					addTotalObservation(mCurCpuData);
-
+					addTotalObservation(mCurCpuData);//添加当前CPU到动态图表中
+					
+					errorRe = handleData(mCurCpuData);//处理采集到的CPU数据，建立问题模型处理机制
+					cpudbd.add(errorRe.CPUString());//转化结果为字符串类型
+					cpudbd.add(errorRe.activityName);//转化结果为字符串类型
+					cpudbd.add(errorRe.reString());//转化结果为字符串类型
+					cpudbd.add((String)errorRe.screenshotsPath);//转化结果为字符串类型
+					cpudbd.add(errorRe.logPath);//转化结果为字符串类型
+					cpudbd.add(errorRe.methodTracePath);//转化结果为字符串类型
+					cpudbd.add(errorRe.memoryTracePath);//转化结果为字符串类型
+					cpudbdata.add(cpudbd);//添加到二维列表
+					cpudbd.clear();//清理一维度列表元素
+					
 					try {
 						Thread.sleep(GlobalConfig.collectInterval);
 					} catch (InterruptedException e) {
@@ -164,11 +185,67 @@ public class CpuView extends BaseChartView {
 		cpuThread.start();
 	}
 
+	
 	/**
-	 * 停止任务
+	 * 处理采集到的CPU数据的，存放数据处理逻辑和方法,返回异常数据处理结果，无CPU的值，可以为true,也可以为FALSE
 	 */
-	public void stop() {
+	public HandleDataResult handleData(CpuData cpuData) {
+		i =i+1;     //在采集频率的方法中添加逻辑判断计数器,添加计时器参数;这部分计数器也可以放在主线程循环中
+    	if (i>10){
+    		i=1;
+    	}
+    	if (i ==10){     //在主线程中添加逻辑判断，条件满足时执行相关方法
+    		HandleDataManager.getInstance().cpuList(cpuData);
+		}
+    	HandleDataResult abresult = HandleDataManager.getInstance().handleCpu(cpuData);
+    	return abresult;
+	}
+	
+	/**
+	 * 保存到数据库，savetodb()
+	 */
+	
+	
+	/**
+	 * 停止任务，标记线程停止，并将测试数据插入数据库。
+	 * @throws SQLException 
+	 * @throws ClassNotFoundException 
+	 */
+	public void stop()  {
 		stopFlag = true;
+		performancedata perfor = new performancedata();
+		try {
+			perfor.conperformance("test");
+		} catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		try {
+			perfor.creatperformance(performancedata.stat,performancedata.conn);
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}//创建数据库performance
+		try {
+			perfor.conperformance("performance");
+		} catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} //连接数据库performance
+		perfor.CPUteble(performancedata.stat,"cputable","com.xdja.actoma","V3.3056.1","CPU");//创建数据表cputable
+		try {
+			perfor.insertDatas(performancedata.stat,cpudbdata,"cputable");
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}//批量插入数据
+		perfor.closeperformance(performancedata.conn,performancedata.stat,performancedata.result);//关闭数据库连接
 	}
 
 	/**
@@ -177,6 +254,7 @@ public class CpuView extends BaseChartView {
 	 * @return
 	 */
 	public List<HandleDataResult> getHandleResult() {
+		
 		return mHandleDataList;
 	}
 }

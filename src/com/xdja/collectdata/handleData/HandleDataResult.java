@@ -6,6 +6,7 @@ package com.xdja.collectdata.handleData;
  *
  */
 public class HandleDataResult{
+	public float CPU; //记录CPU的值
 	// 性能数据是否符合要求 true 时其他元素不填充值，  false时  填充值
 	public boolean result;
 	// 出现问题时的页面
@@ -27,8 +28,7 @@ public class HandleDataResult{
 		// TODO Auto-generated constructor stub
 	}
 	
-	public HandleDataResult(boolean result, String activityName, String screenshotsPath, String logPath,
-			String methodTrace) {
+	public HandleDataResult(boolean result, String activityName, String screenshotsPath, String logPath,String methodTrace) {
 		super();
 		this.result = result;
 		this.activityName = activityName;
@@ -36,6 +36,21 @@ public class HandleDataResult{
 		this.logPath = logPath;
 		this.methodTracePath = methodTrace;
 		// TODO Auto-generated constructor stub
+	}
+	
+	public HandleDataResult(boolean result, String activityName, String screenshotsPath, String logPath,String methodTrace,float CPU) {
+		super();
+		this.result = result;
+		this.activityName = activityName;
+		this.screenshotsPath = screenshotsPath;
+		this.logPath = logPath;
+		this.methodTracePath = methodTrace;
+		this.CPU=CPU;
+		// TODO Auto-generated constructor stub
+	}
+	
+	public float getCPU() {
+		return CPU;
 	}
 
 	public String getActivityName() {
@@ -59,6 +74,9 @@ public class HandleDataResult{
 	public boolean isResult() {
 		return result;
 	}
+	public void setCPU(float CPU) {
+		this.CPU = CPU;
+	}
 	public void setActivityName(String activityName) {
 		this.activityName = activityName;
 	}
@@ -81,6 +99,21 @@ public class HandleDataResult{
 	public String toString() {
 		// TODO Auto-generated method stub
 		return "result = " + this.result + ", activityName = " + this.activityName + ", screenshotsPath = " + this.screenshotsPath + ", logPath =" + this.logPath;
+		
+	}
+	
+	//转化CPU为字符串类型结果
+	public String CPUString() {
+		return ""+this.CPU;
+	}
+	
+	public String reString() {
+		return ""+this.result;
+	}
+	
+	public String toallString() {
+		// TODO Auto-generated method stub
+		return "result = " + this.result + ", activityName = " + this.activityName + ", screenshotsPath = " + this.screenshotsPath + ", logPath =" + this.logPath+",CPU ="+this.CPU+",memoryTracePath="+this.memoryTracePath+",methodTracePath="+this.methodTracePath;
 		
 	}
 	

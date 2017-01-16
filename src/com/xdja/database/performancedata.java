@@ -5,9 +5,9 @@ import java.sql.*;
 import java.util.ArrayList;  
 
 public class performancedata {
-	static Connection conn;
-	static Statement stat ;
-	static ResultSet result ;
+	public static Connection conn;
+	public static Statement stat ;
+	public static ResultSet result ;
 	static String url ;
 	String username ;
 	String password;
@@ -18,13 +18,17 @@ public class performancedata {
 		this.password=password;
 	}
 	
-	private performancedata(){
-		
+	
+	
+	
+	public performancedata() {
+		// TODO Auto-generated constructor stub
 	}
-	
-	
-	//创建连接数据库//
-	private  void conperformance(String test) throws ClassNotFoundException, SQLException{
+
+
+
+
+	public  void conperformance(String test) throws ClassNotFoundException, SQLException{
 		Class.forName("com.mysql.jdbc.Driver");  // 注册 JDBC 驱动
 		//一开始必须填一个已经存在的数据库  
         String url = "jdbc:mysql://localhost:3306/"+test+"?useUnicode=true&characterEncoding=utf-8";     
@@ -34,7 +38,7 @@ public class performancedata {
 	}
 	
 	//创建数据库performance//
-	private void creatperformance(Statement stat,Connection conn) throws SQLException{
+	public void creatperformance(Statement stat,Connection conn) throws SQLException{
 		//创建数据库performance 
 		try {
 			String url = "jdbc:mysql://localhost:3306/performance?useUnicode=true&characterEncoding=utf-8";
@@ -50,14 +54,17 @@ public class performancedata {
     }
 	
 	//创建CPU数据表//
-	private void CPUteble(Statement stat,String table1){
+	public void CPUteble(Statement stat,String table1,String pkg ,String version,String projectname){
 		 String checkTable="show tables like \'"+table1+"'";  
 		try {
 			ResultSet resultSet=stat.executeQuery(checkTable);
 			if (resultSet.next()) {  
 	            System.out.println("table exist!");  
 	        }else{ 
-			stat.executeUpdate("create table "+table1+"(CPU double, Activity varchar(80), package varchar(80),version varchar(50),abnormal varchar(20),screenshot varchar(50),logcat varchar(50),traceview varchar(50),hprof varchar(50))");
+	        String pkg1 = pkg.replace(".", "_");
+	        String version1 = version.replace(".", "_");
+	        String firstid = projectname+pkg1+version1;
+			stat.executeUpdate("create table "+table1+"("+firstid+" double, Activity varchar(80),abnormal varchar(20),screenshot varchar(50),logcat varchar(50),traceview varchar(50),hprof varchar(50))");
 		} resultSet.close();
 			}catch (SQLException e) {
 			// TODO Auto-generated catch block
@@ -66,9 +73,9 @@ public class performancedata {
 	}
 
 	//创建插入CPU数据表的数据//
-	private void insertCPUteble(Statement stat,String table1,double d,String Activity, String pkg,String version ,String result,String  screenshotpath, String logpath,String traceviewpath, String hprofpath){
+	private void insertCPUteble(Statement stat,String table1,double d,String Activity ,String result,String  screenshotpath, String logpath,String traceviewpath, String hprofpath){
 		try {
-		stat.executeUpdate("insert into "+table1+" values('"+d +"', '"+Activity+"','"+pkg+"','"+version+"','"+result+"','"+screenshotpath+"', '"+logpath+"','"+traceviewpath+"','"+hprofpath+"')");
+		stat.executeUpdate("insert into "+table1+" values('"+d +"', '"+Activity+"','"+result+"','"+screenshotpath+"', '"+logpath+"','"+traceviewpath+"','"+hprofpath+"')");
 
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
@@ -76,24 +83,40 @@ public class performancedata {
 		}
 	}
 	
-	//向数据表中插入数据，传入参数为列表类型//
-	private void insertdata(Statement stat,ArrayList<ArrayList<String>> d,String table1){
-		if (d!=null){
-			int i = d.size();
-			for (int j =0; j<i ;j++){
-				try {
-				stat.executeUpdate("insert into "+table1+" values('"+d.get(0) +"', '"+d.get(1)+"','"+d.get(2)+"','"+d.get(3)+"','"+d.get(4)+"','"+d.get(5)+"', '"+d.get(6)+"','"+d.get(7)+"','"+d.get(8)+"')");
-		
-				} catch (SQLException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+	
+	
+	//向数据表中插入数据，传入参数为列表类型，批量插入数据//
+		public void insertDatas(Statement stat,ArrayList<ArrayList<String>> d,String table1) throws SQLException{
+			String insert_sql = "INSERT INTO tb_ipinfos (CPU, Activity, abnormal,screenshot,logcat,traceview,hprof) VALUES (?,?,?,?,?,?,?)";
+			PreparedStatement psts = conn.prepareStatement(insert_sql);
+			if (d!=null){
+				int i = d.size();
+				for (int j =0; j<i ;j++){
+					try {
+						psts.setString(1, d.get(j).get(0));
+						psts.setString(2, d.get(j).get(1));
+						psts.setString(3, d.get(j).get(2));
+						psts.setString(4, d.get(j).get(3));
+						psts.setString(5, d.get(j).get(4));
+						psts.setString(6, d.get(j).get(5));
+						psts.setString(7, d.get(j).get(6));
+						psts.addBatch(); 
+			
+					} catch (SQLException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 				}
+				psts.executeBatch(); // 执行批量处理  
+		        conn.commit();  // 提交  
 			}
 		}
-	}
+		
+		
+		
 	
 	//创建关闭数据库的方法//
-	private void closeperformance(Connection conn,Statement stat,ResultSet result){
+	public void closeperformance(Connection conn,Statement stat,ResultSet result){
 		try {
 			if(result !=null){
 			  result.close();	
@@ -124,19 +147,19 @@ public class performancedata {
 	}
 	
 	static void CPUtestfordatabase () throws ClassNotFoundException, SQLException{
-		performancedata perfor = new performancedata();
-		perfor.conperformance("test"); 
-		perfor.creatperformance(performancedata.stat,performancedata.conn);
-		perfor.conperformance("performance"); 
-		perfor.CPUteble(performancedata.stat,"cputable");
-		perfor.insertCPUteble(performancedata.stat,"cputable", 50.0, "xdja.actoma", "com.xdja.actoma", "2.3.3.3", "true" , "D:/log", "D:/log", "D:/log", "D:/log");
-		perfor.closeperformance(performancedata.conn,performancedata.stat,performancedata.result);
+		performancedata perfor = new performancedata();//创建数据库类perfor
+		perfor.conperformance("test"); //连接数据库test
+		perfor.creatperformance(performancedata.stat,performancedata.conn);//创建数据库performance
+		perfor.conperformance("performance"); //连接数据库performance
+		perfor.CPUteble(performancedata.stat,"cputable","com.xdja.actoma","V3.3056.1","CPU");//创建数据表cputable
+		perfor.insertCPUteble(performancedata.stat,"cputable", 50.0,  "com.xdja.actoma", "true" , "D:/log", "D:/log", "D:/log", "D:/log");//插入单个模拟数据
+		perfor.closeperformance(performancedata.conn,performancedata.stat,performancedata.result);//关闭数据库连接
     }
 	
 	
 	public static void main(String[] args) throws Exception  
     {   
-		CPUtestfordatabase ();
+		CPUtestfordatabase();
     }
 	
 	
