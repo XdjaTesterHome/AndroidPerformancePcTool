@@ -6,6 +6,8 @@ import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -30,7 +32,8 @@ import com.android.ddmlib.ClientData;
 import com.xdja.adb.AdbManager;
 import com.xdja.collectdata.entity.MemoryData;
 import com.xdja.collectdata.handleData.HandleDataManager;
-import com.xdja.collectdata.handleData.HandleDataResult;
+import com.xdja.collectdata.handleData.entity.HandleDataResultBase;
+import com.xdja.collectdata.handleData.entity.MemoryHandleResult;
 import com.xdja.constant.GlobalConfig;
 import com.xdja.util.SwingUiUtil;
 
@@ -46,8 +49,10 @@ public class MemoryView extends BaseChartView implements IClientChangeListener {
 	protected Client mCurClient = null;
 	private Thread memoryThread;
 	private MemoryData mMemoryData = null;
-	private HandleDataResult mHandleDataResult = null;
-
+	private MemoryHandleResult mHandleDataResult = null;
+	private List<MemoryHandleResult> memoryHandleResults = new ArrayList<>(20);
+	
+	
 	public MemoryView(String chartContent, String title, String yaxisName) {
 		super();
 		this.totalAlloc = new TimeSeries("Alloc memory");
@@ -129,8 +134,8 @@ public class MemoryView extends BaseChartView implements IClientChangeListener {
 			AndroidDebugBridge.addClientChangeListener(this);
 		}
 		// 清空数据
-		if (mHandleDataList != null) {
-			mHandleDataList.clear();
+		if (memoryHandleResults != null) {
+			memoryHandleResults.clear();
 		}
 
 		memoryThread = new Thread(new Runnable() {
@@ -195,16 +200,24 @@ public class MemoryView extends BaseChartView implements IClientChangeListener {
 	 * 
 	 * @param result
 	 */
-	private void handleResult(HandleDataResult result, float memoryValue) {
+	private void handleResult(MemoryHandleResult result, float memoryValue) {
 		if (result == null) {
 			return;
 		}
 		// 记录数据
-		mHandleDataList.add(result);
+		memoryHandleResults.add(result);
 
 		if (!result.result) {
 			// 在界面上展示问题数据
 			appendErrorInfo(formatErrorInfo(result, String.valueOf(memoryValue) + "MB", "发生内存抖动"));
 		}
+	}
+	
+	/**
+	 *  获取最终的测试数据
+	 * @return
+	 */
+	public List<MemoryHandleResult> getHandleResult(){
+		return memoryHandleResults;
 	}
 }

@@ -5,7 +5,8 @@ import java.util.List;
 
 import com.xdja.collectdata.CollectDataImpl;
 import com.xdja.collectdata.entity.BaseTestInfo;
-import com.xdja.collectdata.handleData.HandleDataResult;
+import com.xdja.collectdata.handleData.entity.CpuHandleResult;
+import com.xdja.collectdata.handleData.entity.MemoryHandleResult;
 import com.xdja.constant.Constants;
 import com.xdja.constant.GlobalConfig;
 import com.xdja.log.LoggerManager;
@@ -20,6 +21,7 @@ public class PerformanceDB {
 	private static String dbUrl = "jdbc:mysql://11.12.109.38:3306/";
 	private static String driverClass = "com.mysql.jdbc.Driver";
 	private final static String DBNAME = "performanceData";
+
 	public static PerformanceDB getInstance() {
 		if (mInstance == null) {
 			synchronized (PerformanceDB.class) {
@@ -31,7 +33,7 @@ public class PerformanceDB {
 
 		return mInstance;
 	}
-	
+
 	private String cpuTableName, memoryTableName, kpiTableName, fpsTableName, batteryTableName, flowTableName;
 
 	private PerformanceDB() {
@@ -57,8 +59,8 @@ public class PerformanceDB {
 			fpsTableName = getFormatDbName(packageName, version, Constants.TYPE_FPS);
 			batteryTableName = getFormatDbName(packageName, version, Constants.TYPE_BATTERY);
 			flowTableName = getFormatDbName(packageName, version, Constants.TYPE_FLOW);
-			
-			//创建数据表
+
+			// 创建数据表
 			createTables();
 		} catch (ClassNotFoundException | SQLException e) {
 			// TODO Auto-generated catch block
@@ -67,26 +69,25 @@ public class PerformanceDB {
 	}
 
 	/**
-	 * 关闭数据库的一些资源
-	 * 在所有操作完成之后调用
+	 * 关闭数据库的一些资源 在所有操作完成之后调用
 	 */
 	public void closeDB() {
 		try {
 			if (result != null) {
 				result.close();
 			}
-			
+
 			if (stat != null) {
 				stat.close();
 			}
-			
+
 			if (conn != null) {
 				conn.close();
 			}
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		} 
+		}
 	}
 
 	/**
@@ -104,7 +105,7 @@ public class PerformanceDB {
 			// TODO Auto-generated catch block
 			LoggerManager.logError(PerformanceDB.class.getSimpleName(), "createDb", "数据库已经存在：" + DBNAME);
 			return;
-		}finally {
+		} finally {
 			if (stat != null) {
 				try {
 					stat.close();
@@ -113,7 +114,7 @@ public class PerformanceDB {
 					e.printStackTrace();
 				}
 			}
-			
+
 			if (connection != null) {
 				try {
 					connection.close();
@@ -127,11 +128,13 @@ public class PerformanceDB {
 
 	/**
 	 * 创建数据表 适用于公共字段
-	 * @throws SQLException 
+	 * 
+	 * @throws SQLException
 	 */
-	private void createTable(String tableName) throws SQLException {
+	@SuppressWarnings("unused")
+	private void createTable(String tableName, String createSql) throws SQLException {
 		String sql = "CREATE TABLE IF NOT EXISTS `" + tableName + "`("
-					 + "id int(11) not null AUTO_INCREMENT, page varchar(80),testvalue varchar(50), screenshotPath varchar(50),logPath varchar(50),methodTracePath varchar(50),hprofPath varchar(50), pass int, PRIMARY KEY(`id`))";
+				+ "id int(11) not null AUTO_INCREMENT, page varchar(80),testvalue varchar(50), screenshotPath varchar(50),logPath varchar(50),methodTracePath varchar(50),hprofPath varchar(50), pass int, PRIMARY KEY(`id`))";
 		stat.executeUpdate(sql);
 	}
 
@@ -140,11 +143,10 @@ public class PerformanceDB {
 	 * 
 	 * @param tableName
 	 * @param sql
-	 * @throws SQLException 
+	 * @throws SQLException
 	 */
-	@SuppressWarnings("unused")
-	private void createTable(String tableName, String sql) throws SQLException {
-		if (CommonUtil.strIsNull(sql) || CommonUtil.strIsNull(tableName)) {
+	private void createTable(String sql) throws SQLException {
+		if (CommonUtil.strIsNull(sql)) {
 			return;
 		}
 		stat.executeUpdate(sql);
@@ -152,14 +154,35 @@ public class PerformanceDB {
 
 	/**
 	 * 创建所有的数据表
-	 * @throws SQLException 
+	 * 
+	 * @throws SQLException
 	 */
 	public void createTables() throws SQLException {
+		String createMemorySql = "CREATE TABLE IF NOT EXISTS `" + memoryTableName + "`("
+				+ "id int(11) not null AUTO_INCREMENT, page varchar(80),testvalue varchar(50), logPath varchar(50),methodTracePath varchar(50),hprofPath varchar(50), pass int, PRIMARY KEY(`id`))";
+		String createCpuSql = "CREATE TABLE IF NOT EXISTS `" + cpuTableName + "`("
+				+ "id int(11) not null AUTO_INCREMENT, page varchar(80),testvalue varchar(50), logPath varchar(50),methodTracePath varchar(50), pass int, PRIMARY KEY(`id`))";
+		String createKpiSql = "CREATE TABLE IF NOT EXISTS `" + kpiTableName + "`("
+				+ "id int(11) not null AUTO_INCREMENT, page varchar(80),testvalue varchar(50), logPath varchar(50),methodTracePath varchar(50), pass int, PRIMARY KEY(`id`))";
+		String createFlowSql = "CREATE TABLE IF NOT EXISTS `" + flowTableName + "`("
+				+ "id int(11) not null AUTO_INCREMENT, page varchar(80),testvalue varchar(50), logPath varchar(50),methodTracePath varchar(50), pass int, PRIMARY KEY(`id`))";
+		String createFpsSql = "CREATE TABLE IF NOT EXISTS `" + fpsTableName + "`("
+				+ "id int(11) not null AUTO_INCREMENT, page varchar(80),testvalue varchar(50), logPath varchar(50),methodTracePath varchar(50),hprofPath varchar(50), pass int, PRIMARY KEY(`id`))";
+		String createBatterySql = "CREATE TABLE IF NOT EXISTS `" + batteryTableName + "`("
+				+ "id int(11) not null AUTO_INCREMENT, uid int(11),testvalue varchar(50),  detailInfo varchar(256),PRIMARY KEY(`id`))";
 
 		// 创建CPU数据表
-		createTable(cpuTableName);
+		createTable(createMemorySql);
 		// 创建Memory数据表
-		createTable(memoryTableName);
+		createTable(createCpuSql);
+		// 创建KPI数据表
+		createTable(createKpiSql);
+		// 创建Flow数据表
+		createTable(createFlowSql);
+		// 创建FPS数据表
+		createTable(createFpsSql);
+		// 创建电量数据表
+		createTable(createBatterySql);
 	}
 
 	/**
@@ -186,43 +209,41 @@ public class PerformanceDB {
 	 * 
 	 * @param handleDataList
 	 */
-	public void insertCpuData(List<HandleDataResult> handleDataList) {
+	public void insertCpuData(List<CpuHandleResult> handleDataList) {
 		if (handleDataList == null || handleDataList.size() < 1) {
 			return;
 		}
+		
 		String insertSql = "insert into `" + cpuTableName
 				+ "`(page, testvalue, screenshotPath, logPath, methodTracePath, hprofPath, pass) values (?,?,?,?,?,?,?)";
 		PreparedStatement psts = null;
 		try {
 			conn.setAutoCommit(false);
 			psts = conn.prepareStatement(insertSql);
-			for (HandleDataResult result : handleDataList) {
+			for (CpuHandleResult result : handleDataList) {
 				psts.setString(1, result.activityName);
 				psts.setFloat(2, Float.valueOf(result.testValue));
-				psts.setString(3, result.screenshotsPath);
-				psts.setString(4, result.logPath);
-				psts.setString(5, result.methodTracePath);
-				psts.setString(6, result.memoryTracePath);
+				psts.setString(3, result.logPath);
+				psts.setString(4, result.methodTracePath);
 				// 正常数据，值是1，异常数据，值是0
-				psts.setInt(7, result.result ? 1 : 0);
+				psts.setInt(5, result.result ? 1 : 0);
 				psts.addBatch();
 			}
-			
-			psts.executeBatch(); // 执行批量处理  
-	        conn.commit();  // 提交 
+
+			psts.executeBatch(); // 执行批量处理
+			conn.commit(); // 提交
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
-	
-	
+
 	/**
 	 * 将Cpu数据插入到数据表中
 	 * 
 	 * @param handleDataList
 	 */
-	public void insertMemoryData(List<HandleDataResult> handleDataList) {
+	public void insertMemoryData(List<MemoryHandleResult> handleDataList) {
 		if (handleDataList == null || handleDataList.size() < 1) {
 			return;
 		}
@@ -232,20 +253,19 @@ public class PerformanceDB {
 		try {
 			conn.setAutoCommit(false);
 			psts = conn.prepareStatement(insertSql);
-			for (HandleDataResult result : handleDataList) {
+			for (MemoryHandleResult result : handleDataList) {
 				psts.setString(1, result.activityName);
 				psts.setFloat(2, Float.valueOf(result.testValue));
-				psts.setString(3, result.screenshotsPath);
-				psts.setString(4, result.logPath);
-				psts.setString(5, result.methodTracePath);
-				psts.setString(6, result.memoryTracePath);
+				psts.setString(3, result.logPath);
+				psts.setString(4, result.methodTracePath);
+				psts.setString(5, result.memoryHprofPath);
 				// 正常数据，值是1，异常数据，值是0
-				psts.setInt(7, result.result ? 1 : 0);
+				psts.setInt(6, result.result ? 1 : 0);
 				psts.addBatch();
 			}
-			
-			psts.executeBatch(); // 执行批量处理  
-	        conn.commit();  // 提交 
+
+			psts.executeBatch(); // 执行批量处理
+			conn.commit(); // 提交
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

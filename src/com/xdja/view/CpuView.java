@@ -4,6 +4,8 @@ import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Font;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.BorderFactory;
 
@@ -22,7 +24,7 @@ import org.jfree.ui.RectangleInsets;
 import com.xdja.collectdata.CollectDataImpl;
 import com.xdja.collectdata.entity.CpuData;
 import com.xdja.collectdata.handleData.HandleDataManager;
-import com.xdja.collectdata.handleData.HandleDataResult;
+import com.xdja.collectdata.handleData.entity.CpuHandleResult;
 import com.xdja.constant.GlobalConfig;
 
 public class CpuView extends BaseChartView {
@@ -36,7 +38,8 @@ public class CpuView extends BaseChartView {
 	private boolean stopFlag = false;
 	private CpuData mCurCpuData = null;
 	public static int cpuCount = 0; // 添加静态计数器，用作条件判断，何时采集CPU数据用于数据模型的判断
-
+	private List<CpuHandleResult> cpuHandleResults = new ArrayList<>(20);
+	
 	public CpuView(String chartContent, String title, String yaxisName) {
 		super();
 		this.totalcpu = new TimeSeries("应用CPU占用率");
@@ -95,8 +98,8 @@ public class CpuView extends BaseChartView {
 	 */
 	public void start(String packageName) {
 		// 清空上次记录的数据
-		if (mHandleDataList.size() > 0) {
-			mHandleDataList.clear();
+		if (cpuHandleResults.size() > 0) {
+			cpuHandleResults.clear();
 		}
 
 		cpuThread = new Thread(new Runnable() {
@@ -142,12 +145,12 @@ public class CpuView extends BaseChartView {
 	 */
 	public void handleData(CpuData cpuData, double cpu) {
 		// 对数据进行判断
-		HandleDataResult handleDataResult = HandleDataManager.getInstance().handleCpu(cpuData, cpu);
+		CpuHandleResult handleDataResult = HandleDataManager.getInstance().handleCpu(cpuData, cpu);
 		if (handleDataResult == null) {
 			return;
 		}
 		// 记录数据
-		mHandleDataList.add(handleDataResult);
+		cpuHandleResults.add(handleDataResult);
 		
 		// 填充错误信息
 		if (handleDataResult != null && !handleDataResult.result) {
@@ -167,5 +170,10 @@ public class CpuView extends BaseChartView {
 	 */
 	public void stop() {
 		stopFlag = true;
+	}
+	
+	
+	public List<CpuHandleResult> getHandleResult(){
+		return cpuHandleResults;
 	}
 }

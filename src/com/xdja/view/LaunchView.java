@@ -26,7 +26,9 @@ import com.android.ddmlib.IDevice;
 import com.xdja.adb.AdbManager;
 import com.xdja.adb.AndroidDevice;
 import com.xdja.collectdata.CollectDataImpl;
-import com.xdja.collectdata.handleData.HandleDataResult;
+import com.xdja.collectdata.handleData.entity.CpuHandleResult;
+import com.xdja.collectdata.handleData.entity.HandleDataResultBase;
+import com.xdja.collectdata.handleData.entity.MemoryHandleResult;
 import com.xdja.constant.Constants;
 import com.xdja.constant.GlobalConfig;
 import com.xdja.database.PerformanceDB;
@@ -338,13 +340,13 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 	private void saveDataToDB(){
 		// cpu
 		if (viewCpu != null) {
-			List<HandleDataResult> cpuList = viewCpu.getHandleResult();
+			List<CpuHandleResult> cpuList = viewCpu.getHandleResult();
 			PerformanceDB.getInstance().insertCpuData(cpuList);
 		}
 		
 		// memory
 		if (viewMemory != null) {
-			List<HandleDataResult> memoryList = viewMemory.getHandleResult();
+			List<MemoryHandleResult> memoryList = viewMemory.getHandleResult();
 			PerformanceDB.getInstance().insertMemoryData(memoryList);
 		}
 	}

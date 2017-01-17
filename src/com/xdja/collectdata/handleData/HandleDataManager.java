@@ -10,7 +10,9 @@ import com.xdja.collectdata.CollectDataImpl;
 import com.xdja.collectdata.SaveEnvironmentManager;
 import com.xdja.collectdata.entity.CpuData;
 import com.xdja.collectdata.entity.MemoryData;
-import com.xdja.collectdata.handleData.HandleDataResult;
+import com.xdja.collectdata.handleData.entity.CpuHandleResult;
+import com.xdja.collectdata.handleData.entity.HandleDataResultBase;
+import com.xdja.collectdata.handleData.entity.MemoryHandleResult;
 import com.xdja.constant.Constants;
 import com.xdja.constant.GlobalConfig;
 import com.xdja.util.CommonUtil;
@@ -29,19 +31,25 @@ public class HandleDataManager {
 	private boolean memoryTestNow = false;
 	// 用于存放10s内收集的memory数据
 	private List<MemoryData> memoryList = new ArrayList<>(24);
-	private HandleDataResult memoryResult = null;
+	private MemoryHandleResult memoryResult = null;
 	private List<Float> cpuList = new ArrayList<Float>();// 用于存放CPU数据
 
 	// CPU相关配置常量
 	private final static int CPU_MAX = 50;
 	private final static int CPU_CONTINUE_MAX = 30;
 	private static int cpuCount = 0;
+	
 	// 内存相关配置常量
 	// 默认内存上下波动不超过2M
 	private final static int MEMORY_STANDARD = 2;
 	// 内存抖动不超过3次
 	private final static int MEMORY_SHAKECOUNT = 4;
-
+	
+	// kpi相关配置
+	// kpi数据超过多少判定有问题，单位是ms
+	private final static int KPI_TIME = 2000;
+	
+	
 	// 公共配置常量
 
 	private long lastTime = 0;
@@ -64,25 +72,25 @@ public class HandleDataManager {
 
 	// 处理静默CPU数据，异常捕获模型，返回处理后认为有问题的数据,修改传入参数;//
 	// 以下是对问题模型的处理，简单的问题模型，默认只要CPU的数据大于1%，就认为可能存在异常;//
-	public HandleDataResult handleCpusilence(CpuData cpuData, double value) {
+	public HandleDataResultBase handleCpusilence(CpuData cpuData, double value) {
 		// 静默测试数据的判断//
 		boolean result;
-		HandleDataResult upcpu = null;
+		HandleDataResultBase upcpu = null;
 		if (cpuData.cpuUsage > 1) {
 			upcpu = saveCpuEnvironment(false, value);
 		} else {
 			result = true;
-			upcpu = new HandleDataResult(result);
+			upcpu = new HandleDataResultBase(result);
 		}
 
 		return upcpu;
 	}
 
 	// handleCpu处理非静默测试的数据模型,原则上2点：其一大于50%；其二连续三次数据大于30%//
-	public HandleDataResult handleCpu(CpuData cpuData, double cpu) {
+	public CpuHandleResult handleCpu(CpuData cpuData, double cpu) {
 		// 静默测试数据的判断//
 		boolean result;
-		HandleDataResult upcpu = null;
+		CpuHandleResult upcpu = null;
 		cpuList(cpuData);
 		if (cpuData.cpuUsage > CPU_MAX) {
 			upcpu = saveCpuEnvironment(false, cpu);
@@ -94,13 +102,13 @@ public class HandleDataManager {
 					upcpu = saveCpuEnvironment(false, cpu);
 				} else {
 					result = true;
-					upcpu = new HandleDataResult(result);
+					upcpu = new CpuHandleResult(result);
 					upcpu.setTestValue(String.valueOf(cpu));
 					upcpu.setActivityName(CollectDataImpl.getCurActivity());
 				}
 			}else {
 				result = true;
-				upcpu = new HandleDataResult(result);
+				upcpu = new CpuHandleResult(result);
 				upcpu.setTestValue(String.valueOf(cpu));
 				upcpu.setActivityName(CollectDataImpl.getCurActivity());
 			}
@@ -115,19 +123,19 @@ public class HandleDataManager {
 	 * 
 	 * @param result
 	 */
-	private HandleDataResult saveCpuEnvironment(boolean result, double value) {
+	private CpuHandleResult saveCpuEnvironment(boolean result, double value) {
 		String activityName = CollectDataImpl.getCurActivity();
-		String screenshotsPath = SaveEnvironmentManager.getInstance().screenShots(GlobalConfig.DeviceName,
-				Constants.TYPE_CPU);
+//		String screenshotsPath = SaveEnvironmentManager.getInstance().screenShots(GlobalConfig.DeviceName,
+//				Constants.TYPE_CPU);
 		String logPath = SaveEnvironmentManager.getInstance().saveCurrentLog(GlobalConfig.DeviceName,
 				GlobalConfig.PackageName, Constants.TYPE_CPU);
+		// 暂时不抓取method trace，会影响采集数据
 //		String methodTrace = SaveEnvironmentManager.getInstance().methodTracing(GlobalConfig.DeviceName,
 //				GlobalConfig.PackageName, Constants.TYPE_CPU);
-		HandleDataResult handleResult = new HandleDataResult(result);
+		CpuHandleResult handleResult = new CpuHandleResult(result);
 		handleResult.setActivityName(activityName);
 		handleResult.setLogPath(logPath);
 		handleResult.setMethodTracePath("");
-		handleResult.setScreenshotsPath(screenshotsPath);
 		handleResult.setTestValue(String.valueOf(value));
 		return handleResult;
 	}
@@ -151,7 +159,7 @@ public class HandleDataManager {
 		}
 	}
 
-	public HandleDataResult handleFlowData(FlowData flowData) {
+	public HandleDataResultBase handleFlowData(FlowData flowData) {
 		return null;
 	}
 
@@ -160,7 +168,7 @@ public class HandleDataManager {
 	 * @param cpuData
 	 * @return
 	 */
-	public HandleDataResult handleFpsData(FpsData fpsData) {
+	public HandleDataResultBase handleFpsData(FpsData fpsData) {
 		return null;
 	}
 
@@ -169,7 +177,16 @@ public class HandleDataManager {
 	 * @param cpuData
 	 * @return
 	 */
-	public HandleDataResult handleKpiData(KpiData kpiData) {
+	public HandleDataResultBase handleKpiData(KpiData kpiData) {
+		if (kpiData == null) {
+			return null;
+		}
+		
+		// 判断是否有问题
+		if (kpiData.loadTime > KPI_TIME) {
+			
+		}
+		
 		return null;
 	}
 
@@ -187,7 +204,7 @@ public class HandleDataManager {
 	 * @param cpuData
 	 * @return null 就跳过这个结果数据不处理
 	 */
-	public HandleDataResult handleMemoryData(MemoryData memoryData, float value) {
+	public MemoryHandleResult handleMemoryData(MemoryData memoryData, float value) {
 		if (memoryData == null) {
 			return null;
 		}
@@ -215,7 +232,7 @@ public class HandleDataManager {
 			memoryList.add(memoryData);
 		}
 		
-		memoryResult = new HandleDataResult(true);
+		memoryResult = new MemoryHandleResult(true);
 		memoryResult.setTestValue(String.valueOf(CommonUtil.getTwoDots(value)));
 		memoryResult.setActivityName(CollectDataImpl.getCurActivity());
 		return memoryResult;
@@ -227,20 +244,20 @@ public class HandleDataManager {
 	 * @param result
 	 * @return
 	 */
-	private HandleDataResult saveMemoryEnvironment(boolean result, float testValue) {
-		HandleDataResult memoryResult = new HandleDataResult(false);
+	private MemoryHandleResult saveMemoryEnvironment(boolean result, float testValue) {
+		MemoryHandleResult memoryResult = new MemoryHandleResult(false);
 		// dumpsys memory
 //		String filePath = SaveEnvironmentManager.getInstance().dumpMemory(GlobalConfig.DeviceName,
 //				GlobalConfig.PackageName, Constants.TYPE_MEMORY);
 		String logPath = SaveEnvironmentManager.getInstance().saveCurrentLog(GlobalConfig.DeviceName,
 				GlobalConfig.PackageName, Constants.TYPE_MEMORY);
-		String screenPath = SaveEnvironmentManager.getInstance().screenShots(GlobalConfig.DeviceName,
-				Constants.TYPE_MEMORY);
+//		String screenPath = SaveEnvironmentManager.getInstance().screenShots(GlobalConfig.DeviceName,
+//				Constants.TYPE_MEMORY);
 		String activityName = CollectDataImpl.getCurActivity();
 
-		memoryResult.setMemoryTracePath("");
+		memoryResult.setMemoryHprofPath("");
+		memoryResult.setMethodTracePath("");
 		memoryResult.setLogPath(logPath);
-		memoryResult.setScreenshotsPath(screenPath);
 		memoryResult.setActivityName(activityName);
 		memoryResult.setTestValue(String.valueOf(CommonUtil.getTwoDots(testValue)));
 
