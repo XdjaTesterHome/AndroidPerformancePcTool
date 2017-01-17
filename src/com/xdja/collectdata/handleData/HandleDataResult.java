@@ -104,6 +104,7 @@ public class HandleDataResult{
 	
 	//转化CPU为字符串类型结果
 	public String CPUString() {
+		System.out.println(""+this.CPU);//
 		return ""+this.CPU;
 	}
 	

@@ -167,6 +167,7 @@ public class CpuView extends BaseChartView {
 					addTotalObservation(mCurCpuData);//添加当前CPU到动态图表中
 					
 					errorRe = handleData(mCurCpuData);//处理采集到的CPU数据，建立问题模型处理机制
+					System.out.println(errorRe.CPUString());
 					cpudbd.add(errorRe.CPUString());//转化结果为字符串类型
 					cpudbd.add(errorRe.activityName);//转化结果为字符串类型
 					cpudbd.add(errorRe.reString());//转化结果为字符串类型
