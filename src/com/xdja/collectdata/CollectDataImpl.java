@@ -11,6 +11,7 @@ import com.xdja.collectdata.entity.CpuData;
 import com.xdja.collectdata.entity.FlowData;
 import com.xdja.collectdata.entity.FpsData;
 import com.xdja.collectdata.entity.KpiData;
+import com.xdja.constant.GlobalConfig;
 import com.xdja.log.LoggerManager;
 import com.xdja.util.CommonUtil;
 import com.xdja.util.ExecShellUtil;
@@ -317,6 +318,7 @@ public class CollectDataImpl {
 			activityName = activityName.split(" ")[1];
 			int index = activityName.indexOf("/");
 			activityName = activityName.substring(index + 1);
+			activityName = activityName.substring(activityName.lastIndexOf(".")+1);
 			return activityName;
 		}
 
@@ -572,8 +574,8 @@ public class CollectDataImpl {
 	 *  这里可能会有GlobalConfig没有设置的情况存在。
 	 */
 	public static BaseTestInfo getBaseTestInfo() {
-//		String packageName = GlobalConfig.PackageName;
-		String packageName = "com.xdja.HDSafeEMailClient";
+		String packageName = GlobalConfig.PackageName;
+//		String packageName = "com.xdja.HDSafeEMailClient";
 		if (CommonUtil.strIsNull(packageName)) {
 			return null;
 		}
@@ -584,6 +586,7 @@ public class CollectDataImpl {
 			Matcher matcher = pattern.matcher(packageInfo.successMsg);
 			if (matcher.find()) {
 				String result = matcher.group(0);
+				result = result.split("=")[1];
 				BaseTestInfo baseTestInfo = new BaseTestInfo(packageName, result);
 				return baseTestInfo;
 			}

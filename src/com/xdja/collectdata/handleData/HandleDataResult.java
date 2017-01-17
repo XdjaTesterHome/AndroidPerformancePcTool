@@ -1,17 +1,20 @@
 package com.xdja.collectdata.handleData;
 
 /**
- *  处理数据的结果
+ * 处理数据的结果
+ * 
  * @author zlw
  *
  */
-public class HandleDataResult{
-	public float CPU; //记录CPU的值
-	// 性能数据是否符合要求 true 时其他元素不填充值，  false时  填充值
+public class HandleDataResult {
+	// 记录CPU的值
+	public String testValue;
+
+	// 性能数据是否符合要求 true 时其他元素不填充值， false时 填充值
 	public boolean result;
 	// 出现问题时的页面
 	public String activityName;
-	
+
 	// 保存截图的路径
 	public String screenshotsPath;
 	// 保存日志的路径
@@ -20,15 +23,15 @@ public class HandleDataResult{
 	public String memoryTracePath;
 	// traceMethod Path
 	public String methodTracePath;
-	
-	
+
 	public HandleDataResult(boolean result) {
 		super();
 		this.result = result;
 		// TODO Auto-generated constructor stub
 	}
-	
-	public HandleDataResult(boolean result, String activityName, String screenshotsPath, String logPath,String methodTrace) {
+
+	public HandleDataResult(boolean result, String activityName, String screenshotsPath, String logPath,
+			String methodTrace) {
 		super();
 		this.result = result;
 		this.activityName = activityName;
@@ -37,20 +40,17 @@ public class HandleDataResult{
 		this.methodTracePath = methodTrace;
 		// TODO Auto-generated constructor stub
 	}
-	
-	public HandleDataResult(boolean result, String activityName, String screenshotsPath, String logPath,String methodTrace,float CPU) {
+
+	public HandleDataResult(String testValue, boolean result, String activityName, String screenshotsPath,
+			String logPath, String memoryTracePath, String methodTracePath) {
 		super();
+		this.testValue = testValue;
 		this.result = result;
 		this.activityName = activityName;
 		this.screenshotsPath = screenshotsPath;
 		this.logPath = logPath;
-		this.methodTracePath = methodTrace;
-		this.CPU=CPU;
-		// TODO Auto-generated constructor stub
-	}
-	
-	public float getCPU() {
-		return CPU;
+		this.memoryTracePath = memoryTracePath;
+		this.methodTracePath = methodTracePath;
 	}
 
 	public String getActivityName() {
@@ -60,61 +60,60 @@ public class HandleDataResult{
 	public String getLogPath() {
 		return logPath;
 	}
-	
+
 	public String getMemoryTracePath() {
 		return memoryTracePath;
 	}
-	
+
 	public String getMethodTracePath() {
 		return methodTracePath;
 	}
+
 	public String getScreenshotsPath() {
 		return screenshotsPath;
 	}
+
+	public String getTestValue() {
+		return testValue;
+	}
+
 	public boolean isResult() {
 		return result;
 	}
-	public void setCPU(float CPU) {
-		this.CPU = CPU;
-	}
+
 	public void setActivityName(String activityName) {
 		this.activityName = activityName;
 	}
+
 	public void setLogPath(String logPath) {
 		this.logPath = logPath;
 	}
+
 	public void setMemoryTracePath(String memoryTracePath) {
 		this.memoryTracePath = memoryTracePath;
 	}
+
 	public void setMethodTracePath(String methodTracePath) {
 		this.methodTracePath = methodTracePath;
 	}
+
 	public void setResult(boolean result) {
 		this.result = result;
 	}
+
 	public void setScreenshotsPath(String screenshotsPath) {
 		this.screenshotsPath = screenshotsPath;
 	}
+
+	public void setTestValue(String testValue) {
+		this.testValue = testValue;
+	}
+
 	@Override
 	public String toString() {
 		// TODO Auto-generated method stub
-		return "result = " + this.result + ", activityName = " + this.activityName + ", screenshotsPath = " + this.screenshotsPath + ", logPath =" + this.logPath;
-		
+		return "result = " + this.result + ", activityName = " + this.activityName + ", screenshotsPath = "
+				+ this.screenshotsPath + ", logPath =" + this.logPath;
+
 	}
-	
-	//转化CPU为字符串类型结果
-	public String CPUString() {
-		return ""+this.CPU;
-	}
-	
-	public String reString() {
-		return ""+this.result;
-	}
-	
-	public String toallString() {
-		// TODO Auto-generated method stub
-		return "result = " + this.result + ", activityName = " + this.activityName + ", screenshotsPath = " + this.screenshotsPath + ", logPath =" + this.logPath+",CPU ="+this.CPU+",memoryTracePath="+this.memoryTracePath+",methodTracePath="+this.methodTracePath;
-		
-	}
-	
 }

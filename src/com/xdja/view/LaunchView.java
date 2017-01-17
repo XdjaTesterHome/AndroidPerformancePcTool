@@ -28,6 +28,7 @@ import com.xdja.adb.AndroidDevice;
 import com.xdja.collectdata.CollectDataImpl;
 import com.xdja.constant.Constants;
 import com.xdja.constant.GlobalConfig;
+import com.xdja.database.PerformanceDB;
 import com.xdja.log.LoggerManager;
 import com.xdja.util.CommonUtil;
 import com.xdja.util.ExecShellUtil;
@@ -321,6 +322,9 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 		if (kpiTestView != null) {
 			kpiTestView.stop();
 		}
+		
+//		//关闭数据库连接
+//		PerformanceDB.getInstance().closeDB();
 	}
 
 	@Override

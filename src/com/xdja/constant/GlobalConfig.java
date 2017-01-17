@@ -26,4 +26,9 @@ public class GlobalConfig {
 	// 选中的设备名称
 	public static String DeviceName = "";
 	
+	// 数据库配置
+	public static String DBUSERNAME = "xdja";
+	public static String DBUSERPWD  = "123456";
+	
+	
 }
