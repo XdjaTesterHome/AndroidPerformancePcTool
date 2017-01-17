@@ -13,6 +13,7 @@ import com.xdja.collectdata.entity.MemoryData;
 import com.xdja.collectdata.handleData.HandleDataResult;
 import com.xdja.constant.Constants;
 import com.xdja.constant.GlobalConfig;
+import com.xdja.util.CommonUtil;
 
 /**
  * 问题模型：用于对上报的数据进行处理，判断是否存在问题。
@@ -186,7 +187,7 @@ public class HandleDataManager {
 	 * @param cpuData
 	 * @return null 就跳过这个结果数据不处理
 	 */
-	public HandleDataResult handleMemoryData(MemoryData memoryData) {
+	public HandleDataResult handleMemoryData(MemoryData memoryData, float value) {
 		if (memoryData == null) {
 			return null;
 		}
@@ -207,13 +208,16 @@ public class HandleDataManager {
 			System.out.println("shakeCount = " + shakeCount);
 			memoryList.clear();
 			if (shakeCount > MEMORY_SHAKECOUNT) {
-				memoryResult = saveMemoryEnvironment(false);
+				memoryResult = saveMemoryEnvironment(false, CommonUtil.getTwoDots(value));
 				return memoryResult;
 			}
 		} else {
 			memoryList.add(memoryData);
 		}
+		
 		memoryResult = new HandleDataResult(true);
+		memoryResult.setTestValue(String.valueOf(CommonUtil.getTwoDots(value)));
+		memoryResult.setActivityName(CollectDataImpl.getCurActivity());
 		return memoryResult;
 	}
 
@@ -223,25 +227,22 @@ public class HandleDataManager {
 	 * @param result
 	 * @return
 	 */
-	private HandleDataResult saveMemoryEnvironment(boolean result) {
+	private HandleDataResult saveMemoryEnvironment(boolean result, float testValue) {
 		HandleDataResult memoryResult = new HandleDataResult(false);
 		// dumpsys memory
 		String filePath = SaveEnvironmentManager.getInstance().dumpMemory(GlobalConfig.DeviceName,
 				GlobalConfig.PackageName, Constants.TYPE_MEMORY);
-		System.out.println("filePath = " + filePath);
 		String logPath = SaveEnvironmentManager.getInstance().saveCurrentLog(GlobalConfig.DeviceName,
 				GlobalConfig.PackageName, Constants.TYPE_MEMORY);
-		System.out.println("logPath = " + logPath);
 		String screenPath = SaveEnvironmentManager.getInstance().screenShots(GlobalConfig.DeviceName,
 				Constants.TYPE_MEMORY);
-		System.out.println("screenPath = " + screenPath);
 		String activityName = CollectDataImpl.getCurActivity();
-		System.out.println("save environment finish");
 
 		memoryResult.setMemoryTracePath(filePath);
 		memoryResult.setLogPath(logPath);
 		memoryResult.setScreenshotsPath(screenPath);
 		memoryResult.setActivityName(activityName);
+		memoryResult.setTestValue(String.valueOf(CommonUtil.getTwoDots(testValue)));
 
 		return memoryResult;
 	}

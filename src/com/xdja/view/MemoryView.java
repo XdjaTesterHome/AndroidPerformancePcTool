@@ -47,7 +47,6 @@ public class MemoryView extends BaseChartView implements IClientChangeListener {
 	private Thread memoryThread;
 	private MemoryData mMemoryData = null;
 	private HandleDataResult mHandleDataResult = null;
-	
 
 	public MemoryView(String chartContent, String title, String yaxisName) {
 		super();
@@ -181,10 +180,9 @@ public class MemoryView extends BaseChartView implements IClientChangeListener {
 						allocMb = m.bytesAllocated / (1024.f * 1024.f);
 						freeMb = m.sizeInBytes / (1024.f * 1024.f) - allocMb;
 						mMemoryData = new MemoryData(allocMb, freeMb);
-						System.out.println("allocMb = " + allocMb);
 						addTotalObservation(allocMb, freeMb);
 						// 处理有问题的数据
-						mHandleDataResult = HandleDataManager.getInstance().handleMemoryData(mMemoryData);
+						mHandleDataResult = HandleDataManager.getInstance().handleMemoryData(mMemoryData, allocMb);
 						handleResult(mHandleDataResult, allocMb);
 					}
 				}
@@ -198,25 +196,28 @@ public class MemoryView extends BaseChartView implements IClientChangeListener {
 	 * @param result
 	 */
 	private void handleResult(HandleDataResult result, float memoryValue) {
-		if (result == null || result.result) {
+		if (result == null) {
 			return;
 		}
+		// 记录数据
+		mHandleDataList.add(result);
 
-		// 在界面上展示问题数据
-		appendErrorInfo(formatErrorInfo(result, String.valueOf(memoryValue) + "MB"));
-
+		if (!result.result) {
+			// 在界面上展示问题数据
+			appendErrorInfo(formatErrorInfo(result, String.valueOf(memoryValue) + "MB"));
+		}
 	}
-	
+
 	@Override
 	protected String formatErrorInfo(HandleDataResult result, String value) {
 		// TODO Auto-generated method stub
 		StringBuilder sbBuilder = new StringBuilder("===================== \n");
-    	sbBuilder.append("ActivityName = ").append(result.activityName).append("\n");
-    	sbBuilder.append("当前测试值= ").append(value).append("\n");
-    	sbBuilder.append("Logfile= ").append(result.logPath).append("\n");
-    	sbBuilder.append("截屏路径= ").append(result.screenshotsPath).append("\n");
-    	sbBuilder.append("memoryTrace=").append(result.memoryTracePath).append("\n");
-    	sbBuilder.append("===================== \n\n\n\n");
-    	return sbBuilder.toString();
+		sbBuilder.append("ActivityName = ").append(result.activityName).append("\n");
+		sbBuilder.append("当前测试值= ").append(value).append("\n");
+		sbBuilder.append("Logfile= ").append(result.logPath).append("\n");
+		sbBuilder.append("截屏路径= ").append(result.screenshotsPath).append("\n");
+		sbBuilder.append("memoryTrace=").append(result.memoryTracePath).append("\n");
+		sbBuilder.append("===================== \n\n\n\n");
+		return sbBuilder.toString();
 	}
 }

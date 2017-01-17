@@ -16,8 +16,8 @@ public class PerformanceDB {
 	private static Connection conn;
 	private static Statement stat;
 	private static ResultSet result;
-	private static String tableUrl = "jdbc:mysql://localhost:3306/performanceData";
-	private static String dbUrl = "jdbc:mysql://localhost:3306/";
+	private static String tableUrl = "jdbc:mysql://11.12.109.38:3306/performanceData";
+	private static String dbUrl = "jdbc:mysql://11.12.109.38:3306/";
 	private static String driverClass = "com.mysql.jdbc.Driver";
 	private final static String DBNAME = "performanceData";
 	public static PerformanceDB getInstance() {
@@ -191,6 +191,42 @@ public class PerformanceDB {
 			return;
 		}
 		String insertSql = "insert into `" + cpuTableName
+				+ "`(page, testvalue, screenshotPath, logPath, methodTracePath, hprofPath, pass) values (?,?,?,?,?,?,?)";
+		PreparedStatement psts = null;
+		try {
+			conn.setAutoCommit(false);
+			psts = conn.prepareStatement(insertSql);
+			for (HandleDataResult result : handleDataList) {
+				psts.setString(1, result.activityName);
+				psts.setFloat(2, Float.valueOf(result.testValue));
+				psts.setString(3, result.screenshotsPath);
+				psts.setString(4, result.logPath);
+				psts.setString(5, result.methodTracePath);
+				psts.setString(6, result.memoryTracePath);
+				// 正常数据，值是1，异常数据，值是0
+				psts.setInt(7, result.result ? 1 : 0);
+				psts.addBatch();
+			}
+			
+			psts.executeBatch(); // 执行批量处理  
+	        conn.commit();  // 提交 
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	
+	/**
+	 * 将Cpu数据插入到数据表中
+	 * 
+	 * @param handleDataList
+	 */
+	public void insertMemoryData(List<HandleDataResult> handleDataList) {
+		if (handleDataList == null || handleDataList.size() < 1) {
+			return;
+		}
+		String insertSql = "insert into `" + memoryTableName
 				+ "`(page, testvalue, screenshotPath, logPath, methodTracePath, hprofPath, pass) values (?,?,?,?,?,?,?)";
 		PreparedStatement psts = null;
 		try {

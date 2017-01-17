@@ -4,7 +4,6 @@ import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Font;
 import java.sql.SQLException;
-import java.util.List;
 
 import javax.swing.BorderFactory;
 
@@ -25,7 +24,6 @@ import com.xdja.collectdata.entity.CpuData;
 import com.xdja.collectdata.handleData.HandleDataManager;
 import com.xdja.collectdata.handleData.HandleDataResult;
 import com.xdja.constant.GlobalConfig;
-import com.xdja.database.PerformanceDB;
 
 public class CpuView extends BaseChartView {
 
@@ -182,25 +180,5 @@ public class CpuView extends BaseChartView {
 	 */
 	public void stop() {
 		stopFlag = true;
-		saveDataToDB();
-	}
-
-	/**
-	 * 将数据保存到数据表中
-	 */
-	private void saveDataToDB() {
-		if (mHandleDataList != null && mHandleDataList.size() > 1) {
-			PerformanceDB.getInstance().insertCpuData(mHandleDataList);
-		}
-	}
-
-	/**
-	 * 获取处理过的数据
-	 * 
-	 * @return
-	 */
-	public List<HandleDataResult> getHandleResult() {
-
-		return mHandleDataList;
 	}
 }

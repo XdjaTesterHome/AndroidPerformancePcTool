@@ -26,6 +26,7 @@ import com.android.ddmlib.IDevice;
 import com.xdja.adb.AdbManager;
 import com.xdja.adb.AndroidDevice;
 import com.xdja.collectdata.CollectDataImpl;
+import com.xdja.collectdata.handleData.HandleDataResult;
 import com.xdja.constant.Constants;
 import com.xdja.constant.GlobalConfig;
 import com.xdja.database.PerformanceDB;
@@ -323,10 +324,32 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 			kpiTestView.stop();
 		}
 		
-//		//关闭数据库连接
-//		PerformanceDB.getInstance().closeDB();
+		// 将数据保存到数据库中
+		saveDataToDB();
+		
+		// 关闭数据库连接
+		PerformanceDB.getInstance().closeDB();
 	}
-
+	
+	/**
+	 * 将所有的测试数据保存到数据库中
+	 * 
+	 */
+	private void saveDataToDB(){
+		// cpu
+		if (viewCpu != null) {
+			List<HandleDataResult> cpuList = viewCpu.getHandleResult();
+			PerformanceDB.getInstance().insertCpuData(cpuList);
+		}
+		
+		// memory
+		if (viewMemory != null) {
+			List<HandleDataResult> memoryList = viewMemory.getHandleResult();
+			PerformanceDB.getInstance().insertMemoryData(memoryList);
+		}
+	}
+	
+	
 	@Override
 	public void deviceConnected(IDevice device) {
 		// TODO Auto-generated method stub
