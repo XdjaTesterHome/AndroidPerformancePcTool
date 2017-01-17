@@ -16,8 +16,8 @@ public class PerformanceDB {
 	private static Connection conn;
 	private static Statement stat;
 	private static ResultSet result;
-	private static String tableUrl = "jdbc:mysql://11.12.109.38:3306/performanceData";
-	private static String dbUrl = "jdbc:mysql://11.12.109.38:3306/";
+	private static String tableUrl = "jdbc:mysql://localhost:3306/performanceData";
+	private static String dbUrl = "jdbc:mysql://localhost:3306/";
 	private static String driverClass = "com.mysql.jdbc.Driver";
 	private final static String DBNAME = "performanceData";
 	public static PerformanceDB getInstance() {
