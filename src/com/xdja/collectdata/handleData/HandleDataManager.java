@@ -24,7 +24,7 @@ import com.xdja.util.CommonUtil;
 public class HandleDataManager {
 	private static HandleDataManager mInstance = null;
 	// 用于判定内存是否存在抖动。
-	private long memoryInterval = 10 * 1000;
+	private long memoryInterval = 30 * 1000;
 	// 标记是否在测试内存
 	private boolean memoryTestNow = false;
 	// 用于存放10s内收集的memory数据
@@ -39,8 +39,8 @@ public class HandleDataManager {
 	// 内存相关配置常量
 	// 默认内存上下波动不超过2M
 	private final static int MEMORY_STANDARD = 2;
-	// 内存抖动不超过2次
-	private final static int MEMORY_SHAKECOUNT = 2;
+	// 内存抖动不超过3次
+	private final static int MEMORY_SHAKECOUNT = 4;
 
 	// 公共配置常量
 
@@ -121,12 +121,12 @@ public class HandleDataManager {
 				Constants.TYPE_CPU);
 		String logPath = SaveEnvironmentManager.getInstance().saveCurrentLog(GlobalConfig.DeviceName,
 				GlobalConfig.PackageName, Constants.TYPE_CPU);
-		String methodTrace = SaveEnvironmentManager.getInstance().methodTracing(GlobalConfig.DeviceName,
-				GlobalConfig.PackageName, Constants.TYPE_CPU);
+//		String methodTrace = SaveEnvironmentManager.getInstance().methodTracing(GlobalConfig.DeviceName,
+//				GlobalConfig.PackageName, Constants.TYPE_CPU);
 		HandleDataResult handleResult = new HandleDataResult(result);
 		handleResult.setActivityName(activityName);
 		handleResult.setLogPath(logPath);
-		handleResult.setMethodTracePath(methodTrace);
+		handleResult.setMethodTracePath("");
 		handleResult.setScreenshotsPath(screenshotsPath);
 		handleResult.setTestValue(String.valueOf(value));
 		return handleResult;
@@ -230,15 +230,15 @@ public class HandleDataManager {
 	private HandleDataResult saveMemoryEnvironment(boolean result, float testValue) {
 		HandleDataResult memoryResult = new HandleDataResult(false);
 		// dumpsys memory
-		String filePath = SaveEnvironmentManager.getInstance().dumpMemory(GlobalConfig.DeviceName,
-				GlobalConfig.PackageName, Constants.TYPE_MEMORY);
+//		String filePath = SaveEnvironmentManager.getInstance().dumpMemory(GlobalConfig.DeviceName,
+//				GlobalConfig.PackageName, Constants.TYPE_MEMORY);
 		String logPath = SaveEnvironmentManager.getInstance().saveCurrentLog(GlobalConfig.DeviceName,
 				GlobalConfig.PackageName, Constants.TYPE_MEMORY);
 		String screenPath = SaveEnvironmentManager.getInstance().screenShots(GlobalConfig.DeviceName,
 				Constants.TYPE_MEMORY);
 		String activityName = CollectDataImpl.getCurActivity();
 
-		memoryResult.setMemoryTracePath(filePath);
+		memoryResult.setMemoryTracePath("");
 		memoryResult.setLogPath(logPath);
 		memoryResult.setScreenshotsPath(screenPath);
 		memoryResult.setActivityName(activityName);

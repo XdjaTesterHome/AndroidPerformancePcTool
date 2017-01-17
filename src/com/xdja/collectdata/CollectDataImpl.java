@@ -309,15 +309,14 @@ public class CollectDataImpl {
 	 * @return
 	 */
 	public static String getCurActivity() {
-		String cmd = "dumpsys activity top | grep ACTIVITY";
+		String cmd = "dumpsys activity | grep mFocusedActivity";
 		CommandResult activityResult = ExecShellUtil.getInstance().execShellCommand(cmd);
 
 		if (activityResult != null && !"".equals(activityResult.successMsg)) {
 			String activityName = CommonUtil.formatBlanksToBlank(activityResult.successMsg);
 			activityName = activityName.trim();
-			activityName = activityName.split(" ")[1];
-			int index = activityName.indexOf("/");
-			activityName = activityName.substring(index + 1);
+			activityName = activityName.split("/")[1];
+			activityName = activityName.split(" ")[0];
 			activityName = activityName.substring(activityName.lastIndexOf(".")+1);
 			return activityName;
 		}
@@ -630,7 +629,7 @@ public class CollectDataImpl {
 	}
 
 	public static void main(String[] args) {
-		CollectDataImpl.getBaseTestInfo();
+		CollectDataImpl.getCurActivity();
 	}
 
 }

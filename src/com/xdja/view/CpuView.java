@@ -89,23 +89,6 @@ public class CpuView extends BaseChartView {
 	}
 
 	/**
-	 * 格式化错误信息
-	 * 
-	 * @param result
-	 * @return
-	 */
-	private String formatErrorInfo(HandleDataResult result, CpuData cpuData) {
-		StringBuilder sbBuilder = new StringBuilder("===================== \n");
-		sbBuilder.append("ActivityName = ").append(result.activityName).append("\n");
-		sbBuilder.append("当前测试值              = ").append(cpuData.cpuUsage).append("\n");
-		sbBuilder.append("Logfile      = ").append(result.logPath).append("\n");
-		sbBuilder.append("截屏路径                  = ").append(result.screenshotsPath).append("\n");
-		sbBuilder.append("methodTrace  = ").append(result.methodTracePath).append("\n");
-		sbBuilder.append("===================== \n\n\n");
-		return sbBuilder.toString();
-	}
-
-	/**
 	 * 开启任务
 	 * 
 	 * @param packageName
@@ -160,11 +143,15 @@ public class CpuView extends BaseChartView {
 	public void handleData(CpuData cpuData, double cpu) {
 		// 对数据进行判断
 		HandleDataResult handleDataResult = HandleDataManager.getInstance().handleCpu(cpuData, cpu);
+		if (handleDataResult == null) {
+			return;
+		}
 		// 记录数据
 		mHandleDataList.add(handleDataResult);
+		
+		// 填充错误信息
 		if (handleDataResult != null && !handleDataResult.result) {
-			// 填充错误信息
-			appendErrorInfo(formatErrorInfo(handleDataResult, cpuData));
+			appendErrorInfo(formatErrorInfo(handleDataResult, String.valueOf(cpuData.cpuUsage), "cpu使用率过高"));
 		}
 	}
 

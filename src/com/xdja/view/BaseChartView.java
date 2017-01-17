@@ -93,8 +93,11 @@ public abstract class BaseChartView extends JPanel{
      * @param result
      * @return
      */
-    protected String formatErrorInfo(HandleDataResult result, String value){
+    protected String formatErrorInfo(HandleDataResult result, String value, String errorInfo){
     	StringBuilder sbBuilder = new StringBuilder("===================== \n");
+    	if (!CommonUtil.strIsNull(errorInfo)) {
+			sbBuilder.append(errorInfo).append("\n");
+		}
     	sbBuilder.append("ActivityName = ").append(result.activityName).append("\n");
     	sbBuilder.append("µ±«∞≤‚ ‘÷µ= ").append(value).append("\n");
     	sbBuilder.append("Logfile= ").append(result.logPath).append("\n");

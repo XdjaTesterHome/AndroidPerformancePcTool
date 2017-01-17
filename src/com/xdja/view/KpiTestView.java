@@ -30,6 +30,7 @@ public class KpiTestView extends BaseChartView {
 	 * serial UID auto generated
 	 */
 	private static final long serialVersionUID = -9002331611054515951L;
+	private static final String NOMESSGE = "无页面加载数据，请在测试App上切换页面收集数据！！";
 	private boolean stopFlag = false;
 	private Thread kpiThread, kdatathread;
 	private List<KpiData> KpiData = null;
@@ -57,6 +58,8 @@ public class KpiTestView extends BaseChartView {
 
 		// 设置柱状图轴
 		CategoryPlot mPlot = mBarchart.getCategoryPlot();
+		mPlot.setNoDataMessage(NOMESSGE);
+		mPlot.setNoDataMessageFont(new Font("粗体", Font.BOLD, 17));
 		// x轴
 		CategoryAxis mDomainAxis = mPlot.getDomainAxis();
 		mDomainAxis.setCategoryLabelPositions(CategoryLabelPositions.UP_45);

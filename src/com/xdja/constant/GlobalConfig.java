@@ -13,7 +13,7 @@ public class GlobalConfig {
 	public static final int collectDataTime  = 20;
 	
 	// 采集数据的时间间隔
-	public static final int collectInterval  = 500;
+	public static final int collectInterval  = 1000;
 	public static final int collectMIDDLEInterval  = 1000;
 	public static final int collectLONGInterval  = 1500;
 	

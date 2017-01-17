@@ -204,20 +204,7 @@ public class MemoryView extends BaseChartView implements IClientChangeListener {
 
 		if (!result.result) {
 			// 在界面上展示问题数据
-			appendErrorInfo(formatErrorInfo(result, String.valueOf(memoryValue) + "MB"));
+			appendErrorInfo(formatErrorInfo(result, String.valueOf(memoryValue) + "MB", "发生内存抖动"));
 		}
-	}
-
-	@Override
-	protected String formatErrorInfo(HandleDataResult result, String value) {
-		// TODO Auto-generated method stub
-		StringBuilder sbBuilder = new StringBuilder("===================== \n");
-		sbBuilder.append("ActivityName = ").append(result.activityName).append("\n");
-		sbBuilder.append("当前测试值= ").append(value).append("\n");
-		sbBuilder.append("Logfile= ").append(result.logPath).append("\n");
-		sbBuilder.append("截屏路径= ").append(result.screenshotsPath).append("\n");
-		sbBuilder.append("memoryTrace=").append(result.memoryTracePath).append("\n");
-		sbBuilder.append("===================== \n\n\n\n");
-		return sbBuilder.toString();
 	}
 }
