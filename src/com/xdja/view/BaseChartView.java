@@ -14,8 +14,8 @@ import javax.swing.Timer;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.StandardChartTheme;
 
-import com.xdja.collectdata.entity.CpuData;
 import com.xdja.collectdata.handleData.HandleDataResult;
+import com.xdja.util.CommonUtil;
 
 public abstract class BaseChartView extends JPanel{
 
@@ -28,6 +28,7 @@ public abstract class BaseChartView extends JPanel{
 	protected ActionListener mActionListener;
 	protected List<HandleDataResult> mHandleDataList = new ArrayList<>();
 	protected ShowMessageView mShowMessageView;
+	private boolean isFirstShowError = true;  // 是否第一次展示错误信息
 	
 	public BaseChartView() {
 		super(new BorderLayout());
@@ -95,11 +96,25 @@ public abstract class BaseChartView extends JPanel{
     protected String formatErrorInfo(HandleDataResult result, String value){
     	StringBuilder sbBuilder = new StringBuilder("===================== \n");
     	sbBuilder.append("ActivityName = ").append(result.activityName).append("\n");
-    	sbBuilder.append("当前测试值              = ").append(value).append("\n");
-    	sbBuilder.append("Logfile      = ").append(result.logPath).append("\n");
-    	sbBuilder.append("截屏路径                  = ").append(result.screenshotsPath).append("\n");
-    	sbBuilder.append("methodTrace  = ").append(result.methodTracePath).append("\n");
+    	sbBuilder.append("当前测试值= ").append(value).append("\n");
+    	sbBuilder.append("Logfile= ").append(result.logPath).append("\n");
+    	sbBuilder.append("截屏路径= ").append(result.screenshotsPath).append("\n");
     	sbBuilder.append("===================== \n\n\n\n");
     	return sbBuilder.toString();
     }
+    
+    protected void appendErrorInfo(String msg) {
+		if (CommonUtil.strIsNull(msg)) {
+			return;
+		}
+		
+		if (mShowMessageView != null) {
+			if (isFirstShowError) {
+				mShowMessageView.setText("");
+				isFirstShowError = false;
+			}
+			
+			mShowMessageView.append(msg);
+		}
+	}
 }

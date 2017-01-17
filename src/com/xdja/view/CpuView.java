@@ -4,7 +4,6 @@ import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Font;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -44,8 +43,6 @@ public class CpuView extends BaseChartView {
 	public static ArrayList<ArrayList<String>> cpudbdata;//定义二维数组列表，用于接收测试数据并存储，后续批量插入数据库
 	public static ArrayList<String> cpudbd;//定义一维数组列表，用于接收测试数据并存储，后续批量插入数据库
 	
-	HandleDataManager handle = new HandleDataManager();
-
 	public CpuView(String chartContent, String title, String yaxisName) {
 		super();
 		this.totalcpu = new TimeSeries("应用CPU占用率");
@@ -103,9 +100,7 @@ public class CpuView extends BaseChartView {
 		mHandleDataList.add(handleDataResult);
 		if (handleDataResult != null && !handleDataResult.result) {
 			// 填充错误信息
-			if (mShowMessageView != null) {
-				mShowMessageView.append(formatErrorInfo(handleDataResult, cpuData));
-			}
+			appendErrorInfo(formatErrorInfo(handleDataResult, cpuData));
 		}
 	}
 
@@ -117,12 +112,12 @@ public class CpuView extends BaseChartView {
 	 */
 	private String formatErrorInfo(HandleDataResult result, CpuData cpuData) {
 		StringBuilder sbBuilder = new StringBuilder("===================== \n");
-		sbBuilder.append("ActivityName = ").append(result.activityName);
-		sbBuilder.append("当前测试值              = ").append(cpuData.cpuUsage);
-		sbBuilder.append("Logfile      = ").append(result.logPath);
-		sbBuilder.append("截屏路径                  = ").append(result.screenshotsPath);
-		sbBuilder.append("methodTrace  = ").append(result.methodTracePath);
-		sbBuilder.append("===================== \n\n\n\n");
+		sbBuilder.append("ActivityName = ").append(result.activityName).append("\n");
+		sbBuilder.append("当前测试值              = ").append(cpuData.cpuUsage).append("\n");
+		sbBuilder.append("Logfile      = ").append(result.logPath).append("\n");
+		sbBuilder.append("截屏路径                  = ").append(result.screenshotsPath).append("\n");
+		sbBuilder.append("methodTrace  = ").append(result.methodTracePath).append("\n");
+		sbBuilder.append("===================== \n\n\n");
 		return sbBuilder.toString();
 	}
 
@@ -201,9 +196,9 @@ public class CpuView extends BaseChartView {
     		i=1;
     	}
     	if (i ==10){     //在主线程中添加逻辑判断，条件满足时执行相关方法
-    		handle.cpuList(cpuData);
+    		HandleDataManager.getInstance().cpuList(cpuData);
 		}
-    	HandleDataResult abresult = handle.handleCpu(cpuData);
+    	HandleDataResult abresult = HandleDataManager.getInstance().handleCpu(cpuData);
     	return abresult;
 	}
 	

@@ -29,14 +29,24 @@ public class HandleDataManager {
 	// 用于存放10s内收集的memory数据
 	private List<MemoryData> memoryList = new ArrayList<>(24);
 	private HandleDataResult memoryResult = null;
-	public HandleDataResult upcpu = null;//用于存放CPU的处理结果
-	private List<Float> cpuList = new ArrayList<Float>();// 用于存放采集来做数据模型监测的CPU数据
-	
-	// 各个测试项值的标准
+	private List<Float> cpuList = new ArrayList<Float>();// 用于存放CPU数据
+
+	// CPU相关配置常量
 	private final static int CPU_MAX = 50;
-	private final static int CPU_CONTINUE_MAX = 10;
+	private final static int CPU_CONTINUE_MAX = 30;
+
+	// 内存相关配置常量
+	// 默认内存上下波动不超过2M
+	private final static int MEMORY_STANDARD = 2;
+	// 内存抖动不超过2次
+	private final static int MEMORY_SHAKECOUNT = 2;
 	
-	public HandleDataManager() {
+	// 公共配置常量
+
+	private long lastTime = 0;
+	private long nowTime = 0;
+
+	private HandleDataManager() {
 
 	}
 
@@ -56,17 +66,12 @@ public class HandleDataManager {
 	public HandleDataResult handleCpusilence(CpuData cpuData) {
 		// 静默测试数据的判断//
 		boolean result;
+		HandleDataResult upcpu = null;
 		if (cpuData.cpuUsage > 1) {
-			upcpu = saveCpuEnvironment(false,cpuData.cpuUsage);
+			upcpu = saveCpuEnvironment(false);
 		} else {
 			result = true;
 			upcpu = new HandleDataResult(result);
-			upcpu.setActivityName("none");//none表示当前cpu的值正常，无需保存log等环境
-			upcpu.setLogPath("none");
-			upcpu.setMethodTracePath("none");
-			upcpu.setScreenshotsPath("none");
-			upcpu.setMemoryTracePath("none");
-			upcpu.setCPU(cpuData.cpuUsage);
 		}
 
 		return upcpu;
@@ -74,25 +79,21 @@ public class HandleDataManager {
 
 	// handleCpu处理非静默测试的数据模型,原则上2点：其一大于50%；其二连续三次数据大于30%//
 	public HandleDataResult handleCpu(CpuData cpuData) {
-		// 静默测试数据的判断,返回TRUE无异常，返回FALSE,则数据是有问题的。//
+		// 静默测试数据的判断//
 		boolean result;
+		HandleDataResult upcpu = null;
 		cpuList(cpuData);
 		if (cpuData.cpuUsage > CPU_MAX) {
-			upcpu = saveCpuEnvironment(false,cpuData.cpuUsage);
+			upcpu = saveCpuEnvironment(false);
 		} else {
 			int i = cpuList.size();
 			if (i == 3) {
-				if (cpuList.get(0) > CPU_CONTINUE_MAX && cpuList.get(1) > CPU_CONTINUE_MAX && cpuList.get(2) > CPU_CONTINUE_MAX) {
-					upcpu = saveCpuEnvironment(false,cpuList.get(2));
+				if (cpuList.get(0) > CPU_CONTINUE_MAX && cpuList.get(1) > CPU_CONTINUE_MAX
+						&& cpuList.get(2) > CPU_CONTINUE_MAX) {
+					upcpu = saveCpuEnvironment(false);
 				} else {
 					result = true;
 					upcpu = new HandleDataResult(result);
-					upcpu.setActivityName("none");//none表示当前cpu的值正常，无需保存log等环境
-					upcpu.setLogPath("none");
-					upcpu.setMethodTracePath("none");
-					upcpu.setScreenshotsPath("none");
-					upcpu.setMemoryTracePath("none");
-					upcpu.setCPU(cpuList.get(2));
 				}
 			}
 
@@ -106,8 +107,7 @@ public class HandleDataManager {
 	 * 
 	 * @param result
 	 */
-	private HandleDataResult saveCpuEnvironment(boolean result,float cpu) {
-		String memoryTracePath = "";
+	private HandleDataResult saveCpuEnvironment(boolean result) {
 		String activityName = CollectDataImpl.getCurActivity();
 		String screenshotsPath = SaveEnvironmentManager.getInstance().screenShots(GlobalConfig.DeviceName,
 				Constants.TYPE_CPU);
@@ -120,13 +120,10 @@ public class HandleDataManager {
 		handleResult.setLogPath(logPath);
 		handleResult.setMethodTracePath(methodTrace);
 		handleResult.setScreenshotsPath(screenshotsPath);
-		handleResult.setMemoryTracePath(memoryTracePath);//添加methodTracePath
-		handleResult.setCPU(cpu);//添加保存CPU数据
 		return handleResult;
 	}
 
 	// cpuList列表中依次添加元素，直到添加长度为3的元素后，每次只更新列表元素，删除第一个和添加最后一个，列表长度适中为3//
-	//每隔500ms采集一次数据，理论上我们采集异常数据，需要5s采集一次并判断异常数据//
 	public List<Float> cpuList(CpuData cpuData) {
 		if (cpuData != null) {
 			int i = cpuList.size();
@@ -164,13 +161,14 @@ public class HandleDataManager {
 
 	/**
 	 * 处理得到的内存数据 内存的问题暂时有如下几种 待扩展： 一、对当前版本的内存数据进行判定
-	 * 1.内存抖动。（暂定的标准是10s内超过5次内存波动），我们只记录判定为内存抖动时的页面。
+	 * 1.内存抖动。（暂定的标准是10s内超过2次内存波动），我们只记录判定为内存抖动时的页面。
 	 * 2.内存泄露。通过工具不太好判定内存泄露，准备用LeakCanary + monkey跑
 	 * 
 	 * 二、版本间进行数据对比 1.每次启动应用后，Heap内存相比之前版本稳定增长。这通常是因为增加了新的功能或者代码造成的。
 	 * 2.对比版本数据，Heap Alloc的变化不大，但进程的Dalvik Heap pss
 	 * 内存明显增加，这主要是因为分配了大量小对象造成的内存碎片。 上面两种情况，暂时还不能抽象
 	 * 
+	 * 修改，采集数据的时间间隔换成5s。内存泄露数据采集改为30s
 	 * 
 	 * @param cpuData
 	 * @return null 就跳过这个结果数据不处理
@@ -179,8 +177,6 @@ public class HandleDataManager {
 		if (memoryData == null) {
 			return null;
 		}
-		long lastTime = 0;
-		long nowTime = 0;
 		if (!memoryTestNow) {
 			lastTime = System.currentTimeMillis();
 			memoryTestNow = true;
@@ -188,44 +184,55 @@ public class HandleDataManager {
 
 		nowTime = System.currentTimeMillis();
 		/**
-		 * 如果超过10s，清空条件，重新开始。
+		 * 如果超过30s，清空条件，重新开始。
 		 */
 		if (nowTime - lastTime > memoryInterval) {
 			memoryTestNow = false;
 			lastTime = 0;
 			nowTime = 0;
 			int shakeCount = getShakeCount();
-			if (shakeCount > 5) {
+			System.out.println("shakeCount = " + shakeCount);
+			memoryList.clear();
+			if (shakeCount > MEMORY_SHAKECOUNT) {
 				memoryResult = saveMemoryEnvironment(false);
 				return memoryResult;
 			}
-			memoryList.clear();
 		} else {
 			memoryList.add(memoryData);
 		}
 		memoryResult = new HandleDataResult(true);
 		return memoryResult;
 	}
-	
+
 	/**
 	 * memory测试保存结果
+	 * 
 	 * @param result
 	 * @return
 	 */
-	private HandleDataResult saveMemoryEnvironment(boolean result){
+	private HandleDataResult saveMemoryEnvironment(boolean result) {
 		HandleDataResult memoryResult = new HandleDataResult(false);
 		// dumpsys memory
 		String filePath = SaveEnvironmentManager.getInstance().dumpMemory(GlobalConfig.DeviceName,
 				GlobalConfig.PackageName, Constants.TYPE_MEMORY);
+		System.out.println("filePath = " + filePath);
 		String logPath = SaveEnvironmentManager.getInstance().saveCurrentLog(GlobalConfig.DeviceName,
 				GlobalConfig.PackageName, Constants.TYPE_MEMORY);
-		String screenPath = SaveEnvironmentManager.getInstance().screenShots(GlobalConfig.DeviceName, Constants.TYPE_MEMORY);
+		System.out.println("logPath = " + logPath);
+		String screenPath = SaveEnvironmentManager.getInstance().screenShots(GlobalConfig.DeviceName,
+				Constants.TYPE_MEMORY);
+		System.out.println("screenPath = " + screenPath);
+		String activityName = CollectDataImpl.getCurActivity();
+		System.out.println("save environment finish");
+		
 		memoryResult.setMemoryTracePath(filePath);
 		memoryResult.setLogPath(logPath);
 		memoryResult.setScreenshotsPath(screenPath);
-		
+		memoryResult.setActivityName(activityName);
+
 		return memoryResult;
 	}
+
 	/**
 	 * 获取shakeCount的次数
 	 * 
@@ -237,8 +244,9 @@ public class HandleDataManager {
 			for (int i = 0; i < memoryList.size() - 1; i++) {
 				float nowData = memoryList.get(i).memAlloc;
 				float nextData = memoryList.get(i + 1).memAlloc;
+				System.out.println("nextData - nowData= " + (nowData - nextData));
 				// 这里的单位都是M
-				if (Math.abs(nowData - nextData) > 2) {
+				if (Math.abs(nowData - nextData) > MEMORY_STANDARD) {
 					num += 1;
 				}
 			}

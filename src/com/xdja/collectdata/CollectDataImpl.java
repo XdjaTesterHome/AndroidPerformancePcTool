@@ -11,7 +11,6 @@ import com.xdja.collectdata.entity.CpuData;
 import com.xdja.collectdata.entity.FlowData;
 import com.xdja.collectdata.entity.FpsData;
 import com.xdja.collectdata.entity.KpiData;
-import com.xdja.constant.GlobalConfig;
 import com.xdja.log.LoggerManager;
 import com.xdja.util.CommonUtil;
 import com.xdja.util.ExecShellUtil;
@@ -78,9 +77,9 @@ public class CollectDataImpl {
 	 */
 	public static void startCollectKpiData(String packageName) {
 		kpiList.clear();
-		String cmd = "logcat -v time -s ActivityManager | grep " + packageName;
+		String cmd = "adb logcat -v time -s ActivityManager | grep " + packageName;
 		System.out.println(cmd);
-		String clearcmd = "logcat -c";
+		String clearcmd = "adb logcat -c";
 		ExecShellUtil.getInstance().execShellCommand(clearcmd);
 		System.out.println(clearcmd);
 		ExecShellUtil.getInstance().execCmdCommand(cmd, mGetDataListener);
@@ -240,7 +239,6 @@ public class CollectDataImpl {
 				totalRecv += recv_bytes;
 				totalSend += send_bytes;
 			}
-			System.out.println("totalSend = " + totalSend + ", totalRecv = " + totalRecv);
 			float totalFlows = (totalRecv + totalSend) / 1024;
 			totalFlows = CommonUtil.getTwoDots(totalFlows);
 			flowData = new FlowData(totalFlows, totalRecv, totalSend);

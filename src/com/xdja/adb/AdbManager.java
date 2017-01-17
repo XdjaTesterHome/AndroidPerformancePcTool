@@ -1,21 +1,14 @@
 package com.xdja.adb;
 
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
 import java.util.TreeSet;
 
-import javax.imageio.ImageIO;
-
-import com.android.ddmlib.AdbCommandRejectedException;
 import com.android.ddmlib.AndroidDebugBridge;
 import com.android.ddmlib.AndroidDebugBridge.IDebugBridgeChangeListener;
 import com.android.ddmlib.Client;
 import com.android.ddmlib.DdmPreferences;
 import com.android.ddmlib.IDevice;
-import com.android.ddmlib.RawImage;
-import com.android.ddmlib.TimeoutException;
 import com.xdja.collectdata.thread.DumpMemoryThread;
+import com.xdja.collectdata.thread.ScreenCaptureThread;
 import com.xdja.collectdata.thread.TraceMethodThread;
 import com.xdja.constant.GlobalConfig;
 import com.xdja.util.CommonUtil;
@@ -34,6 +27,7 @@ public class AdbManager implements IDebugBridgeChangeListener {
 	AndroidDebugBridge myBridge = null;
 	private DumpMemoryThread dumpMemoryThread = null;
 	private TraceMethodThread traceMethodThread = null;
+	private ScreenCaptureThread screenCaptureThread = null;
 
 	public static AdbManager getInstance() {
 		if (mInstance == null) {
@@ -221,40 +215,11 @@ public class AdbManager implements IDebugBridgeChangeListener {
 	 * @param needSave
 	 *            是否需要自己保存
 	 */
-	public BufferedImage screenCapture(String deviceName, String filePath, boolean needSave) {
-		IDevice device = getIDevice(deviceName);
-		BufferedImage myImage = null;
-		if (device != null) {
-			try {
-				RawImage rawImage = device.getScreenshot();
-				if (rawImage != null) {
-					myImage = new BufferedImage(rawImage.width, rawImage.height, BufferedImage.TYPE_INT_ARGB);
-					for (int y = 0; y < rawImage.height; y++) {
-						for (int x = 0; x < rawImage.width; x++) {
-							int argb = rawImage.getARGB((x + y * rawImage.width) * (rawImage.bpp / 8));
-							myImage.setRGB(x, y, argb);
-						}
-					}
-
-					if (needSave) {
-						return myImage;
-					}
-
-					ImageIO.write(myImage, "PNG", new File(filePath));
-				}
-			} catch (TimeoutException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (AdbCommandRejectedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-
-		return myImage;
+	public ScreenCaptureThread screenCapture(String deviceName, String filePath, boolean needSave) {
+		screenCaptureThread = new ScreenCaptureThread(deviceName, needSave, filePath); 
+		screenCaptureThread.start();
+		
+		return screenCaptureThread;
 	}
 
 	/**
