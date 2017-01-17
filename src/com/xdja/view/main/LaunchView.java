@@ -1,4 +1,4 @@
-package com.xdja.view;
+package com.xdja.view.main;
 
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
@@ -37,6 +37,13 @@ import com.xdja.util.CommonUtil;
 import com.xdja.util.ExecShellUtil;
 import com.xdja.util.SwingUiUtil;
 import com.xdja.util.SwingUiUtil.ClickDialogBtnListener;
+import com.xdja.view.ToolsView;
+import com.xdja.view.chart.BatteryView;
+import com.xdja.view.chart.CpuView;
+import com.xdja.view.chart.FlowView;
+import com.xdja.view.chart.FpsView;
+import com.xdja.view.chart.KpiTestView;
+import com.xdja.view.chart.MemoryView;
 
 public class LaunchView extends JFrame implements IDeviceChangeListener {
 

@@ -1,4 +1,4 @@
-package com.xdja.view;
+package com.xdja.view.chart;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -14,6 +14,7 @@ import org.jfree.chart.StandardChartTheme;
 
 import com.xdja.collectdata.handleData.entity.HandleDataResultBase;
 import com.xdja.util.CommonUtil;
+import com.xdja.view.ShowMessageView;
 
 public abstract class BaseChartView extends JPanel{
 

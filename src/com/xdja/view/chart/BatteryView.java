@@ -1,5 +1,5 @@
 
-package com.xdja.view;
+package com.xdja.view.chart;
 
 import java.awt.Color;
 import java.awt.FlowLayout;
