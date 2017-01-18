@@ -390,7 +390,7 @@ public class PerformanceDB {
 			conn.setAutoCommit(false);
 			psts = conn.prepareStatement(insertSql);
 			for (BatteryHandleResult result : handleBatteryList) {
-				psts.setInt(1, result.uid);
+				psts.setString(1, result.uid);
 				psts.setFloat(2, Float.valueOf(result.testValue));
 				psts.setString(3, result.detailInfo);
 				psts.addBatch();
