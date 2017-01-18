@@ -7,7 +7,7 @@ package com.xdja.collectdata.handleData.entity;
  */
 public class BatteryHandleResult extends HandleDataResultBase {
 	
-	public int uid;
+	public String uid;
 	public String detailInfo;
 	
 	public BatteryHandleResult() {
@@ -29,7 +29,7 @@ public class BatteryHandleResult extends HandleDataResultBase {
 		return detailInfo;
 	}
 
-	public int getUid() {
+	public String getUid() {
 		return uid;
 	}
 
@@ -37,7 +37,7 @@ public class BatteryHandleResult extends HandleDataResultBase {
 		this.detailInfo = detailInfo;
 	}
 
-	public void setUid(int uid) {
+	public void setUid(String uid) {
 		this.uid = uid;
 	}
 	

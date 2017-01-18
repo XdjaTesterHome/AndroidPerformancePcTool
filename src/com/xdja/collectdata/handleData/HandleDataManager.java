@@ -1,6 +1,7 @@
 package com.xdja.collectdata.handleData;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import com.xdja.collectdata.entity.FlowData;
@@ -8,8 +9,10 @@ import com.xdja.collectdata.entity.FpsData;
 import com.xdja.collectdata.entity.KpiData;
 import com.xdja.collectdata.CollectDataImpl;
 import com.xdja.collectdata.SaveEnvironmentManager;
+import com.xdja.collectdata.entity.BatteryData;
 import com.xdja.collectdata.entity.CpuData;
 import com.xdja.collectdata.entity.MemoryData;
+import com.xdja.collectdata.handleData.entity.BatteryHandleResult;
 import com.xdja.collectdata.handleData.entity.CpuHandleResult;
 import com.xdja.collectdata.handleData.entity.FlowHandleResult;
 import com.xdja.collectdata.handleData.entity.FpsHandleResult;
@@ -40,34 +43,33 @@ public class HandleDataManager {
 	private List<KpiHandleResult> kpiList = new ArrayList<>(12);
 	// 用于存放fps数据
 	private List<FpsHandleResult> fpsList = new ArrayList<>(12);
-	
+
 	// 声明处理数据结果的对象
-	private MemoryHandleResult memoryResult  = null;
+	private MemoryHandleResult memoryResult = null;
 	private KpiHandleResult mKpiHandleResult = null;
 	private FpsHandleResult mFpsHandleResult = null;
-	
+
 	// CPU相关配置常量
 	private final static int CPU_MAX = 50;
 	private final static int CPU_CONTINUE_MAX = 30;
 	private static int cpuCount = 0;
-	
+
 	// 内存相关配置常量
 	// 默认内存上下波动不超过2M
 	private final static int MEMORY_STANDARD = 2;
 	// 内存抖动不超过3次
 	private final static int MEMORY_SHAKECOUNT = 4;
-	
+
 	// kpi相关配置
 	// kpi数据超过多少判定有问题，单位是ms
 	private final static int KPI_TIME = 2000;
-	
+
 	// flow相关配置 单位是KB
 	private final static int FLOW_VALUE = 1024;
-	
+
 	// fps相关配置
 	private final static int FPS_COUNT = 40;
-	
-	
+
 	// 公共配置常量
 
 	private long lastTime = 0;
@@ -124,7 +126,7 @@ public class HandleDataManager {
 					upcpu.setTestValue(String.valueOf(cpu));
 					upcpu.setActivityName(CollectDataImpl.getCurActivity());
 				}
-			}else {
+			} else {
 				result = true;
 				upcpu = new CpuHandleResult(result);
 				upcpu.setTestValue(String.valueOf(cpu));
@@ -132,7 +134,7 @@ public class HandleDataManager {
 			}
 
 		}
-		
+
 		return upcpu;
 	}
 
@@ -143,13 +145,15 @@ public class HandleDataManager {
 	 */
 	private CpuHandleResult saveCpuEnvironment(boolean result, double value) {
 		String activityName = CollectDataImpl.getCurActivity();
-//		String screenshotsPath = SaveEnvironmentManager.getInstance().screenShots(GlobalConfig.DeviceName,
-//				Constants.TYPE_CPU);
+		// String screenshotsPath =
+		// SaveEnvironmentManager.getInstance().screenShots(GlobalConfig.DeviceName,
+		// Constants.TYPE_CPU);
 		String logPath = SaveEnvironmentManager.getInstance().saveCurrentLog(GlobalConfig.DeviceName,
 				GlobalConfig.PackageName, Constants.TYPE_CPU);
 		// 暂时不抓取method trace，会影响采集数据
-//		String methodTrace = SaveEnvironmentManager.getInstance().methodTracing(GlobalConfig.DeviceName,
-//				GlobalConfig.PackageName, Constants.TYPE_CPU);
+		// String methodTrace =
+		// SaveEnvironmentManager.getInstance().methodTracing(GlobalConfig.DeviceName,
+		// GlobalConfig.PackageName, Constants.TYPE_CPU);
 		CpuHandleResult handleResult = new CpuHandleResult(result);
 		handleResult.setActivityName(activityName);
 		handleResult.setLogPath(logPath);
@@ -181,16 +185,16 @@ public class HandleDataManager {
 		if (flowData == null) {
 			return null;
 		}
-		
+
 		if (flowData.flowTotal > FLOW_VALUE) {
-			
+
 		}
 		return null;
 	}
 
 	/**
-	 * 对采集到的fps数据进行处理
-	 * 问题判定标准： 当fps < 40 
+	 * 对采集到的fps数据进行处理 问题判定标准： 当fps < 40
+	 * 
 	 * @param cpuData
 	 * @return
 	 */
@@ -198,62 +202,87 @@ public class HandleDataManager {
 		if (fpsDatas == null || fpsDatas.size() < 1) {
 			return null;
 		}
-		for(FpsData fpsData : fpsDatas ){
+		for (FpsData fpsData : fpsDatas) {
 			mFpsHandleResult = new FpsHandleResult();
 			mFpsHandleResult.setActivityName(fpsData.activityName);
 			mFpsHandleResult.setTestValue(String.valueOf(fpsData.fps));
 			mFpsHandleResult.setDropcount(fpsData.dropcount);
 			// 判断是否有问题
 			if (fpsData.fps < FPS_COUNT) {
-				
-				//保存log
-				String logPath = SaveEnvironmentManager.getInstance().saveCurrentLog(GlobalConfig.DeviceName, GlobalConfig.PackageName, Constants.TYPE_KPI);
+
+				// 保存log
+				String logPath = SaveEnvironmentManager.getInstance().saveCurrentLog(GlobalConfig.DeviceName,
+						GlobalConfig.PackageName, Constants.TYPE_KPI);
 				// 保存method trace
 				mFpsHandleResult.setLogPath(logPath);
 				mFpsHandleResult.setResult(false);
 				mFpsHandleResult.setMethodTracePath("");
 				mFpsHandleResult.setMemoryHprofPath("");
 				handleFpsDataInList(mFpsHandleResult);
-			}else {
+			} else {
 				mFpsHandleResult.setResult(true);
 				handleFpsDataInList(mFpsHandleResult);
 			}
 		}
-		
+
 		return fpsList;
 	}
 	
 	/**
+	 *  处理电量相关数据
+	 *  问题模型：暂时还没确定，电量场景比较多，标准不好定
+	 */
+	public List<BatteryHandleResult> handleBatteryData(List<BatteryData> batteryDatas) {
+		// 用于存放Battery数据
+		List<BatteryHandleResult> batteryList = new ArrayList<>(12);
+		BatteryHandleResult batteryHandleResult = null;
+		if (batteryDatas == null || batteryDatas.size() < 1) {
+			return batteryList;
+		}
+		
+		for(BatteryData batteryData : batteryDatas){
+			batteryHandleResult = new BatteryHandleResult();
+			batteryHandleResult.setResult(true);
+			batteryHandleResult.setUid(batteryData.uid);
+			batteryHandleResult.setTestValue(String.valueOf(batteryData.batteryValue));
+			batteryList.add(batteryHandleResult);
+		}
+		
+		return batteryList;
+	}
+
+	/**
 	 * 处理fps在列表中的数据
+	 * 
 	 * @param handleFpsData
 	 */
-	private void handleFpsDataInList(FpsHandleResult handleFpsData){
+	private void handleFpsDataInList(FpsHandleResult handleFpsData) {
 		if (handleFpsData == null) {
 			return;
 		}
-		
+
 		if (fpsList.contains(handleFpsData)) {
 			int lastFps = Integer.parseInt(fpsList.get(fpsList.indexOf(handleFpsData)).testValue);
-			int nowFps  = Integer.parseInt(handleFpsData.testValue);
-			int curFps  = (lastFps + nowFps)/2;
+			int nowFps = Integer.parseInt(handleFpsData.testValue);
+			int curFps = (lastFps + nowFps) / 2;
 			if (curFps > FPS_COUNT) {
 				handleFpsData.setResult(false);
-			}else {
+			} else {
 				handleFpsData.setResult(true);
 				handleFpsData.setLogPath("");
 				handleFpsData.setMemoryHprofPath("");
 				handleFpsData.setMethodTracePath("");
 			}
-			
+
 			handleFpsData.testValue = String.valueOf(curFps);
 		}
-		
+
 		fpsList.add(handleFpsData);
 	}
-	
+
 	/**
-	 * 处理kpi相关的数据
-	 * 判断问题的标准： 页面加载时间大于2s，但是暂时还没有区分首次启动、冷启动
+	 * 处理kpi相关的数据 判断问题的标准： 页面加载时间大于2s，但是暂时还没有区分首次启动、冷启动
+	 * 
 	 * @param cpuData
 	 * @return
 	 */
@@ -261,56 +290,57 @@ public class HandleDataManager {
 		if (KpiDatas == null || KpiDatas.size() < 1) {
 			return null;
 		}
-		
-		for(KpiData kpiData : KpiDatas ){
+
+		for (KpiData kpiData : KpiDatas) {
 			mKpiHandleResult = new KpiHandleResult();
 			mKpiHandleResult.setActivityName(kpiData.currentPage);
 			mKpiHandleResult.setTestValue(String.valueOf(kpiData.loadTime));
 			// 判断是否有问题
 			if (kpiData.loadTime > KPI_TIME) {
-				
-				//保存log
-				String logPath = SaveEnvironmentManager.getInstance().saveCurrentLog(GlobalConfig.DeviceName, GlobalConfig.PackageName, Constants.TYPE_KPI);
+
+				// 保存log
+				String logPath = SaveEnvironmentManager.getInstance().saveCurrentLog(GlobalConfig.DeviceName,
+						GlobalConfig.PackageName, Constants.TYPE_KPI);
 				// 保存method trace
 				mKpiHandleResult.setLogPath(logPath);
 				mKpiHandleResult.setResult(false);
 				mKpiHandleResult.setMethodTracePath("");
 				handleKpiDataInList(mKpiHandleResult);
-			}else {
+			} else {
 				mKpiHandleResult.setResult(true);
 				handleKpiDataInList(mKpiHandleResult);
 			}
 		}
-		
+
 		return kpiList;
 	}
-	
+
 	/**
 	 * 对列表中已经存在的数据进行合并
+	 * 
 	 * @param kpiData
 	 */
-	private void handleKpiDataInList(KpiHandleResult kpiData){
+	private void handleKpiDataInList(KpiHandleResult kpiData) {
 		if (kpiData == null) {
 			return;
 		}
-		
+
 		if (kpiList.contains(kpiData)) {
 			int lastTime = Integer.parseInt(kpiList.get(kpiList.indexOf(kpiData)).testValue);
 			int nowTime = Integer.parseInt(kpiData.testValue);
-			int curTime = (lastTime + nowTime)/2;
+			int curTime = (lastTime + nowTime) / 2;
 			if (curTime > KPI_TIME) {
 				kpiData.setResult(false);
-			}else {
+			} else {
 				kpiData.setResult(true);
 			}
-			
+
 			kpiData.testValue = String.valueOf(curTime);
 		}
-		
+
 		kpiList.add(kpiData);
 	}
-	
-	
+
 	/**
 	 * 处理得到的内存数据 内存的问题暂时有如下几种 待扩展： 一、对当前版本的内存数据进行判定
 	 * 1.内存抖动。（暂定的标准是10s内超过2次内存波动），我们只记录判定为内存抖动时的页面。
@@ -352,7 +382,7 @@ public class HandleDataManager {
 		} else {
 			memoryList.add(memoryData);
 		}
-		
+
 		memoryResult = new MemoryHandleResult(true);
 		memoryResult.setTestValue(String.valueOf(CommonUtil.getTwoDots(value)));
 		memoryResult.setActivityName(CollectDataImpl.getCurActivity());
@@ -368,12 +398,14 @@ public class HandleDataManager {
 	private MemoryHandleResult saveMemoryEnvironment(boolean result, float testValue) {
 		MemoryHandleResult memoryResult = new MemoryHandleResult(false);
 		// dumpsys memory
-//		String filePath = SaveEnvironmentManager.getInstance().dumpMemory(GlobalConfig.DeviceName,
-//				GlobalConfig.PackageName, Constants.TYPE_MEMORY);
+		// String filePath =
+		// SaveEnvironmentManager.getInstance().dumpMemory(GlobalConfig.DeviceName,
+		// GlobalConfig.PackageName, Constants.TYPE_MEMORY);
 		String logPath = SaveEnvironmentManager.getInstance().saveCurrentLog(GlobalConfig.DeviceName,
 				GlobalConfig.PackageName, Constants.TYPE_MEMORY);
-//		String screenPath = SaveEnvironmentManager.getInstance().screenShots(GlobalConfig.DeviceName,
-//				Constants.TYPE_MEMORY);
+		// String screenPath =
+		// SaveEnvironmentManager.getInstance().screenShots(GlobalConfig.DeviceName,
+		// Constants.TYPE_MEMORY);
 		String activityName = CollectDataImpl.getCurActivity();
 
 		memoryResult.setMemoryHprofPath("");

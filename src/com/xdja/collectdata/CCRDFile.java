@@ -1,9 +1,12 @@
 package com.xdja.collectdata;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.xdja.collectdata.entity.BatteryData;
 import com.xdja.collectdata.entity.CommandResult;
 import com.xdja.util.CommonUtil;
 import com.xdja.util.ExecShellUtil;
@@ -19,7 +22,7 @@ public class CCRDFile {
 	// 通过 sPath.matches(matches) 方法的返回值判断是否正确
 	// sPath 为路径字符串
 	boolean flag = false;
-	
+	private static BatteryData batteryData = null;
 
 	public boolean DeleteFolder(String deletePath) {// 根据路径删除指定的目录或文件，无论存在与否
 		flag = false;
@@ -352,6 +355,71 @@ public class CCRDFile {
 		
 	}
 	
+	/**
+	 * 处理采集到的电量数据
+	 * @param message
+	 * @return
+	 */
+	public static List<BatteryData> handlePowerData(String message){
+		List<BatteryData> batteryDatas = new ArrayList<>(12);
+		if (CommonUtil.strIsNull(message)) {
+			return batteryDatas;
+		}
+		
+		// 匹配我们关心的数据
+		String result = handlere(message);
+		String resus = result.trim();
+		if (CommonUtil.strIsNull(resus)) {
+			return batteryDatas;
+		}
+		
+		String[] batterys = result.split("\n\n");
+		int computerDrain = 0;
+		int actualDrain = 0;
+		
+		for(int i = 0; i< batterys.length; i++){
+			batteryData = new BatteryData();
+			if (i == 0) {
+				String totalBattery = CommonUtil.formatBlanksToBlank(batterys[0]);
+				String[] totalBatterys = totalBattery.split(",");
+				computerDrain = Integer.parseInt(totalBatterys[1].split(":")[1]);
+				actualDrain  = Integer.parseInt(totalBatterys[2].split(":")[1]);
+				if (computerDrain > 0) {
+					batteryData.setBatteryValue(computerDrain);
+					batteryData.setUid("Computed drain");
+					batteryDatas.add(batteryData);
+				}
+				
+				if (actualDrain > 0) {
+					batteryData = new BatteryData();
+					batteryData.setBatteryValue(actualDrain);
+					batteryData.setUid("actual drain");
+					batteryDatas.add(batteryData);
+				}
+			}
+			
+			// 判断字符串中是否包含Uid
+			if (batterys[i].contains("Uid")) {
+				String tempStr = CommonUtil.formatBlanksToBlank(batterys[i]);
+				String[] Uidbatterys = tempStr.split(" ");
+				String uid = Uidbatterys[1].substring(0, Uidbatterys[1].length() - 1);
+				float value = Float.parseFloat(Uidbatterys[2]);
+				batteryData.setUid(uid);
+				batteryData.setBatteryValue(value);
+				batteryDatas.add(batteryData);
+			}else{
+				String tempStr = CommonUtil.formatBlanksToBlank(batterys[i]);
+				String[] UidBatterys = tempStr.split(":");
+				String uid = UidBatterys[0].trim();
+				float value = Float.parseFloat(UidBatterys[1].trim());
+				batteryData.setUid(uid);
+				batteryData.setBatteryValue(value);
+				batteryDatas.add(batteryData);
+			}
+		}
+		
+		return batteryDatas;
+	}
 	//判断是否为isDouble类型的数据//
 	private static boolean isDouble(String str)
 	{
@@ -364,11 +432,11 @@ public class CCRDFile {
 	   return false;
 	}
 	
-	public static String[][] getpowerdata(String pac) throws IOException{
+	public static List<BatteryData> getpowerdata(String pac) throws IOException{
 		CommandResult data = get_battery_data(pac);
 		writetofile(data.successMsg);
-		String[][] getpowerdata = handlepowerdata(data.successMsg);
-		return getpowerdata;
+		List<BatteryData> batteryDatas = handlePowerData(data.successMsg);
+		return batteryDatas;
 	}
 	
 	public static void main(String[] args) throws IOException  {
