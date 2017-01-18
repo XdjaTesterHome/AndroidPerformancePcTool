@@ -198,7 +198,20 @@ public class BatteryView extends BaseChartView {
 		}
 		
 		List<BatteryHandleResult> batteryHandleResults = HandleDataManager.getInstance().handleBatteryData(batteryDataList);
+		if (batteryHandleResults == null || batteryHandleResults.size() < 1) {
+			return;
+			
+		}
+		
+		// 保存到数据库
 		saveDataToDb(batteryHandleResults);
+		
+		// 显示异常信息
+		for(BatteryHandleResult result : batteryHandleResults){
+			if (!result.result) {
+				mShowMessageView.append(formatErrorInfo(result, result.testValue, "电量消耗过多"));
+			}
+		}
 	}
 	
 	/**
