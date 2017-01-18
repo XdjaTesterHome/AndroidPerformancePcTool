@@ -7,4 +7,19 @@ package com.xdja.collectdata.handleData.entity;
  */
 public class FlowHandleResult extends HandleDataResultBase {
 	
+	public FlowHandleResult() {
+		super();
+		// TODO Auto-generated constructor stub
+	}
+
+	public FlowHandleResult(boolean result) {
+		super(result);
+		// TODO Auto-generated constructor stub
+	}
+
+	public FlowHandleResult(String testValue, boolean result, String activityName, String logPath) {
+		super(testValue, result, activityName, logPath);
+		// TODO Auto-generated constructor stub
+	}
+	
 }

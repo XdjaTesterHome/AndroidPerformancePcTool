@@ -11,7 +11,10 @@ import com.xdja.collectdata.SaveEnvironmentManager;
 import com.xdja.collectdata.entity.CpuData;
 import com.xdja.collectdata.entity.MemoryData;
 import com.xdja.collectdata.handleData.entity.CpuHandleResult;
+import com.xdja.collectdata.handleData.entity.FlowHandleResult;
+import com.xdja.collectdata.handleData.entity.FpsHandleResult;
 import com.xdja.collectdata.handleData.entity.HandleDataResultBase;
+import com.xdja.collectdata.handleData.entity.KpiHandleResult;
 import com.xdja.collectdata.handleData.entity.MemoryHandleResult;
 import com.xdja.constant.Constants;
 import com.xdja.constant.GlobalConfig;
@@ -31,9 +34,18 @@ public class HandleDataManager {
 	private boolean memoryTestNow = false;
 	// 用于存放10s内收集的memory数据
 	private List<MemoryData> memoryList = new ArrayList<>(24);
-	private MemoryHandleResult memoryResult = null;
-	private List<Float> cpuList = new ArrayList<Float>();// 用于存放CPU数据
-
+	// 用于存放CPU数据
+	private List<Float> cpuList = new ArrayList<Float>();
+	// 用于存放kpi数据
+	private List<KpiHandleResult> kpiList = new ArrayList<>(12);
+	// 用于存放fps数据
+	private List<FpsHandleResult> fpsList = new ArrayList<>(12);
+	
+	// 声明处理数据结果的对象
+	private MemoryHandleResult memoryResult  = null;
+	private KpiHandleResult mKpiHandleResult = null;
+	private FpsHandleResult mFpsHandleResult = null;
+	
 	// CPU相关配置常量
 	private final static int CPU_MAX = 50;
 	private final static int CPU_CONTINUE_MAX = 30;
@@ -48,6 +60,12 @@ public class HandleDataManager {
 	// kpi相关配置
 	// kpi数据超过多少判定有问题，单位是ms
 	private final static int KPI_TIME = 2000;
+	
+	// flow相关配置 单位是KB
+	private final static int FLOW_VALUE = 1024;
+	
+	// fps相关配置
+	private final static int FPS_COUNT = 40;
 	
 	
 	// 公共配置常量
@@ -159,37 +177,140 @@ public class HandleDataManager {
 		}
 	}
 
-	public HandleDataResultBase handleFlowData(FlowData flowData) {
-		return null;
-	}
-
-	/**
-	 * 
-	 * @param cpuData
-	 * @return
-	 */
-	public HandleDataResultBase handleFpsData(FpsData fpsData) {
-		return null;
-	}
-
-	/**
-	 * 
-	 * @param cpuData
-	 * @return
-	 */
-	public HandleDataResultBase handleKpiData(KpiData kpiData) {
-		if (kpiData == null) {
+	public FlowHandleResult handleFlowData(FlowData flowData) {
+		if (flowData == null) {
 			return null;
 		}
 		
-		// 判断是否有问题
-		if (kpiData.loadTime > KPI_TIME) {
+		if (flowData.flowTotal > FLOW_VALUE) {
 			
 		}
-		
 		return null;
 	}
 
+	/**
+	 * 对采集到的fps数据进行处理
+	 * 问题判定标准： 当fps < 40 
+	 * @param cpuData
+	 * @return
+	 */
+	public List<FpsHandleResult> handleFpsData(List<FpsData> fpsDatas) {
+		if (fpsDatas == null || fpsDatas.size() < 1) {
+			return null;
+		}
+		for(FpsData fpsData : fpsDatas ){
+			mFpsHandleResult = new FpsHandleResult();
+			mFpsHandleResult.setActivityName(fpsData.activityName);
+			mFpsHandleResult.setTestValue(String.valueOf(fpsData.fps));
+			mFpsHandleResult.setDropcount(fpsData.dropcount);
+			// 判断是否有问题
+			if (fpsData.fps < FPS_COUNT) {
+				
+				//保存log
+				String logPath = SaveEnvironmentManager.getInstance().saveCurrentLog(GlobalConfig.DeviceName, GlobalConfig.PackageName, Constants.TYPE_KPI);
+				// 保存method trace
+				mFpsHandleResult.setLogPath(logPath);
+				mFpsHandleResult.setResult(false);
+				mFpsHandleResult.setMethodTracePath("");
+				mFpsHandleResult.setMemoryHprofPath("");
+				handleFpsDataInList(mFpsHandleResult);
+			}else {
+				mFpsHandleResult.setResult(true);
+				handleFpsDataInList(mFpsHandleResult);
+			}
+		}
+		
+		return fpsList;
+	}
+	
+	/**
+	 * 处理fps在列表中的数据
+	 * @param handleFpsData
+	 */
+	private void handleFpsDataInList(FpsHandleResult handleFpsData){
+		if (handleFpsData == null) {
+			return;
+		}
+		
+		if (fpsList.contains(handleFpsData)) {
+			int lastFps = Integer.parseInt(fpsList.get(fpsList.indexOf(handleFpsData)).testValue);
+			int nowFps  = Integer.parseInt(handleFpsData.testValue);
+			int curFps  = (lastFps + nowFps)/2;
+			if (curFps > FPS_COUNT) {
+				handleFpsData.setResult(false);
+			}else {
+				handleFpsData.setResult(true);
+				handleFpsData.setLogPath("");
+				handleFpsData.setMemoryHprofPath("");
+				handleFpsData.setMethodTracePath("");
+			}
+			
+			handleFpsData.testValue = String.valueOf(curFps);
+		}
+		
+		fpsList.add(handleFpsData);
+	}
+	
+	/**
+	 * 处理kpi相关的数据
+	 * 判断问题的标准： 页面加载时间大于2s，但是暂时还没有区分首次启动、冷启动
+	 * @param cpuData
+	 * @return
+	 */
+	public List<KpiHandleResult> handleKpiData(List<KpiData> KpiDatas) {
+		if (KpiDatas == null || KpiDatas.size() < 1) {
+			return null;
+		}
+		
+		for(KpiData kpiData : KpiDatas ){
+			mKpiHandleResult = new KpiHandleResult();
+			mKpiHandleResult.setActivityName(kpiData.currentPage);
+			mKpiHandleResult.setTestValue(String.valueOf(kpiData.loadTime));
+			// 判断是否有问题
+			if (kpiData.loadTime > KPI_TIME) {
+				
+				//保存log
+				String logPath = SaveEnvironmentManager.getInstance().saveCurrentLog(GlobalConfig.DeviceName, GlobalConfig.PackageName, Constants.TYPE_KPI);
+				// 保存method trace
+				mKpiHandleResult.setLogPath(logPath);
+				mKpiHandleResult.setResult(false);
+				mKpiHandleResult.setMethodTracePath("");
+				handleKpiDataInList(mKpiHandleResult);
+			}else {
+				mKpiHandleResult.setResult(true);
+				handleKpiDataInList(mKpiHandleResult);
+			}
+		}
+		
+		return kpiList;
+	}
+	
+	/**
+	 * 对列表中已经存在的数据进行合并
+	 * @param kpiData
+	 */
+	private void handleKpiDataInList(KpiHandleResult kpiData){
+		if (kpiData == null) {
+			return;
+		}
+		
+		if (kpiList.contains(kpiData)) {
+			int lastTime = Integer.parseInt(kpiList.get(kpiList.indexOf(kpiData)).testValue);
+			int nowTime = Integer.parseInt(kpiData.testValue);
+			int curTime = (lastTime + nowTime)/2;
+			if (curTime > KPI_TIME) {
+				kpiData.setResult(false);
+			}else {
+				kpiData.setResult(true);
+			}
+			
+			kpiData.testValue = String.valueOf(curTime);
+		}
+		
+		kpiList.add(kpiData);
+	}
+	
+	
 	/**
 	 * 处理得到的内存数据 内存的问题暂时有如下几种 待扩展： 一、对当前版本的内存数据进行判定
 	 * 1.内存抖动。（暂定的标准是10s内超过2次内存波动），我们只记录判定为内存抖动时的页面。

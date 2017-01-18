@@ -179,4 +179,15 @@ public class BatteryView extends BaseChartView {
 		});
 		batteryThread.start();
 	}
+	
+	/**
+	 * 将数据保存到数据库中
+	 */
+	public void saveDataToDb(){
+		if (batteryData == null) {
+			return;
+		}
+		
+		
+	}
 }

@@ -27,7 +27,9 @@ import com.xdja.adb.AdbManager;
 import com.xdja.adb.AndroidDevice;
 import com.xdja.collectdata.CollectDataImpl;
 import com.xdja.collectdata.handleData.entity.CpuHandleResult;
+import com.xdja.collectdata.handleData.entity.FpsHandleResult;
 import com.xdja.collectdata.handleData.entity.HandleDataResultBase;
+import com.xdja.collectdata.handleData.entity.KpiHandleResult;
 import com.xdja.collectdata.handleData.entity.MemoryHandleResult;
 import com.xdja.constant.Constants;
 import com.xdja.constant.GlobalConfig;
@@ -355,6 +357,12 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 		if (viewMemory != null) {
 			List<MemoryHandleResult> memoryList = viewMemory.getHandleResult();
 			PerformanceDB.getInstance().insertMemoryData(memoryList);
+		}
+		
+		// ±£´æKPiÊý¾Ý
+		if (kpiTestView != null) {
+			List<KpiHandleResult> kpiHandleResults = kpiTestView.getHandleKpiList();
+			PerformanceDB.getInstance().insertKpiData(kpiHandleResults);
 		}
 	}
 	

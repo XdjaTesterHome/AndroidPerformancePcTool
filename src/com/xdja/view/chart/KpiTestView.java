@@ -2,6 +2,7 @@ package com.xdja.view.chart;
 
 import java.awt.Color;
 import java.awt.Font;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.BorderFactory;
@@ -22,6 +23,8 @@ import org.jfree.data.category.DefaultCategoryDataset;
 
 import com.xdja.collectdata.CollectDataImpl;
 import com.xdja.collectdata.entity.KpiData;
+import com.xdja.collectdata.handleData.HandleDataManager;
+import com.xdja.collectdata.handleData.entity.KpiHandleResult;
 import com.xdja.constant.GlobalConfig;
 
 public class KpiTestView extends BaseChartView {
@@ -34,6 +37,8 @@ public class KpiTestView extends BaseChartView {
 	private boolean stopFlag = false;
 	private Thread kpiThread, kdatathread;
 	private List<KpiData> KpiData = null;
+	private List<KpiHandleResult> kpiHandleList = new ArrayList<>(12);
+	private List<KpiHandleResult> errorList = new ArrayList<>(12);
 
 	private CategoryPlot mPlot;
 	private DefaultCategoryDataset mDataset = null;
@@ -125,6 +130,7 @@ public class KpiTestView extends BaseChartView {
 						}
 					}
 					
+					handleKpiData(KpiData);
 					try {
 						Thread.sleep(GlobalConfig.collectMIDDLEInterval);
 					} catch (InterruptedException e) {
@@ -138,6 +144,34 @@ public class KpiTestView extends BaseChartView {
 		kpiThread.start();
 	}
 
+	/**
+	 *  处理kpi相关的数据
+	 */
+	private void handleKpiData(List<KpiData> kpiList){
+		kpiHandleList = HandleDataManager.getInstance().handleKpiData(kpiList);
+		if (kpiHandleList == null || kpiHandleList.size() < 1) {
+			return;
+		}
+		//将错误信息展示
+		for(KpiHandleResult kpiHandle : kpiHandleList){
+			if (!kpiHandle.result) {
+				if (errorList.contains(kpiHandle)) {
+					continue;
+				}
+				errorList.add(kpiHandle);
+				mShowMessageView.append(formatErrorInfo(kpiHandle, kpiHandle.testValue, "页面加载时间过长"));
+			}
+		}
+	}
+	
+	/**
+	 *  返回kpi相关的处理数据
+	 * @return
+	 */
+	public List<KpiHandleResult> getHandleKpiList() {
+		return kpiHandleList;
+	}
+	
 	public void stop() {
 		stopFlag = true;
 		CollectDataImpl.stopCollectKpiData();
