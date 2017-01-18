@@ -41,7 +41,7 @@ public class FpsView extends BaseChartView {
 	 * serial UID auto generated
 	 */
 	private static final long serialVersionUID = -9002331611054515951L;
-	private boolean stopFlag = false;
+	private JButton startBtn, pauseBtn;
 	private Thread fpsThread;
 	private List<FpsData> fpsdataList = null;
 	private List<FpsHandleResult> fpsHandleList = new ArrayList<>(12);
@@ -100,8 +100,8 @@ public class FpsView extends BaseChartView {
 //		addSigleSwitch();
 		chartPanel.setLayout(new FlowLayout(FlowLayout.RIGHT));
 		//添加单独的图标
-		JButton startBtn = SwingUiUtil.getInstance().createBtnWithColor("开始", Color.green);
-		JButton pauseBtn = SwingUiUtil.getInstance().createBtnWithColor("结束", Color.RED);
+		startBtn = SwingUiUtil.getInstance().createBtnWithColor("开始", Color.green);
+		pauseBtn = SwingUiUtil.getInstance().createBtnWithColor("结束", Color.RED);
 		pauseBtn.setEnabled(false);
 		startBtn.addActionListener(new ActionListener() {
 			
@@ -147,8 +147,10 @@ public class FpsView extends BaseChartView {
 			public void run() {
 				// TODO Auto-generated method stub
 				stopFlag = false;
+				isRunning = true;
 				while (true) {
 					if (stopFlag) {
+						isRunning = false;
 						break;
 					}
 					fpsdataList = CollectDataImpl.getFpsData(packageName);
@@ -226,7 +228,7 @@ public class FpsView extends BaseChartView {
 		return fpsHandleList;
 	}
 	
-	private void saveDataToDb(){
+	public void saveDataToDb(){
 		// 保存fps数据
 		if (fpsHandleList == null || fpsHandleList.size() < 1) {
 			return;
@@ -236,6 +238,36 @@ public class FpsView extends BaseChartView {
 		
 		// 关闭数据库
 		PerformanceDB.getInstance().closeDB();
+	}
+	
+	public void destoryData(){
+		if (fpsHandleList != null) {
+			fpsHandleList.clear();
+			fpsHandleList = null;
+		}
+		
+		if (errorList != null) {
+			errorList.clear();
+			errorList = null;
+		}
+	}
+	
+	/**
+	 *  设置当前界面的按钮是否是可以点击的。
+	 * @param enable
+	 */
+	public void setBtnEnable(boolean enable){
+		if (startBtn == null || pauseBtn == null) {
+			return;
+		}
+		if (enable) {
+			startBtn.setEnabled(true);
+			pauseBtn.setEnabled(false);
+		}else {
+			startBtn.setEnabled(false);
+			pauseBtn.setEnabled(false);
+		}
+		
 	}
 }
 

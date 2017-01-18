@@ -27,6 +27,8 @@ public abstract class BaseChartView extends JPanel{
 	protected ActionListener mActionListener;
 	protected ShowMessageView mShowMessageView;
 	private boolean isFirstShowError = true;  // 是否第一次展示错误信息
+	public boolean stopFlag = false; // 是否停止的标志
+	public boolean isRunning = false; // 是否正在运行的标志。
 	
 	public BaseChartView() {
 		super(new BorderLayout());

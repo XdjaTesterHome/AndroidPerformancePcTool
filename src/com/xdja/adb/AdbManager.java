@@ -7,6 +7,7 @@ import com.android.ddmlib.AndroidDebugBridge.IDebugBridgeChangeListener;
 import com.android.ddmlib.Client;
 import com.android.ddmlib.DdmPreferences;
 import com.android.ddmlib.IDevice;
+import com.xdja.collectdata.entity.CommandResult;
 import com.xdja.collectdata.thread.DumpMemoryThread;
 import com.xdja.collectdata.thread.ScreenCaptureThread;
 import com.xdja.collectdata.thread.TraceMethodThread;
@@ -280,5 +281,41 @@ public class AdbManager implements IDebugBridgeChangeListener {
 	 */
 	public void release() {
 		AndroidDebugBridge.removeDebugBridgeChangeListener(this);
+	}
+	
+	/**
+	 *  ÈÃÉè±¸½øÈë¾²Ä¬×´Ì¬
+	 */
+	public void makeDeviceSlient(){
+		String pressHomeKeyCmd = "input keyevent 3";
+		String pressPowerKeyCmd = "input keyevent 26";
+		ExecShellUtil.getInstance().execShellCommand(pressHomeKeyCmd, false);
+		if (isScrrenOn()) {
+			ExecShellUtil.getInstance().execShellCommand(pressPowerKeyCmd, false);
+		}
+	}
+	
+	/**
+	 *  ÅÐ¶ÏÆÁÄ»ÊÇ·ñÁÁ×Å
+	 * @return
+	 */
+	public boolean isScrrenOn(){
+		String screenOnCmd = "dumpsys window policy | grep mScreenOnFully";
+		CommandResult cmdResult = ExecShellUtil.getInstance().execShellCommand(screenOnCmd, true);
+		if (cmdResult != null && !CommonUtil.strIsNull(cmdResult.successMsg)) {
+			String tempStr = CommonUtil.formatBlanksToBlank(cmdResult.successMsg).trim();
+			String[] cmdResults = tempStr.split(" ");
+			String value = cmdResults[0].split("=")[1];
+			if ("false".equals(value.trim())) {
+				return false;
+			}
+			
+			if ("true".equals(value.trim())) {
+				return true;
+			}
+		}
+		
+		
+		return false;
 	}
 }

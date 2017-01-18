@@ -34,7 +34,6 @@ public class KpiTestView extends BaseChartView {
 	 */
 	private static final long serialVersionUID = -9002331611054515951L;
 	private static final String NOMESSGE = "无页面加载数据，请在测试App上切换页面收集数据！！";
-	private boolean stopFlag = false;
 	private Thread kpiThread, kdatathread;
 	private List<KpiData> KpiData = null;
 	private List<KpiHandleResult> kpiHandleList = new ArrayList<>(12);
@@ -113,8 +112,10 @@ public class KpiTestView extends BaseChartView {
 			public void run() {
 				// TODO Auto-generated method stub
 				stopFlag = false;
+				isRunning = true;
 				while (true) {
 					if (stopFlag) {
+						isRunning = false;
 						break;
 					}
 
@@ -182,5 +183,16 @@ public class KpiTestView extends BaseChartView {
 			KpiData.clear();
 		}
 	}
-
+	
+	public void destoryData() {
+		if (kpiHandleList != null) {
+			kpiHandleList.clear();
+			kpiHandleList = null;
+		}
+		
+		if (errorList != null) {
+			errorList.clear();
+			errorList = null;
+		}
+	}
 }

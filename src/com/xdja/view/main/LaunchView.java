@@ -27,8 +27,7 @@ import com.xdja.adb.AdbManager;
 import com.xdja.adb.AndroidDevice;
 import com.xdja.collectdata.CollectDataImpl;
 import com.xdja.collectdata.handleData.entity.CpuHandleResult;
-import com.xdja.collectdata.handleData.entity.FpsHandleResult;
-import com.xdja.collectdata.handleData.entity.HandleDataResultBase;
+import com.xdja.collectdata.handleData.entity.FlowHandleResult;
 import com.xdja.collectdata.handleData.entity.KpiHandleResult;
 import com.xdja.collectdata.handleData.entity.MemoryHandleResult;
 import com.xdja.constant.Constants;
@@ -56,7 +55,7 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 	private Logger logger = Logger.getLogger(LaunchView.class);
 	private String author;
 	private JPanel frame;
-	private JButton jb1, jb2;
+	private JButton jb1, jb2,slientBtn;
 	private MemoryView viewMemory;
 	private FlowView viewFlow;
 	private CpuView viewCpu;
@@ -132,7 +131,7 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 
 		// 开始监控按钮
 		jb1 = new JButton("开始监控");
-		Rectangle rectjb1 = new Rectangle(860, 0, 100, 30);
+		Rectangle rectjb1 = new Rectangle(800, 0, 100, 30);
 		frame.add(jb1);
 		jb1.setBounds(rectjb1);
 
@@ -146,6 +145,10 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 						// TODO Auto-generated method stub
 						jb2.setEnabled(true);
 						jb1.setEnabled(false);
+						slientBtn.setEnabled(false);
+						if (viewFps != null) {
+							viewFps.setBtnEnable(false);
+						}
 						comboDevices.setEnabled(false);
 						comboProcess.setEnabled(false);
 						startTest();
@@ -159,7 +162,7 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 
 		// 停止监控按钮
 		jb2 = new JButton("停止监控");
-		Rectangle rectjb2 = new Rectangle(980, 0, 100, 30);
+		Rectangle rectjb2 = new Rectangle(920, 0, 100, 30);
 		frame.add(jb2);
 		jb2.setBounds(rectjb2);
 		jb2.setEnabled(false);
@@ -174,19 +177,127 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 						// TODO Auto-generated method stub
 						jb1.setEnabled(true);
 						jb2.setEnabled(false);
+						slientBtn.setEnabled(true);
 						comboDevices.setEnabled(true);
 						comboProcess.setEnabled(true);
 						stopTest();
+						if (viewFps != null) {
+							viewFps.setBtnEnable(true);
+						}
 					}
 				});
 
 				thread.start();
 			}
 		});
-
+		
+		// 静默测试
+		slientBtn = new JButton("开始静默测试");
+		Rectangle slientRect = new Rectangle(1040, 0, 120, 30);
+		frame.add(slientBtn);
+		slientBtn.setBounds(slientRect);
+		slientBtn.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// TODO Auto-generated method stub
+				String cmd = e.getActionCommand();
+				switch (cmd) {
+				case "开始静默测试":
+					Thread startThread = new Thread(new Runnable() {
+						
+						@Override
+						public void run() {
+							// TODO Auto-generated method stub
+							jb1.setEnabled(false);
+							jb2.setEnabled(false);
+							comboDevices.setEnabled(false);
+							comboProcess.setEnabled(false);
+							slientBtn.setText("停止静默测试");
+							startSlientTest();
+						}
+					});
+					
+					startThread.start();
+					break;
+				case "停止静默测试":
+					Thread stopThread = new Thread(new Runnable() {
+						
+						@Override
+						public void run() {
+							// TODO Auto-generated method stub
+							jb1.setEnabled(true);
+							jb2.setEnabled(true);
+							comboDevices.setEnabled(true);
+							comboProcess.setEnabled(true);
+							slientBtn.setText("开始静默测试");
+							stopSlientTest();
+						}
+					});
+					
+					stopThread.start();
+					break;
+				default:
+					break;
+				}
+			}
+		});
+		
 		layoutTabComponents();
 	}
-
+	
+	/**
+	 *  开启静默测试
+	 *  静默测试目前只针对CPU 和 Flow 两种类型的数据
+	 */
+	private void startSlientTest(){
+		//让设备进入静默状态
+		AdbManager.getInstance().makeDeviceSlient();
+		
+		if (viewCpu != null) {
+			viewCpu.setSlientTest(true);
+			viewCpu.start(GlobalConfig.PackageName);
+		}
+		
+		if (viewFlow != null) {
+			viewFlow.setSlient(true);
+			viewFlow.start(GlobalConfig.PackageName);
+		}
+	}
+	
+	/**
+	 * 停止静默测试
+	 */
+	private void stopSlientTest(){
+		if (viewCpu != null) {
+			viewCpu.stop();
+		}
+		
+		if (viewFlow != null) {
+			viewFlow.stop();
+		}
+		
+		saveSlientDataToDb();
+		
+		// 关闭数据库
+		PerformanceDB.getInstance().closeDB();
+	}
+	
+	/**
+	 * 将静态数据保存到数据库中
+	 */
+	private void saveSlientDataToDb(){
+		if (viewCpu != null) {
+			List<CpuHandleResult> handleSlientList = viewCpu.getHandleResult();
+			PerformanceDB.getInstance().insertSlientCpuData(handleSlientList);
+		}
+		
+		if (viewFlow != null) {
+			List<FlowHandleResult> handleFlowList = viewFlow.getHandleResultList();
+			PerformanceDB.getInstance().insertSlientFlowData(handleFlowList);
+		}	
+	}
+	
 	/**
 	 * 用来摆放tab的组件 tabNames = {"内存", "cpu", "电量", "kpitest", "帧率", "流量"};
 	 */
@@ -282,6 +393,8 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 				// TODO Auto-generated method stub
 				logger.info("program is exited!");
 				setDefaultCloseOperation(EXIT_ON_CLOSE);
+				destoryViewData();
+				handleExitSaveData();
 			}
 
 			@Override
@@ -291,9 +404,32 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 			}
 		});
 	}
-
+	
+	/**
+	 *  当退出程序或者手机设备断开连接时，
+	 *  保存测试数据，避免白测的情况出现
+	 */
+	private void handleExitSaveData(){
+		if (isNormalTestNow()) {
+			stopTest();
+		}
+		
+		if (isSlientTestNow()) {
+			stopSlientTest();
+		}
+		
+		if (isFpsTestNow()) {
+			if (viewFps != null) {
+				viewFps.stop();
+				viewFps.saveDataToDb();
+			}
+		}
+	}
+	
+	
 	private void startTest() {
 		if (viewCpu != null) {
+			viewCpu.setSlientTest(false);
 			viewCpu.start(GlobalConfig.PackageName);
 		}
 
@@ -302,6 +438,7 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 		}
 
 		if (viewFlow != null) {
+			viewFlow.setSlient(false);
 			viewFlow.start(GlobalConfig.PackageName);
 		}
 
@@ -338,7 +475,6 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 		// 将数据保存到数据库中
 		saveDataToDB();
 		
-		// 关闭数据库连接
 		PerformanceDB.getInstance().closeDB();
 	}
 	
@@ -350,19 +486,36 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 		// cpu
 		if (viewCpu != null) {
 			List<CpuHandleResult> cpuList = viewCpu.getHandleResult();
-			PerformanceDB.getInstance().insertCpuData(cpuList);
+			if (cpuList != null && cpuList.size() > 0) {
+				PerformanceDB.getInstance().insertCpuData(cpuList);
+			}
 		}
 		
 		// memory
 		if (viewMemory != null) {
 			List<MemoryHandleResult> memoryList = viewMemory.getHandleResult();
-			PerformanceDB.getInstance().insertMemoryData(memoryList);
+			if (memoryList != null && memoryList.size() > 0) {
+				PerformanceDB.getInstance().insertMemoryData(memoryList);
+			}
+			
 		}
 		
 		// 保存KPi数据
 		if (kpiTestView != null) {
 			List<KpiHandleResult> kpiHandleResults = kpiTestView.getHandleKpiList();
-			PerformanceDB.getInstance().insertKpiData(kpiHandleResults);
+			if (kpiHandleResults != null && kpiHandleResults.size() > 0) {
+				PerformanceDB.getInstance().insertKpiData(kpiHandleResults);
+			}
+			
+		}
+		
+		if (viewFlow != null) {
+			List<FlowHandleResult> flowHandleResults = viewFlow.getHandleResultList();
+			if (flowHandleResults != null && flowHandleResults.size() > 0) {
+				PerformanceDB.getInstance().insertFlowData(flowHandleResults);
+			}
+			
+			
 		}
 	}
 	
@@ -476,7 +629,74 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 
 		menuBar.add(aboutMenu);
 	}
-
+	
+	/**
+	 *  销毁view中的数据
+	 */
+	private void destoryViewData(){
+		if (viewFlow != null) {
+			viewFlow.destoryData();
+		}
+		
+		if (viewMemory != null) {
+			viewMemory.destoryData();
+		}
+		
+		if (viewCpu != null) {
+			viewCpu.destoryData();
+		}
+		
+		if (viewBattery != null) {
+			viewBattery.destoryData();
+		}
+		
+		if (viewFps != null) {
+			viewFps.destoryData();
+		}
+		
+		if (kpiTestView != null) {
+			kpiTestView.destoryData();
+		}
+	}
+	
+	/**
+	 *  判断是否有任务在进行
+	 *  
+	 * @return
+	 */
+	private boolean isNormalTestNow(){
+		if (viewMemory.isRunning && viewCpu.isRunning && viewFlow.isRunning && kpiTestView.isRunning) {
+			return true;
+		}
+		
+		return false;
+	}
+	
+	/**
+	 * 判断静态任务是否在进行
+	 * @return
+	 */
+	private boolean isSlientTestNow(){
+		if (viewCpu.isRunning && viewFlow.isRunning && viewCpu.slient && viewFlow.isRunning) {
+			return true;
+		}
+		
+		return false;
+	}
+	
+	/**
+	 *  判断Fps是否在测试
+	 * @return
+	 */
+	private boolean isFpsTestNow(){
+		if (viewFps.isRunning) {
+			return true;
+		}
+		
+		return false;
+	}
+	
+	
 	public static void main(String[] args) {
 		LaunchView launch = new LaunchView();
 		launch.createParts();
@@ -484,7 +704,6 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 		launch.initAdbManager();
 		launch.addActionListener();
 		launch.setVisible(true);
-
 	}
 
 }

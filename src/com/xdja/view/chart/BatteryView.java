@@ -50,7 +50,6 @@ public class BatteryView extends BaseChartView {
 	private final static String NOMESSGE = "收集电量数据，需要拔掉USB连接，然后执行自己的测试用例，再次连接USB并分析数据";
 	private CategoryPlot mPlot;
 	private DefaultCategoryDataset mDataset = null;
-	private BatteryHandleResult batteryHandleResult = null;
 
 	public BatteryView(String chartContent, String title, String yaxisName) {
 		super();
@@ -166,6 +165,7 @@ public class BatteryView extends BaseChartView {
 			@Override
 			public void run() {
 				// TODO Auto-generated method stub
+				isRunning = false;
 				try {
 					batteryDataList = CCRDFile.getpowerdata(packageName);
 				} catch (IOException e) {
@@ -183,6 +183,7 @@ public class BatteryView extends BaseChartView {
 				}
 				
 				handleBatteryData();
+				isRunning = false;
 			}
 
 		});
@@ -225,5 +226,12 @@ public class BatteryView extends BaseChartView {
 		PerformanceDB.getInstance().insertBatteryData(batteryHandleResults);
 		
 		PerformanceDB.getInstance().closeDB();
+	}
+	
+	public void destoryData(){
+		if (batteryDataList != null) {
+			batteryDataList.clear();
+			batteryDataList = null;
+		}
 	}
 }

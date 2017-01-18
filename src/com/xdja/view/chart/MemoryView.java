@@ -4,6 +4,7 @@ import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.FlowLayout;
 import java.awt.Font;
+import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
@@ -32,7 +33,6 @@ import com.android.ddmlib.ClientData;
 import com.xdja.adb.AdbManager;
 import com.xdja.collectdata.entity.MemoryData;
 import com.xdja.collectdata.handleData.HandleDataManager;
-import com.xdja.collectdata.handleData.entity.HandleDataResultBase;
 import com.xdja.collectdata.handleData.entity.MemoryHandleResult;
 import com.xdja.constant.GlobalConfig;
 import com.xdja.util.SwingUiUtil;
@@ -43,9 +43,9 @@ public class MemoryView extends BaseChartView implements IClientChangeListener {
 	 * serial UID auto generated
 	 */
 	private static final long serialVersionUID = -9002331611054515951L;
+	private JButton gcButton;
 	private TimeSeries totalAlloc;
 	private TimeSeries freeAlloc;
-	private boolean stopFlag = false;
 	protected Client mCurClient = null;
 	private Thread memoryThread;
 	private MemoryData mMemoryData = null;
@@ -94,8 +94,8 @@ public class MemoryView extends BaseChartView implements IClientChangeListener {
 				BorderFactory.createLineBorder(Color.black)));
 		chartPanel.setLayout(new FlowLayout(FlowLayout.RIGHT));
 		// 添加单独的图标
-		JButton gcButton = SwingUiUtil.getInstance().createBtnWithColor("GC", Color.green);
-		gcButton.setLocation(0, 30);
+		gcButton = SwingUiUtil.getInstance().createBtnWithColor("GC", Color.green);
+		gcButton.setEnabled(false);
 		gcButton.addActionListener(new ActionListener() {
 
 			@Override
@@ -144,8 +144,12 @@ public class MemoryView extends BaseChartView implements IClientChangeListener {
 			public void run() {
 				// TODO Auto-generated method stub
 				stopFlag = false;
+				gcButton.setEnabled(true);
+				isRunning = true;
 				while (true) {
 					if (stopFlag) {
+						isRunning = false;
+						gcButton.setEnabled(false);
 						break;
 					}
 
@@ -219,5 +223,12 @@ public class MemoryView extends BaseChartView implements IClientChangeListener {
 	 */
 	public List<MemoryHandleResult> getHandleResult(){
 		return memoryHandleResults;
+	}
+	
+	public void destoryData(){
+		if (memoryHandleResults != null) {
+			memoryHandleResults.clear();
+			memoryHandleResults = null;
+		}
 	}
 }

@@ -35,13 +35,22 @@ public class CpuView extends BaseChartView {
 	private static final long serialVersionUID = -9002331611054515951L;
 	private TimeSeries totalcpu;
 	private Thread cpuThread;
-	private boolean stopFlag = false;
 	private CpuData mCurCpuData = null;
 	public static int cpuCount = 0; // 添加静态计数器，用作条件判断，何时采集CPU数据用于数据模型的判断
 	private List<CpuHandleResult> cpuHandleResults = new ArrayList<>(20);
-	
+	public boolean slient = false; // 是否是静默测试
+
+	public CpuView(String chartContent, String title, String yaxisName, boolean slient) {
+		super();
+		initView(chartContent, title, yaxisName);
+	}
+
 	public CpuView(String chartContent, String title, String yaxisName) {
 		super();
+		initView(chartContent, title, yaxisName);
+	}
+
+	private void initView(String chartContent, String title, String yaxisName) {
 		this.totalcpu = new TimeSeries("应用CPU占用率");
 		TimeSeriesCollection dataset = new TimeSeriesCollection();
 		dataset.addSeries(this.totalcpu);
@@ -79,6 +88,17 @@ public class CpuView extends BaseChartView {
 	}
 
 	/**
+	 * 设置是否是静默测试
+	 * 
+	 * @param isSlient
+	 *            是否是静默测试
+	 */
+	public void setSlientTest(boolean isSlient) {
+		slient = isSlient;
+	}
+
+	/**
+	 * 
 	 * Adds an observation to the 'total memory' time series.
 	 *
 	 * @param y
@@ -109,8 +129,18 @@ public class CpuView extends BaseChartView {
 				// TODO Auto-generated method stub
 				stopFlag = false;
 				mCurCpuData = null;
+				isRunning = true;
+				// 判断错误提示区域显示内容
+				if (slient) {
+					String slientStr = "===========开始CPU静默测试=============\n\n";
+					appendErrorInfo(slientStr);
+				} else {
+					String normalStr = "===========开始CPU测试=============\n\n";
+					appendErrorInfo(normalStr);
+				}
 				while (true) {
 					if (stopFlag) {
+						isRunning = false;
 						break;
 					}
 
@@ -123,9 +153,13 @@ public class CpuView extends BaseChartView {
 							mCurCpuData.lastProcPid);
 
 					addTotalObservation(mCurCpuData);// 添加当前CPU到动态图表中
-					
+
 					// 处理采集到的CPU数据，建立问题模型处理机制
-					handleData(mCurCpuData, mCurCpuData.cpuUsage);
+					if (slient) {
+						handleSlientData(mCurCpuData);
+					}else {
+						handleData(mCurCpuData);
+					}
 
 					try {
 						Thread.sleep(GlobalConfig.collectInterval);
@@ -143,15 +177,15 @@ public class CpuView extends BaseChartView {
 	/**
 	 * 处理采集到的CPU数据的，存放数据处理逻辑和方法,返回异常数据处理结果，无CPU的值，可以为true,也可以为FALSE
 	 */
-	public void handleData(CpuData cpuData, double cpu) {
+	public void handleData(CpuData cpuData) {
 		// 对数据进行判断
-		CpuHandleResult handleDataResult = HandleDataManager.getInstance().handleCpu(cpuData, cpu);
+		CpuHandleResult handleDataResult = HandleDataManager.getInstance().handleCpu(cpuData, cpuData.cpuUsage);
 		if (handleDataResult == null) {
 			return;
 		}
 		// 记录数据
 		cpuHandleResults.add(handleDataResult);
-		
+
 		// 填充错误信息
 		if (handleDataResult != null && !handleDataResult.result) {
 			appendErrorInfo(formatErrorInfo(handleDataResult, String.valueOf(cpuData.cpuUsage), "cpu使用率过高"));
@@ -159,8 +193,23 @@ public class CpuView extends BaseChartView {
 	}
 
 	/**
-	 * 保存到数据库，savetodb()
+	 * 处理静默状态的数据
+	 * 当10s内，cpu一直大于0.5时，我们认为是不正常的
+	 * @param cpuData
 	 */
+	public void handleSlientData(CpuData cpuData) {
+		CpuHandleResult handleCpu = HandleDataManager.getInstance().handleCpusilence(cpuData, cpuData.cpuUsage);
+		if (handleCpu == null) {
+			return;
+		}
+
+		// 记录数据
+		cpuHandleResults.add(handleCpu);
+		// 填充错误信息
+		if (handleCpu != null && !handleCpu.result) {
+			appendErrorInfo(formatErrorInfo(handleCpu, String.valueOf(cpuData.cpuUsage), "静默状态使用CPU"));
+		}
+	}
 
 	/**
 	 * 停止任务，标记线程停止，并将测试数据插入数据库。
@@ -170,10 +219,24 @@ public class CpuView extends BaseChartView {
 	 */
 	public void stop() {
 		stopFlag = true;
+		// 判断错误提示区域显示内容
+		if (slient) {
+			String slientStr = "===========结束静默测试=============\n\n";
+			appendErrorInfo(slientStr);
+		} else {
+			String normalStr = "===========结束测试=============\n\n";
+			appendErrorInfo(normalStr);
+		}
 	}
-	
-	
-	public List<CpuHandleResult> getHandleResult(){
+
+	public List<CpuHandleResult> getHandleResult() {
 		return cpuHandleResults;
+	}
+
+	public void destoryData() {
+		if (cpuHandleResults != null) {
+			cpuHandleResults.clear();
+			cpuHandleResults = null;
+		}
 	}
 }

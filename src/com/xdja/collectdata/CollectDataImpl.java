@@ -578,8 +578,8 @@ public class CollectDataImpl {
 		if (CommonUtil.strIsNull(packageName)) {
 			return null;
 		}
-		String cmd = "adb shell dumpsys package " + packageName;
-		CommandResult packageInfo = ExecShellUtil.getInstance().execCmdCommand(cmd, false, true);
+		String cmd = "dumpsys package " + packageName;
+		CommandResult packageInfo = ExecShellUtil.getInstance().execShellCommand(cmd, true);
 		if (packageInfo != null && !CommonUtil.strIsNull(packageInfo.successMsg)) {
 			Pattern pattern = Pattern.compile("versionName=(\\d.+)");
 			Matcher matcher = pattern.matcher(packageInfo.successMsg);
