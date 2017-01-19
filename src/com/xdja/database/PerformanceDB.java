@@ -21,10 +21,14 @@ public class PerformanceDB {
 	private static Connection conn;
 	private static Statement stat;
 	private static ResultSet result;
-	private static String tableUrl = "jdbc:mysql://11.12.109.38:3306/performanceData";
-	private static String dbUrl = "jdbc:mysql://11.12.109.38:3306/";
+//	private static String tableUrl = "jdbc:mysql://11.12.109.38:3306/performanceData";
+//	private static String dbUrl = "jdbc:mysql://11.12.109.38:3306/";
+	private static String tableUrl = "jdbc:mysql://localhost:3306/performanceData";
+	private static String dbUrl = "jdbc:mysql://localhost:3306/";
 	private static String driverClass = "com.mysql.jdbc.Driver";
 	private final static String DBNAME = "performanceData";
+	private static String packageName ;
+	private static String version;
 
 	public static PerformanceDB getInstance() {
 		if (mInstance == null) {
@@ -55,17 +59,26 @@ public class PerformanceDB {
 			if (baseTestInfo == null) {
 				return;
 			}
-			String packageName = baseTestInfo.packageName;
-			String version = baseTestInfo.versionName;
-			// 拼接表的名称
-			cpuTableName = getFormatDbName(packageName, version, Constants.TYPE_CPU);
-			memoryTableName = getFormatDbName(packageName, version, Constants.TYPE_MEMORY);
-			kpiTableName = getFormatDbName(packageName, version, Constants.TYPE_KPI);
-			fpsTableName = getFormatDbName(packageName, version, Constants.TYPE_FPS);
-			batteryTableName = getFormatDbName(packageName, version, Constants.TYPE_BATTERY);
-			flowTableName = getFormatDbName(packageName, version, Constants.TYPE_FLOW);
-			cpuSlientTableName = getFormatDbName(packageName, version, Constants.TYPE_SLIENT_CPU);
-			flowSlientTableName = getFormatDbName(packageName, version, Constants.TYPE_SLIENT_FLOW);
+			packageName = baseTestInfo.packageName;
+			version = baseTestInfo.versionName;
+//			// 拼接表的名称
+//			cpuTableName = getFormatDbName(packageName, version, Constants.TYPE_CPU);
+//			memoryTableName = getFormatDbName(packageName, version, Constants.TYPE_MEMORY);
+//			kpiTableName = getFormatDbName(packageName, version, Constants.TYPE_KPI);
+//			fpsTableName = getFormatDbName(packageName, version, Constants.TYPE_FPS);
+//			batteryTableName = getFormatDbName(packageName, version, Constants.TYPE_BATTERY);
+//			flowTableName = getFormatDbName(packageName, version, Constants.TYPE_FLOW);
+//			cpuSlientTableName = getFormatDbName(packageName, version, Constants.TYPE_SLIENT_CPU);
+//			flowSlientTableName = getFormatDbName(packageName, version, Constants.TYPE_SLIENT_FLOW);
+			
+			cpuTableName = Constants.TYPE_CPU;
+			memoryTableName = Constants.TYPE_MEMORY;
+			kpiTableName = Constants.TYPE_KPI;
+			fpsTableName = Constants.TYPE_FPS;
+			batteryTableName = Constants.TYPE_BATTERY;
+			flowTableName = Constants.TYPE_FLOW;
+			cpuSlientTableName = Constants.TYPE_SLIENT_CPU;
+			flowSlientTableName = Constants.TYPE_SLIENT_FLOW;
 
 			// 创建数据表
 			createTables();
@@ -91,6 +104,8 @@ public class PerformanceDB {
 			if (conn != null) {
 				conn.close();
 			}
+			
+			mInstance = null;
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -166,21 +181,21 @@ public class PerformanceDB {
 	 */
 	public void createTables() throws SQLException {
 		String createMemorySql = "CREATE TABLE IF NOT EXISTS `" + memoryTableName + "`("
-				+ "id int(11) not null AUTO_INCREMENT, page varchar(80),testvalue varchar(50), logPath varchar(50),methodTracePath varchar(50),hprofPath varchar(50), pass int, PRIMARY KEY(`id`))";
+				+ "id int(11) not null AUTO_INCREMENT, page varchar(80),package varchar(160),version varchar(160),testvalue varchar(50), logPath varchar(50),methodTracePath varchar(50),hprofPath varchar(50), pass int, PRIMARY KEY(`id`))";
 		String createCpuSql = "CREATE TABLE IF NOT EXISTS `" + cpuTableName + "`("
-				+ "id int(11) not null AUTO_INCREMENT, page varchar(80),testvalue varchar(50), logPath varchar(50),methodTracePath varchar(50), pass int, PRIMARY KEY(`id`))";
+				+ "id int(11) not null AUTO_INCREMENT, page varchar(80),package varchar(160),version varchar(160),testvalue varchar(50), logPath varchar(50),methodTracePath varchar(50), pass int, PRIMARY KEY(`id`))";
 		String createKpiSql = "CREATE TABLE IF NOT EXISTS `" + kpiTableName + "`("
-				+ "id int(11) not null AUTO_INCREMENT, page varchar(80),testvalue varchar(50), logPath varchar(50),methodTracePath varchar(50), pass int, PRIMARY KEY(`id`))";
+				+ "id int(11) not null AUTO_INCREMENT, page varchar(80),package varchar(160),version varchar(160),testvalue varchar(50), logPath varchar(50),methodTracePath varchar(50), pass int, PRIMARY KEY(`id`))";
 		String createFlowSql = "CREATE TABLE IF NOT EXISTS `" + flowTableName + "`("
-				+ "id int(11) not null AUTO_INCREMENT, page varchar(80),testvalue varchar(50), logPath varchar(50), pass int, PRIMARY KEY(`id`))";
+				+ "id int(11) not null AUTO_INCREMENT, page varchar(80),package varchar(160),version varchar(160),testvalue varchar(50), logPath varchar(50), pass int, PRIMARY KEY(`id`))";
 		String createFpsSql = "CREATE TABLE IF NOT EXISTS `" + fpsTableName + "`("
-				+ "id int(11) not null AUTO_INCREMENT, page varchar(80),testvalue varchar(50), logPath varchar(50),methodTracePath varchar(50),hprofPath varchar(50), pass int, PRIMARY KEY(`id`))";
+				+ "id int(11) not null AUTO_INCREMENT, page varchar(80),package varchar(160),version varchar(160),testvalue varchar(50), logPath varchar(50),methodTracePath varchar(50),hprofPath varchar(50), pass int, PRIMARY KEY(`id`))";
 		String createBatterySql = "CREATE TABLE IF NOT EXISTS `" + batteryTableName + "`("
 				+ "id int(11) not null AUTO_INCREMENT, uid int(11),testvalue varchar(50),  detailInfo varchar(256),PRIMARY KEY(`id`))";
 		String createSlientCpuSql = "CREATE TABLE IF NOT EXISTS `" + cpuSlientTableName + "`("
-				+ "id int(11) not null AUTO_INCREMENT, page varchar(80),testvalue varchar(50), logPath varchar(50),methodTracePath varchar(50), pass int, PRIMARY KEY(`id`))";
+				+ "id int(11) not null AUTO_INCREMENT, page varchar(80),package varchar(160),version varchar(160),testvalue varchar(50), logPath varchar(50),methodTracePath varchar(50), pass int, PRIMARY KEY(`id`))";
 		String createSlientFlowSql = "CREATE TABLE IF NOT EXISTS `" + flowSlientTableName + "`("
-				+ "id int(11) not null AUTO_INCREMENT, page varchar(80),testvalue varchar(50), logPath varchar(50), pass int, PRIMARY KEY(`id`))";
+				+ "id int(11) not null AUTO_INCREMENT, page varchar(80),package varchar(160),version varchar(160),testvalue varchar(50), logPath varchar(50), pass int, PRIMARY KEY(`id`))";
 		// 创建CPU数据表
 		createTable(createMemorySql);
 		// 创建Memory数据表
@@ -229,18 +244,20 @@ public class PerformanceDB {
 		}
 
 		String insertSql = "insert into `" + cpuTableName
-				+ "`(page, testvalue, logPath, methodTracePath, pass) values (?,?,?,?,?)";
+				+ "`(page,package,version ,testvalue, logPath, methodTracePath, pass) values (?,?,?,?,?,?,?)";
 		PreparedStatement psts = null;
 		try {
 			conn.setAutoCommit(false);
 			psts = conn.prepareStatement(insertSql);
 			for (CpuHandleResult result : handleDataList) {
 				psts.setString(1, result.activityName);
-				psts.setFloat(2, Float.valueOf(result.testValue));
-				psts.setString(3, result.logPath);
-				psts.setString(4, result.methodTracePath);
+				psts.setString(2, packageName);  //增加package
+				psts.setString(3, version);   //增加version
+				psts.setFloat(4, Float.valueOf(result.testValue));
+				psts.setString(5, result.logPath);
+				psts.setString(6, result.methodTracePath);
 				// 正常数据，值是1，异常数据，值是0
-				psts.setInt(5, result.result ? 1 : 0);
+				psts.setInt(7, result.result ? 1 : 0);
 				psts.addBatch();
 			}
 
@@ -263,18 +280,20 @@ public class PerformanceDB {
 		}
 
 		String insertSql = "insert into `" + cpuSlientTableName
-				+ "`(page, testvalue, logPath, methodTracePath, pass) values (?,?,?,?,?)";
+				+ "`(page,package,version, testvalue, logPath, methodTracePath, pass) values (?,?,?,?,?,?,?)";
 		PreparedStatement psts = null;
 		try {
 			conn.setAutoCommit(false);
 			psts = conn.prepareStatement(insertSql);
 			for (CpuHandleResult result : handleDataList) {
 				psts.setString(1, result.activityName);
-				psts.setFloat(2, Float.valueOf(result.testValue));
-				psts.setString(3, result.logPath);
-				psts.setString(4, result.methodTracePath);
+				psts.setString(2, packageName);  //增加package
+				psts.setString(3, version);   //增加version
+				psts.setFloat(4, Float.valueOf(result.testValue));
+				psts.setString(5, result.logPath);
+				psts.setString(6, result.methodTracePath);
 				// 正常数据，值是1，异常数据，值是0
-				psts.setInt(5, result.result ? 1 : 0);
+				psts.setInt(7, result.result ? 1 : 0);
 				psts.addBatch();
 			}
 
@@ -297,18 +316,20 @@ public class PerformanceDB {
 		}
 
 		String insertSql = "insert into `" + kpiTableName
-				+ "`(page, testvalue, logPath, methodTracePath, pass) values (?,?,?,?,?)";
+				+ "`(page,package,version, testvalue, logPath, methodTracePath, pass) values (?,?,?,?,?,?,?)";
 		PreparedStatement psts = null;
 		try {
 			conn.setAutoCommit(false);
 			psts = conn.prepareStatement(insertSql);
 			for (KpiHandleResult result : handleKpiList) {
 				psts.setString(1, result.activityName);
-				psts.setFloat(2, Float.valueOf(result.testValue));
-				psts.setString(3, result.logPath);
-				psts.setString(4, result.methodTracePath);
+				psts.setString(2, packageName);  //增加package
+				psts.setString(3, version);   //增加version
+				psts.setFloat(4, Float.valueOf(result.testValue));
+				psts.setString(5, result.logPath);
+				psts.setString(6, result.methodTracePath);
 				// 正常数据，值是1，异常数据，值是0
-				psts.setInt(5, result.result ? 1 : 0);
+				psts.setInt(7, result.result ? 1 : 0);
 				psts.addBatch();
 			}
 
@@ -330,19 +351,21 @@ public class PerformanceDB {
 			return;
 		}
 		String insertSql = "insert into `" + memoryTableName
-				+ "`(page, testvalue, logPath, methodTracePath, hprofPath, pass) values (?,?,?,?,?,?)";
+				+ "`(page,package,version, testvalue, logPath, methodTracePath, hprofPath, pass) values (?,?,?,?,?,?,?,?)";
 		PreparedStatement psts = null;
 		try {
 			conn.setAutoCommit(false);
 			psts = conn.prepareStatement(insertSql);
 			for (MemoryHandleResult result : handleDataList) {
 				psts.setString(1, result.activityName);
-				psts.setFloat(2, Float.valueOf(result.testValue));
-				psts.setString(3, result.logPath);
-				psts.setString(4, result.methodTracePath);
-				psts.setString(5, result.memoryHprofPath);
+				psts.setString(2, packageName);  //增加package
+				psts.setString(3, version);   //增加version
+				psts.setFloat(4, Float.valueOf(result.testValue));
+				psts.setString(5, result.logPath);
+				psts.setString(6, result.methodTracePath);
+				psts.setString(7, result.memoryHprofPath);
 				// 正常数据，值是1，异常数据，值是0
-				psts.setInt(6, result.result ? 1 : 0);
+				psts.setInt(8, result.result ? 1 : 0);
 				psts.addBatch();
 			}
 
@@ -363,17 +386,19 @@ public class PerformanceDB {
 		if (handleFlowList == null || handleFlowList.size() < 1) {
 			return;
 		}
-		String insertSql = "insert into `" + flowTableName + "`(page, testvalue, logPath, pass) values (?,?,?,?)";
+		String insertSql = "insert into `" + flowTableName + "`(page,package,version, testvalue, logPath, pass) values (?,?,?,?,?,?)";
 		PreparedStatement psts = null;
 		try {
 			conn.setAutoCommit(false);
 			psts = conn.prepareStatement(insertSql);
 			for (FlowHandleResult result : handleFlowList) {
 				psts.setString(1, result.activityName);
-				psts.setFloat(2, Float.valueOf(result.testValue));
-				psts.setString(3, result.logPath);
+				psts.setString(2, packageName);  //增加package
+				psts.setString(3, version);   //增加version
+				psts.setFloat(4, Float.valueOf(result.testValue));
+				psts.setString(5, result.logPath);
 				// 正常数据，值是1，异常数据，值是0
-				psts.setInt(4, result.result ? 1 : 0);
+				psts.setInt(6, result.result ? 1 : 0);
 				psts.addBatch();
 			}
 
@@ -394,17 +419,19 @@ public class PerformanceDB {
 		if (handleFlowList == null || handleFlowList.size() < 1) {
 			return;
 		}
-		String insertSql = "insert into `" + flowSlientTableName + "`(page, testvalue, logPath, pass) values (?,?,?,?)";
+		String insertSql = "insert into `" + flowSlientTableName + "`(page,package,version, testvalue, logPath, pass) values (?,?,?,?,?,?)";
 		PreparedStatement psts = null;
 		try {
 			conn.setAutoCommit(false);
 			psts = conn.prepareStatement(insertSql);
 			for (FlowHandleResult result : handleFlowList) {
 				psts.setString(1, result.activityName);
-				psts.setFloat(2, Float.valueOf(result.testValue));
-				psts.setString(3, result.logPath);
+				psts.setString(2, packageName);  //增加package
+				psts.setString(3, version);   //增加version
+				psts.setFloat(4, Float.valueOf(result.testValue));
+				psts.setString(5, result.logPath);
 				// 正常数据，值是1，异常数据，值是0
-				psts.setInt(4, result.result ? 1 : 0);
+				psts.setInt(6, result.result ? 1 : 0);
 				psts.addBatch();
 			}
 
@@ -426,19 +453,21 @@ public class PerformanceDB {
 			return;
 		}
 		String insertSql = "insert into `" + fpsTableName
-				+ "`(page, testvalue, logPath, methodTracePath, hprofPath, pass) values (?,?,?,?,?,?)";
+				+ "`(page,package,version, testvalue, logPath, methodTracePath, hprofPath, pass) values (?,?,?,?,?,?,?,?)";
 		PreparedStatement psts = null;
 		try {
 			conn.setAutoCommit(false);
 			psts = conn.prepareStatement(insertSql);
 			for (FpsHandleResult result : handleFpsList) {
 				psts.setString(1, result.activityName);
-				psts.setFloat(2, Float.valueOf(result.testValue));
-				psts.setString(3, result.logPath);
-				psts.setString(4, result.methodTracePath);
-				psts.setString(5, result.memoryHprofPath);
+				psts.setString(2, packageName);  //增加package
+				psts.setString(3, version);   //增加version
+				psts.setFloat(4, Float.valueOf(result.testValue));
+				psts.setString(5, result.logPath);
+				psts.setString(6, result.methodTracePath);
+				psts.setString(7, result.memoryHprofPath);
 				// 正常数据，值是1，异常数据，值是0
-				psts.setInt(6, result.result ? 1 : 0);
+				psts.setInt(8, result.result ? 1 : 0);
 				psts.addBatch();
 			}
 
