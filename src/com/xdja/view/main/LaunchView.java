@@ -3,9 +3,13 @@ package com.xdja.view.main;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.TreeSet;
 
@@ -36,6 +40,7 @@ import com.xdja.database.PerformanceDB;
 import com.xdja.log.LoggerManager;
 import com.xdja.util.CommonUtil;
 import com.xdja.util.ExecShellUtil;
+import com.xdja.util.ProPertiesUtil;
 import com.xdja.util.SwingUiUtil;
 import com.xdja.util.SwingUiUtil.ClickDialogBtnListener;
 import com.xdja.view.ToolsView;
@@ -85,7 +90,6 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 		setBounds(100, 50, WIDTH, HEIGHT);
 		createTopMenu();
 		add(frame);
-		setVisible(true);
 		AndroidDebugBridge.addDeviceChangeListener(this);
 	}
 
@@ -113,15 +117,43 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 		frame.add(comboProcess);
 		Rectangle rectProcess = new Rectangle(320, 0, 420, 30);
 		comboProcess.setBounds(rectProcess);
-		comboProcess.addActionListener(new ActionListener() {
-
+		// 添加点击事件，JComboBox 添加元素也会调用actionPerform方法，所以添加了鼠标事件
+		comboProcess.addMouseListener(new MouseListener() {
+			
 			@Override
-			public void actionPerformed(ActionEvent e) {
+			public void mouseReleased(MouseEvent e) {
 				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void mousePressed(MouseEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void mouseExited(MouseEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void mouseEntered(MouseEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				// TODO Auto-generated method stub
+				System.out.println("I am select");
 				String packageNameold = GlobalConfig.PackageName;
 				String packageName = (String) comboProcess.getSelectedItem();
 				if (packageName != null) {
 					GlobalConfig.PackageName = packageName;
+					// 保存选择的包名
+					ProPertiesUtil.getInstance().writeProperties(Constants.CHOOSE_PACKAGE, GlobalConfig.PackageName);
 				}
 				if (packageNameold != GlobalConfig.PackageName) {
 					kpiTestView.clear();
@@ -215,6 +247,9 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 							comboProcess.setEnabled(false);
 							slientBtn.setText("停止静默测试");
 							startSlientTest();
+							if (viewFps != null) {
+								viewFps.setBtnEnable(false);
+							}
 						}
 					});
 					
@@ -232,6 +267,9 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 							comboProcess.setEnabled(true);
 							slientBtn.setText("开始静默测试");
 							stopSlientTest();
+							if (viewFps != null) {
+								viewFps.setBtnEnable(true);
+							}
 						}
 					});
 					
@@ -563,10 +601,6 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 		for (String sn : snList) {
 			comboDevices.addItem(sn);
 		}
-
-		if (kpiTestView != null) {
-			kpiTestView.stop();
-		}
 	}
 
 	/**
@@ -585,12 +619,31 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 			if (respack.size() > 0 && comboProcess != null) {
 				comboProcess.removeAllItems();
 			}
+			System.out.println("ZLW == respack " + respack.size());
+			// 对得到的列表按照首字母排序
+			Collections.sort(respack, latterComparator);
 			for (String sn : respack) {
 				comboProcess.addItem(sn);
 			}
+			
+			String packageName = ProPertiesUtil.getInstance().getProperties(Constants.CHOOSE_PACKAGE);
+			if (!CommonUtil.strIsNull(packageName)) {
+				comboProcess.setSelectedItem(packageName);
+			}
 		}
 	}
+	
+	/**
+	 * 进程名称的首字母排序
+	 */
+	private Comparator<String> latterComparator = new Comparator<String>() {
 
+		@Override
+		public int compare(String o1, String o2) {
+			// TODO Auto-generated method stub
+			return o1.compareTo(o2);
+		}
+	};
 	/**
 	 * 初始化AdbManager
 	 */
@@ -657,6 +710,9 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 		if (kpiTestView != null) {
 			kpiTestView.destoryData();
 		}
+		
+		// 清空选择的包名数据
+		ProPertiesUtil.getInstance().removeValue(Constants.CHOOSE_PACKAGE);
 	}
 	
 	/**

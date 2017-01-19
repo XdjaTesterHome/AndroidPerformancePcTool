@@ -3,7 +3,6 @@ package com.xdja.collectdata.handleData;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.xdja.collectdata.entity.FlowData;
 import com.xdja.collectdata.entity.FpsData;
 import com.xdja.collectdata.entity.KpiData;
 import com.xdja.collectdata.CollectDataImpl;
@@ -239,22 +238,19 @@ public class HandleDataManager {
 	 * @param flowData
 	 * @return
 	 */
-	public FlowHandleResult handleFlowData(FlowData flowData) {
+	public FlowHandleResult handleFlowData(float flowData) {
 		mFlowHandleResult = new FlowHandleResult();
-		if (flowData == null) {
-			return null;
-		}
 
-		if (flowData.flowTotal > FLOW_VALUE) {
+		if (flowData > FLOW_VALUE) {
 			mFlowHandleResult.setActivityName(CollectDataImpl.getCurActivity());
 			mFlowHandleResult.setResult(false);
-			mFlowHandleResult.setTestValue(String.valueOf(flowData.flowTotal));
+			mFlowHandleResult.setTestValue(String.valueOf(flowData));
 			return mFlowHandleResult;
 		}
 
 		mFlowHandleResult.setActivityName(CollectDataImpl.getCurActivity());
 		mFlowHandleResult.setResult(true);
-		mFlowHandleResult.setTestValue(String.valueOf(flowData.flowTotal));
+		mFlowHandleResult.setTestValue(String.valueOf(flowData));
 		return mFlowHandleResult;
 	}
 
@@ -263,15 +259,12 @@ public class HandleDataManager {
 	 * 
 	 * @return
 	 */
-	public FlowHandleResult handleFlowSlientData(FlowData flowData) {
+	public FlowHandleResult handleFlowSlientData(float flowData) {
 		mFlowHandleSlientResult = new FlowHandleResult();
-		if (flowData == null) {
-			return null;
-		}
 
-		if (flowData.flowTotal > FLOW_SLIENT_VALUE) {
+		if (flowData > FLOW_SLIENT_VALUE) {
 			mFlowHandleSlientResult.setResult(false);
-			mFlowHandleSlientResult.setTestValue(String.valueOf(flowData.flowTotal));
+			mFlowHandleSlientResult.setTestValue(String.valueOf(flowData));
 			String logPath = SaveEnvironmentManager.getInstance().saveCurrentLog(GlobalConfig.DeviceName,
 					GlobalConfig.PackageName, Constants.TYPE_FLOW);
 			mFlowHandleSlientResult.setLogPath(logPath);
@@ -280,7 +273,7 @@ public class HandleDataManager {
 		}
 
 		mFlowHandleSlientResult.setResult(true);
-		mFlowHandleSlientResult.setTestValue(String.valueOf(flowData.flowTotal));
+		mFlowHandleSlientResult.setTestValue(String.valueOf(flowData));
 		return mFlowHandleSlientResult;
 	}
 

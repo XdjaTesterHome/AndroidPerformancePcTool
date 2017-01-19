@@ -74,7 +74,10 @@ public class Constants {
 	public static final String ABOUT = "用于测试Android性能";
 	public static final String HELP = "在使用工具之前，需要关掉其他的工具比如：AndroidStudio、Eclipse等 \n 不然会对工具的使用造成影响";
 	
+	// ProPerties 属性
 	public static final String LAST_PACKAGENAME = "lastPackageName";
+	public static final String CHOOSE_PACKAGE = "choosePackage";
+	
 	
 	//存储截图和dump memory的路径
 	public static final String SCREEN_SHOTS = "screenshots";

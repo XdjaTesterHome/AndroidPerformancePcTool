@@ -218,10 +218,7 @@ public class CollectDataImpl {
 			if (commandFlowResult != null && !commandFlowResult.errorMsg.contains("No such file or directory")) {
 				flowRecv = Integer.parseInt(commandFlowResult.successMsg);
 			}
-			
-			float totalFlow = (float)(flowSend + flowRecv) / 1024 / 1024;
-			totalFlow = CommonUtil.getTwoDots(totalFlow);
-			flowData = new FlowData(totalFlow, flowRecv, flowSend);
+			flowData = new FlowData(getTwoPointsWithMB(flowSend + flowRecv), getTwoPointsWithMB(flowRecv), getTwoPointsWithMB(flowSend));
 			return flowData;
 		}
 
@@ -240,16 +237,24 @@ public class CollectDataImpl {
 				totalRecv += recv_bytes;
 				totalSend += send_bytes;
 			}
-			float totalFlows = (totalRecv + totalSend) / 1024;
-			totalFlows = CommonUtil.getTwoDots(totalFlows);
-			flowData = new FlowData(totalFlows, totalRecv, totalSend);
+			flowData = new FlowData(getTwoPointsWithMB(totalRecv + totalSend), getTwoPointsWithMB(totalRecv), getTwoPointsWithMB(totalSend));
 			return flowData;
 		}
 
 		flowData = new FlowData(0, 0, 0);
 		return flowData;
 	}
-
+	
+	/**
+	 * 将int值转换成MB
+	 * @param value
+	 * @return
+	 */
+	private static float getTwoPointsWithMB(int value){
+		float fValue = (float) (value / 1024.0 / 1024.0);
+		fValue = CommonUtil.getTwoDots(fValue);
+		return fValue;
+	}
 	/**
 	 * 获取内存数据, 返回的数据单位是KB
 	 * 
