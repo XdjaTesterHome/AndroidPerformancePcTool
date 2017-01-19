@@ -108,7 +108,7 @@ public class BatteryView extends BaseChartView {
 				startBtn.setEnabled(false);
 
 				// 记录上一次测试的packageName
-				ProPertiesUtil.getInstance().writeProperties(Constants.LAST_PACKAGENAME, GlobalConfig.PackageName);
+				ProPertiesUtil.getInstance().writeProperties(Constants.LAST_PACKAGENAME, GlobalConfig.getTestPackageName());
 				// 清理数据
 				boolean isSuc = CollectDataImpl.clearBatteryData();
 				if (isSuc) {
@@ -128,7 +128,7 @@ public class BatteryView extends BaseChartView {
 
 				try {
 					String lastPackageName = ProPertiesUtil.getInstance().getProperties(Constants.LAST_PACKAGENAME);
-					if (CommonUtil.strIsNull(lastPackageName) || !lastPackageName.equals(GlobalConfig.PackageName)) {
+					if (CommonUtil.strIsNull(lastPackageName) || !lastPackageName.equals(GlobalConfig.getTestPackageName())) {
 						SwingUiUtil.getInstance().showTipsDialog(BatteryView.this, "提示", "请选择上次测试的应用包名之后再执行解析数据操作",
 								"好的", null);
 						return;

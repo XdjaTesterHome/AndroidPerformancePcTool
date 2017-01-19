@@ -205,7 +205,7 @@ public class CollectDataImpl {
 		String cmd = "cat /proc/net/xt_qtaguid/stats";
 		commandFlowResult = ExecShellUtil.getInstance().execShellCommand(cmd);
 		int flowSend = 0, flowRecv = 0;
-		if (commandFlowResult == null || commandFlowResult.errorMsg != null && !"".equals(commandFlowResult.errorMsg)) {
+		if (commandFlowResult == null || CommonUtil.strIsNull(commandFlowResult.successMsg) || commandFlowResult.successMsg.contains("No such file or directory")) {
 			String cmdSnd = "cat /proc/uid_stat/" + uid + "/tcp_snd";
 			String cmdRec = "cat /proc/uid_stat/" + uid + "+/tcp_rcv";
 			commandFlowResult = ExecShellUtil.getInstance().execShellCommand(cmdSnd);
@@ -530,6 +530,9 @@ public class CollectDataImpl {
 	 * @return
 	 */
 	public static int getPid(String packageName) {
+		if (CommonUtil.strIsNull(packageName)) {
+			return 0;
+		}
 		String cmd = "ps | grep " + packageName;
 		// String cmd = "ps";
 		commandPidResult = ExecShellUtil.getInstance().execShellCommand(cmd);
@@ -578,7 +581,7 @@ public class CollectDataImpl {
 	 *  这里可能会有GlobalConfig没有设置的情况存在。
 	 */
 	public static BaseTestInfo getBaseTestInfo() {
-		String packageName = GlobalConfig.PackageName;
+		String packageName = GlobalConfig.getTestPackageName();
 //		String packageName = "com.xdja.HDSafeEMailClient";
 		if (CommonUtil.strIsNull(packageName)) {
 			return null;

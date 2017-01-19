@@ -83,14 +83,14 @@ public class HandleDataManager {
 	private FpsHandleResult mFpsHandleResult = null;
 	private FlowHandleResult mFlowHandleSlientResult = null;
 	private FlowHandleResult mFlowHandleResult = null;
-
+	private String mCurTestPackage;
 	// 公共配置常量
 	private long lastTime = 0;
 
 	private long nowTime = 0;
 
 	private HandleDataManager() {
-
+		mCurTestPackage = GlobalConfig.getTestPackageName();
 	}
 
 	// cpuList列表中依次添加元素，直到添加长度为3的元素后，每次只更新列表元素，删除第一个和添加最后一个，列表长度适中为3//
@@ -266,7 +266,7 @@ public class HandleDataManager {
 			mFlowHandleSlientResult.setResult(false);
 			mFlowHandleSlientResult.setTestValue(String.valueOf(flowData));
 			String logPath = SaveEnvironmentManager.getInstance().saveCurrentLog(GlobalConfig.DeviceName,
-					GlobalConfig.PackageName, Constants.TYPE_FLOW);
+					mCurTestPackage, Constants.TYPE_FLOW);
 			mFlowHandleSlientResult.setLogPath(logPath);
 
 			return mFlowHandleSlientResult;
@@ -297,7 +297,7 @@ public class HandleDataManager {
 
 				// 保存log
 				String logPath = SaveEnvironmentManager.getInstance().saveCurrentLog(GlobalConfig.DeviceName,
-						GlobalConfig.PackageName, Constants.TYPE_KPI);
+						mCurTestPackage, Constants.TYPE_KPI);
 				// 保存method trace
 				mFpsHandleResult.setLogPath(logPath);
 				mFpsHandleResult.setResult(false);
@@ -362,7 +362,7 @@ public class HandleDataManager {
 
 				// 保存log
 				String logPath = SaveEnvironmentManager.getInstance().saveCurrentLog(GlobalConfig.DeviceName,
-						GlobalConfig.PackageName, Constants.TYPE_KPI);
+						mCurTestPackage, Constants.TYPE_KPI);
 				// 保存method trace
 				mKpiHandleResult.setLogPath(logPath);
 				mKpiHandleResult.setResult(false);
@@ -462,7 +462,7 @@ public class HandleDataManager {
 		// SaveEnvironmentManager.getInstance().screenShots(GlobalConfig.DeviceName,
 		// Constants.TYPE_CPU);
 		String logPath = SaveEnvironmentManager.getInstance().saveCurrentLog(GlobalConfig.DeviceName,
-				GlobalConfig.PackageName, Constants.TYPE_CPU);
+				mCurTestPackage, Constants.TYPE_CPU);
 		// 暂时不抓取method trace，会影响采集数据
 		// String methodTrace =
 		// SaveEnvironmentManager.getInstance().methodTracing(GlobalConfig.DeviceName,
@@ -488,7 +488,7 @@ public class HandleDataManager {
 		// SaveEnvironmentManager.getInstance().dumpMemory(GlobalConfig.DeviceName,
 		// GlobalConfig.PackageName, Constants.TYPE_MEMORY);
 		String logPath = SaveEnvironmentManager.getInstance().saveCurrentLog(GlobalConfig.DeviceName,
-				GlobalConfig.PackageName, Constants.TYPE_MEMORY);
+				mCurTestPackage, Constants.TYPE_MEMORY);
 		// String screenPath =
 		// SaveEnvironmentManager.getInstance().screenShots(GlobalConfig.DeviceName,
 		// Constants.TYPE_MEMORY);

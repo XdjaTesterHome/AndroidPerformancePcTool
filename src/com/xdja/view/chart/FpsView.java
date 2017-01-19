@@ -110,7 +110,7 @@ public class FpsView extends BaseChartView {
 				// TODO Auto-generated method stub
 				startBtn.setEnabled(false);
 				pauseBtn.setEnabled(true);
-				start(GlobalConfig.PackageName);
+				start(GlobalConfig.getTestPackageName());
 			}
 		});
 		

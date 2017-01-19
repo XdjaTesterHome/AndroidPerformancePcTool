@@ -72,6 +72,7 @@ public class CpuView extends BaseChartView {
 		plot.setDomainGridlinePaint(Color.white);
 		plot.setRangeGridlinePaint(Color.white);
 		plot.setAxisOffset(new RectangleInsets(5.0, 5.0, 5.0, 5.0));
+		
 		domain.setAutoRange(true);
 		domain.setLowerMargin(0.0);
 		domain.setUpperMargin(0.0);

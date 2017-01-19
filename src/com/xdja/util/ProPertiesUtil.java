@@ -89,17 +89,14 @@ public class ProPertiesUtil {
 	 * @param key
 	 */
 	public void removeValue(String key) {
+		FileOutputStream oFile;
 		try {
 			InputStream in = new BufferedInputStream(new FileInputStream(NAME));
 			mProperties.load(in); /// 加载属性列表
-			Iterator<String> it = mProperties.stringPropertyNames().iterator();
-			while (it.hasNext()) {
-				String ikey = it.next();
-				if (ikey != null && ikey.equals(key)) {
-					mProperties.remove(ikey);
-				}
-			}
-			in.close();
+			mProperties.remove(key);
+			oFile = new FileOutputStream(NAME);
+			mProperties.store(oFile, "delete" + key);
+			in.close(); 
 		} catch (Exception e) {
 			// TODO: handle exception
 		}
