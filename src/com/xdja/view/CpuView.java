@@ -93,7 +93,6 @@ public class CpuView extends BaseChartView {
 		}
 		
 		this.totalcpu.addOrUpdate(new Millisecond(), cpuData.cpuUsage);
-		
 		// 对数据进行判断
 		HandleDataResult handleDataResult = HandleDataManager.getInstance().handleCpu(cpuData);
 		// 记录数据
@@ -162,10 +161,12 @@ public class CpuView extends BaseChartView {
 					addTotalObservation(mCurCpuData);//添加当前CPU到动态图表中
 					
 					errorRe = handleData(mCurCpuData);//处理采集到的CPU数据，建立问题模型处理机制
-					System.out.println(errorRe.CPUString());
-					cpudbd.add(errorRe.CPUString());//转化结果为字符串类型
+					cpudbd =new ArrayList<String>();
+					System.out.println(errorRe.CPU);
+					cpudbd.add(String.valueOf(errorRe.CPU));//转化结果为字符串类型
+					
 					cpudbd.add(errorRe.activityName);//转化结果为字符串类型
-					cpudbd.add(errorRe.reString());//转化结果为字符串类型
+					cpudbd.add(String.valueOf(errorRe.result));//转化结果为字符串类型
 					cpudbd.add((String)errorRe.screenshotsPath);//转化结果为字符串类型
 					cpudbd.add(errorRe.logPath);//转化结果为字符串类型
 					cpudbd.add(errorRe.methodTracePath);//转化结果为字符串类型
