@@ -1,7 +1,8 @@
-package com.xdja.view;
+package com.xdja.view.chart;
 
 import java.awt.Color;
 import java.awt.Font;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.BorderFactory;
@@ -22,6 +23,8 @@ import org.jfree.data.category.DefaultCategoryDataset;
 
 import com.xdja.collectdata.CollectDataImpl;
 import com.xdja.collectdata.entity.KpiData;
+import com.xdja.collectdata.handleData.HandleDataManager;
+import com.xdja.collectdata.handleData.entity.KpiHandleResult;
 import com.xdja.constant.GlobalConfig;
 
 public class KpiTestView extends BaseChartView {
@@ -30,9 +33,11 @@ public class KpiTestView extends BaseChartView {
 	 * serial UID auto generated
 	 */
 	private static final long serialVersionUID = -9002331611054515951L;
-	private boolean stopFlag = false;
+	private static final String NOMESSGE = "无页面加载数据，请在测试App上切换页面收集数据！！";
 	private Thread kpiThread, kdatathread;
 	private List<KpiData> KpiData = null;
+	private List<KpiHandleResult> kpiHandleList = new ArrayList<>(12);
+	private List<KpiHandleResult> errorList = new ArrayList<>(12);
 
 	private CategoryPlot mPlot;
 	private DefaultCategoryDataset mDataset = null;
@@ -57,6 +62,8 @@ public class KpiTestView extends BaseChartView {
 
 		// 设置柱状图轴
 		CategoryPlot mPlot = mBarchart.getCategoryPlot();
+		mPlot.setNoDataMessage(NOMESSGE);
+		mPlot.setNoDataMessageFont(new Font("粗体", Font.BOLD, 17));
 		// x轴
 		CategoryAxis mDomainAxis = mPlot.getDomainAxis();
 		mDomainAxis.setCategoryLabelPositions(CategoryLabelPositions.UP_45);
@@ -105,8 +112,10 @@ public class KpiTestView extends BaseChartView {
 			public void run() {
 				// TODO Auto-generated method stub
 				stopFlag = false;
+				isRunning = true;
 				while (true) {
 					if (stopFlag) {
+						isRunning = false;
 						break;
 					}
 
@@ -122,6 +131,7 @@ public class KpiTestView extends BaseChartView {
 						}
 					}
 					
+					handleKpiData(KpiData);
 					try {
 						Thread.sleep(GlobalConfig.collectMIDDLEInterval);
 					} catch (InterruptedException e) {
@@ -135,6 +145,34 @@ public class KpiTestView extends BaseChartView {
 		kpiThread.start();
 	}
 
+	/**
+	 *  处理kpi相关的数据
+	 */
+	private void handleKpiData(List<KpiData> kpiList){
+		kpiHandleList = HandleDataManager.getInstance().handleKpiData(kpiList);
+		if (kpiHandleList == null || kpiHandleList.size() < 1) {
+			return;
+		}
+		//将错误信息展示
+		for(KpiHandleResult kpiHandle : kpiHandleList){
+			if (!kpiHandle.result) {
+				if (errorList.contains(kpiHandle)) {
+					continue;
+				}
+				errorList.add(kpiHandle);
+				mShowMessageView.append(formatErrorInfo(kpiHandle, kpiHandle.testValue, "页面加载时间过长"));
+			}
+		}
+	}
+	
+	/**
+	 *  返回kpi相关的处理数据
+	 * @return
+	 */
+	public List<KpiHandleResult> getHandleKpiList() {
+		return kpiHandleList;
+	}
+	
 	public void stop() {
 		stopFlag = true;
 		CollectDataImpl.stopCollectKpiData();
@@ -145,5 +183,16 @@ public class KpiTestView extends BaseChartView {
 			KpiData.clear();
 		}
 	}
-
+	
+	public void destoryData() {
+		if (kpiHandleList != null) {
+			kpiHandleList.clear();
+			kpiHandleList = null;
+		}
+		
+		if (errorList != null) {
+			errorList.clear();
+			errorList = null;
+		}
+	}
 }

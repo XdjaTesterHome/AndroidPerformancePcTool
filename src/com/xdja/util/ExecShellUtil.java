@@ -23,10 +23,10 @@ import com.xdja.constant.GlobalConfig;
  */
 public class ExecShellUtil {
 
-	public static final String COMMAND_SU = "su";
-	public static final String COMMAND_SH = "sh";
-	public static final String COMMAND_EXIT = "exit\n";
-	public static final String COMMAND_LINE_END = "\n";
+	private static final String COMMAND_SU = "su";
+	private static final String COMMAND_SH = "sh";
+	private static final String COMMAND_EXIT = "exit\n";
+	private static final String COMMAND_LINE_END = "\n";
 	private IDevice device;
  //	private static DefaultHardwareDevice mDefaultHardwareDevice;
 	
@@ -82,7 +82,7 @@ public class ExecShellUtil {
 	 * @return
 	 * @see ShellUtils#execCommand(Object[], boolean, boolean)
 	 */
-	public CommandResult execCommand(List commands, boolean isRoot) {
+	public CommandResult execCommand(List<?> commands, boolean isRoot) {
 		return execCommand(commands == null ? null : commands.toArray(new String[] {}), isRoot, true);
 	}
 
@@ -128,7 +128,7 @@ public class ExecShellUtil {
 	 * @return
 	 * @see ShellUtils#execCommand(Object[], boolean, boolean)
 	 */
-	public CommandResult execCommand(List commands, boolean isRoot, boolean isNeedResultMsg) {
+	public CommandResult execCommand(List<?> commands, boolean isRoot, boolean isNeedResultMsg) {
 		return execCommand(commands == null ? null : commands.toArray(new String[] {}), isRoot, isNeedResultMsg);
 	}
 

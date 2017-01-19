@@ -10,12 +10,12 @@ public class BaseTestInfo {
 	public String packageName;
 	
 	// ²âÊÔ°üµÄ°æ±¾ºÅ
-	public String versionCode;
+	public String versionName;
 
-	public BaseTestInfo(String packageName, String versionCode) {
+	public BaseTestInfo(String packageName, String versionName) {
 		super();
 		this.packageName = packageName;
-		this.versionCode = versionCode;
+		this.versionName = versionName;
 	}
 	
 	

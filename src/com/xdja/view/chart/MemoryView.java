@@ -1,11 +1,14 @@
-package com.xdja.view;
+package com.xdja.view.chart;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.FlowLayout;
 import java.awt.Font;
+import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -30,7 +33,7 @@ import com.android.ddmlib.ClientData;
 import com.xdja.adb.AdbManager;
 import com.xdja.collectdata.entity.MemoryData;
 import com.xdja.collectdata.handleData.HandleDataManager;
-import com.xdja.collectdata.handleData.HandleDataResult;
+import com.xdja.collectdata.handleData.entity.MemoryHandleResult;
 import com.xdja.constant.GlobalConfig;
 import com.xdja.util.SwingUiUtil;
 
@@ -40,15 +43,16 @@ public class MemoryView extends BaseChartView implements IClientChangeListener {
 	 * serial UID auto generated
 	 */
 	private static final long serialVersionUID = -9002331611054515951L;
+	private JButton gcButton;
 	private TimeSeries totalAlloc;
 	private TimeSeries freeAlloc;
-	private boolean stopFlag = false;
 	protected Client mCurClient = null;
 	private Thread memoryThread;
 	private MemoryData mMemoryData = null;
-	private HandleDataResult mHandleDataResult = null;
+	private MemoryHandleResult mHandleDataResult = null;
+	private List<MemoryHandleResult> memoryHandleResults = new ArrayList<>(20);
 	
-
+	
 	public MemoryView(String chartContent, String title, String yaxisName) {
 		super();
 		this.totalAlloc = new TimeSeries("Alloc memory");
@@ -90,8 +94,8 @@ public class MemoryView extends BaseChartView implements IClientChangeListener {
 				BorderFactory.createLineBorder(Color.black)));
 		chartPanel.setLayout(new FlowLayout(FlowLayout.RIGHT));
 		// 添加单独的图标
-		JButton gcButton = SwingUiUtil.getInstance().createBtnWithColor("GC", Color.green);
-		gcButton.setLocation(0, 30);
+		gcButton = SwingUiUtil.getInstance().createBtnWithColor("GC", Color.green);
+		gcButton.setEnabled(false);
 		gcButton.addActionListener(new ActionListener() {
 
 			@Override
@@ -130,8 +134,8 @@ public class MemoryView extends BaseChartView implements IClientChangeListener {
 			AndroidDebugBridge.addClientChangeListener(this);
 		}
 		// 清空数据
-		if (mHandleDataList != null) {
-			mHandleDataList.clear();
+		if (memoryHandleResults != null) {
+			memoryHandleResults.clear();
 		}
 
 		memoryThread = new Thread(new Runnable() {
@@ -140,8 +144,12 @@ public class MemoryView extends BaseChartView implements IClientChangeListener {
 			public void run() {
 				// TODO Auto-generated method stub
 				stopFlag = false;
+				gcButton.setEnabled(true);
+				isRunning = true;
 				while (true) {
 					if (stopFlag) {
+						isRunning = false;
+						gcButton.setEnabled(false);
 						break;
 					}
 
@@ -181,10 +189,9 @@ public class MemoryView extends BaseChartView implements IClientChangeListener {
 						allocMb = m.bytesAllocated / (1024.f * 1024.f);
 						freeMb = m.sizeInBytes / (1024.f * 1024.f) - allocMb;
 						mMemoryData = new MemoryData(allocMb, freeMb);
-						System.out.println("allocMb = " + allocMb);
 						addTotalObservation(allocMb, freeMb);
 						// 处理有问题的数据
-						mHandleDataResult = HandleDataManager.getInstance().handleMemoryData(mMemoryData);
+						mHandleDataResult = HandleDataManager.getInstance().handleMemoryData(mMemoryData, allocMb);
 						handleResult(mHandleDataResult, allocMb);
 					}
 				}
@@ -197,26 +204,31 @@ public class MemoryView extends BaseChartView implements IClientChangeListener {
 	 * 
 	 * @param result
 	 */
-	private void handleResult(HandleDataResult result, float memoryValue) {
-		if (result == null || result.result) {
+	private void handleResult(MemoryHandleResult result, float memoryValue) {
+		if (result == null) {
 			return;
 		}
+		// 记录数据
+		memoryHandleResults.add(result);
 
-		// 在界面上展示问题数据
-		appendErrorInfo(formatErrorInfo(result, String.valueOf(memoryValue) + "MB"));
-
+		if (!result.result) {
+			// 在界面上展示问题数据
+			appendErrorInfo(formatErrorInfo(result, String.valueOf(memoryValue) + "MB", "发生内存抖动"));
+		}
 	}
 	
-	@Override
-	protected String formatErrorInfo(HandleDataResult result, String value) {
-		// TODO Auto-generated method stub
-		StringBuilder sbBuilder = new StringBuilder("===================== \n");
-    	sbBuilder.append("ActivityName = ").append(result.activityName).append("\n");
-    	sbBuilder.append("当前测试值= ").append(value).append("\n");
-    	sbBuilder.append("Logfile= ").append(result.logPath).append("\n");
-    	sbBuilder.append("截屏路径= ").append(result.screenshotsPath).append("\n");
-    	sbBuilder.append("memoryTrace=").append(result.memoryTracePath).append("\n");
-    	sbBuilder.append("===================== \n\n\n\n");
-    	return sbBuilder.toString();
+	/**
+	 *  获取最终的测试数据
+	 * @return
+	 */
+	public List<MemoryHandleResult> getHandleResult(){
+		return memoryHandleResults;
+	}
+	
+	public void destoryData(){
+		if (memoryHandleResults != null) {
+			memoryHandleResults.clear();
+			memoryHandleResults = null;
+		}
 	}
 }

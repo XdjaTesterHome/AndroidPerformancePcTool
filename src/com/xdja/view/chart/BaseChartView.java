@@ -1,11 +1,9 @@
-package com.xdja.view;
+package com.xdja.view.chart;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.event.ActionListener;
-import java.util.ArrayList;
-import java.util.List;
 
 import javax.swing.Box;
 import javax.swing.JPanel;
@@ -14,8 +12,9 @@ import javax.swing.Timer;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.StandardChartTheme;
 
-import com.xdja.collectdata.handleData.HandleDataResult;
+import com.xdja.collectdata.handleData.entity.HandleDataResultBase;
 import com.xdja.util.CommonUtil;
+import com.xdja.view.ShowMessageView;
 
 public abstract class BaseChartView extends JPanel{
 
@@ -26,9 +25,10 @@ public abstract class BaseChartView extends JPanel{
 	private static Font FONT = new Font("宋体", Font.PLAIN, 12);
 	protected Timer mTaskTimer;
 	protected ActionListener mActionListener;
-	protected List<HandleDataResult> mHandleDataList = new ArrayList<>();
 	protected ShowMessageView mShowMessageView;
 	private boolean isFirstShowError = true;  // 是否第一次展示错误信息
+	public boolean stopFlag = false; // 是否停止的标志
+	public boolean isRunning = false; // 是否正在运行的标志。
 	
 	public BaseChartView() {
 		super(new BorderLayout());
@@ -79,26 +79,20 @@ public abstract class BaseChartView extends JPanel{
 		add(horizontalBox);
 	}
 	
-    /**
-     *  获取处理过的数据
-     * @return
-     */
-    public List<HandleDataResult> getHandleResult(){
-    	return mHandleDataList;
-    }
-    
     
     /**
      *  格式化错误信息
      * @param result
      * @return
      */
-    protected String formatErrorInfo(HandleDataResult result, String value){
+    protected String formatErrorInfo(HandleDataResultBase result, String value, String errorInfo){
     	StringBuilder sbBuilder = new StringBuilder("===================== \n");
+    	if (!CommonUtil.strIsNull(errorInfo)) {
+			sbBuilder.append(errorInfo).append("\n");
+		}
     	sbBuilder.append("ActivityName = ").append(result.activityName).append("\n");
     	sbBuilder.append("当前测试值= ").append(value).append("\n");
     	sbBuilder.append("Logfile= ").append(result.logPath).append("\n");
-    	sbBuilder.append("截屏路径= ").append(result.screenshotsPath).append("\n");
     	sbBuilder.append("===================== \n\n\n\n");
     	return sbBuilder.toString();
     }

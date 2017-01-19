@@ -13,7 +13,7 @@ public class GlobalConfig {
 	public static final int collectDataTime  = 20;
 	
 	// 采集数据的时间间隔
-	public static final int collectInterval  = 500;
+	public static final int collectInterval  = 1000;
 	public static final int collectMIDDLEInterval  = 1000;
 	public static final int collectLONGInterval  = 1500;
 	
@@ -25,5 +25,10 @@ public class GlobalConfig {
 	
 	// 选中的设备名称
 	public static String DeviceName = "";
+	
+	// 数据库配置
+	public static String DBUSERNAME = "xdja";
+	public static String DBUSERPWD  = "123456";
+	
 	
 }

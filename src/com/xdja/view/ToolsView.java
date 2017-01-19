@@ -18,6 +18,7 @@ import com.xdja.collectdata.SaveEnvironmentManager;
 import com.xdja.collectdata.thread.ScreenCaptureThread;
 import com.xdja.constant.Constants;
 import com.xdja.constant.GlobalConfig;
+import com.xdja.util.CommonUtil;
 import com.xdja.util.ExecShellUtil;
 import com.xdja.util.SwingUiUtil;
 import com.xdja.util.SwingUiUtil.chooseFileListener;
@@ -32,6 +33,8 @@ public class ToolsView extends JPanel implements ActionListener {
 
 	private final static String TRACEBUTTON = "打开Trace文件";
 	private final static String SCREENSHOT = "截屏";
+	private final static String MEMORYTRACE = "抓取内存快照";
+	
 	/**
 	 * 
 	 */
@@ -58,6 +61,12 @@ public class ToolsView extends JPanel implements ActionListener {
 		screenShotBtn.setBounds(new Rectangle(70, 10, 100, 50));
 		screenShotBtn.addActionListener(this);
 		add(screenShotBtn);
+		
+		// memory trace
+		JButton memoryBtn = new JButton(MEMORYTRACE);
+		memoryBtn.setBounds(new Rectangle(70, 10, 100, 50));
+		memoryBtn.addActionListener(this);
+		add(memoryBtn);
 	}
 
 	@Override
@@ -70,7 +79,6 @@ public class ToolsView extends JPanel implements ActionListener {
 			if (!file.exists()) {
 				file.mkdirs();
 			}
-			System.out.println("path = " + file.getAbsolutePath());
 			SwingUiUtil.getInstance().showChooseFileDialog(this, file.getAbsolutePath(), new chooseFileListener() {
 
 				@Override
@@ -117,6 +125,33 @@ public class ToolsView extends JPanel implements ActionListener {
 						}
 					}
 				}
+			});
+			break;
+		case MEMORYTRACE:
+			if (CommonUtil.strIsNull(GlobalConfig.DeviceName) || CommonUtil.strIsNull(GlobalConfig.PackageName)) {
+				break;
+			}
+			File memoryFile = new File(Constants.MEMORY_DUMP);
+			if (!memoryFile.exists()) {
+				memoryFile.mkdirs();
+			}
+			
+			SwingUiUtil.getInstance().showChooseFileDialog(this, memoryFile.getAbsolutePath(), new chooseFileListener(){
+
+				@Override
+				public void chooseFile(File chooseFile) {
+					// TODO Auto-generated method stub
+					if (chooseFile != null) {
+						if (chooseFile.isDirectory()) {
+							AdbManager.getInstance().dumpMemory(GlobalConfig.DeviceName, GlobalConfig.PackageName, chooseFile.getAbsolutePath() + File.separator + "unkonwName.hprof");
+						}
+
+						if (chooseFile.isFile()) {
+							AdbManager.getInstance().dumpMemory(GlobalConfig.DeviceName, GlobalConfig.PackageName, chooseFile.getAbsolutePath());
+						}
+					}
+				}
+				
 			});
 			break;
 		default:

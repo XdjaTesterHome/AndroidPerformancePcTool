@@ -85,7 +85,9 @@ public class Constants {
 	// 保存截图等时需要指明的测试类型
 	public static final String TYPE_FPS = "fps";
 	public static final String TYPE_FLOW = "flow";
+	public static final String TYPE_SLIENT_FLOW = "flowSlient";
 	public static final String TYPE_CPU = "cpu";
+	public static final String TYPE_SLIENT_CPU = "cpuSlient";
 	public static final String TYPE_KPI = "kpi";
 	public static final String TYPE_MEMORY = "memory";
 	public static final String TYPE_BATTERY = "battery";
