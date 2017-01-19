@@ -80,6 +80,7 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 	// 静默测试时，过十分钟之后再采集数据
 	private final static int SLIENT_TIME_INTERVAL = 10 * 1000;
 	private Timer mSlientWaitTimer = new Timer();
+	private String mCurTestPackageName;
 	
 	/**
 	 * constructor to init a LaunchView instance create a JPanel instance to put
@@ -130,6 +131,9 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 				String packageNameold = GlobalConfig.getTestPackageName();
 				String packageName = (String) comboProcess.getSelectedItem();
 				System.out.println("I am select, packageName = " + packageName);
+				if (CommonUtil.strIsNull(packageName)) {
+					mCurTestPackageName = packageName;
+				}
 				if (packageNameold != packageName) {
 					kpiTestView.clear();
 				}
@@ -157,6 +161,7 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 						comboDevices.setEnabled(false);
 						comboProcess.setEnabled(false);
 						startTest();
+						ProPertiesUtil.getInstance().writeProperties(Constants.CHOOSE_PACKAGE, mCurTestPackageName);
 					}
 				});
 

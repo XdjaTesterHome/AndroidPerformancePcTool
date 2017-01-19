@@ -29,6 +29,7 @@ public abstract class BaseChartView extends JPanel{
 	private boolean isFirstShowError = true;  // 是否第一次展示错误信息
 	public boolean stopFlag = false; // 是否停止的标志
 	public boolean isRunning = false; // 是否正在运行的标志。
+	protected String nowTestPackage ;
 	
 	public BaseChartView() {
 		super(new BorderLayout());
@@ -36,6 +37,13 @@ public abstract class BaseChartView extends JPanel{
 		initCommonChart();
 	}
 	
+	/**
+	 *  设置当前测试的packageName
+	 * @param packageName
+	 */
+	protected void setNowTestPackage(String packageName){
+		nowTestPackage = packageName;
+	}
 	/**
 	 * 初始化chart公共的部分
 	 */
