@@ -222,6 +222,7 @@ public class PerformanceDB {
 	 * @param testType
 	 * @return
 	 */
+	@SuppressWarnings("unused")
 	private String getFormatDbName(String packageName, String version, String testType) {
 		String pkg1 = packageName.replace(".", "_");
 		String version1 = version.replace(".", "_");
