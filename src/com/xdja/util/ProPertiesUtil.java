@@ -20,7 +20,6 @@ public class ProPertiesUtil {
 	private static ProPertiesUtil mInstance;
 	private final static String NAME = "tools.properties";
 	private Properties mProperties;
-	
 
 	private ProPertiesUtil() {
 		mProperties = new Properties();
@@ -80,7 +79,26 @@ public class ProPertiesUtil {
 		} catch (Exception e) {
 			// TODO: handle exception
 		}
-		
+
 		return "";
+	}
+
+	/**
+	 * 清空key对应的value
+	 * 
+	 * @param key
+	 */
+	public void removeValue(String key) {
+		FileOutputStream oFile;
+		try {
+			InputStream in = new BufferedInputStream(new FileInputStream(NAME));
+			mProperties.load(in); /// 加载属性列表
+			mProperties.remove(key);
+			oFile = new FileOutputStream(NAME);
+			mProperties.store(oFile, "delete" + key);
+			in.close(); 
+		} catch (Exception e) {
+			// TODO: handle exception
+		}
 	}
 }

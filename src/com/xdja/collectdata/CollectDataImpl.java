@@ -205,7 +205,7 @@ public class CollectDataImpl {
 		String cmd = "cat /proc/net/xt_qtaguid/stats";
 		commandFlowResult = ExecShellUtil.getInstance().execShellCommand(cmd);
 		int flowSend = 0, flowRecv = 0;
-		if (commandFlowResult == null || commandFlowResult.errorMsg != null && !"".equals(commandFlowResult.errorMsg)) {
+		if (commandFlowResult == null || CommonUtil.strIsNull(commandFlowResult.successMsg) || commandFlowResult.successMsg.contains("No such file or directory")) {
 			String cmdSnd = "cat /proc/uid_stat/" + uid + "/tcp_snd";
 			String cmdRec = "cat /proc/uid_stat/" + uid + "+/tcp_rcv";
 			commandFlowResult = ExecShellUtil.getInstance().execShellCommand(cmdSnd);
@@ -218,10 +218,7 @@ public class CollectDataImpl {
 			if (commandFlowResult != null && !commandFlowResult.errorMsg.contains("No such file or directory")) {
 				flowRecv = Integer.parseInt(commandFlowResult.successMsg);
 			}
-			
-			float totalFlow = (float)(flowSend + flowRecv) / 1024 / 1024;
-			totalFlow = CommonUtil.getTwoDots(totalFlow);
-			flowData = new FlowData(totalFlow, flowRecv, flowSend);
+			flowData = new FlowData(getTwoPointsWithMB(flowSend + flowRecv), getTwoPointsWithMB(flowRecv), getTwoPointsWithMB(flowSend));
 			return flowData;
 		}
 
@@ -240,16 +237,24 @@ public class CollectDataImpl {
 				totalRecv += recv_bytes;
 				totalSend += send_bytes;
 			}
-			float totalFlows = (totalRecv + totalSend) / 1024;
-			totalFlows = CommonUtil.getTwoDots(totalFlows);
-			flowData = new FlowData(totalFlows, totalRecv, totalSend);
+			flowData = new FlowData(getTwoPointsWithMB(totalRecv + totalSend), getTwoPointsWithMB(totalRecv), getTwoPointsWithMB(totalSend));
 			return flowData;
 		}
 
 		flowData = new FlowData(0, 0, 0);
 		return flowData;
 	}
-
+	
+	/**
+	 * 将int值转换成MB
+	 * @param value
+	 * @return
+	 */
+	private static float getTwoPointsWithMB(int value){
+		float fValue = (float) (value / 1024.0 / 1024.0);
+		fValue = CommonUtil.getTwoDots(fValue);
+		return fValue;
+	}
 	/**
 	 * 获取内存数据, 返回的数据单位是KB
 	 * 
@@ -525,6 +530,9 @@ public class CollectDataImpl {
 	 * @return
 	 */
 	public static int getPid(String packageName) {
+		if (CommonUtil.strIsNull(packageName)) {
+			return 0;
+		}
 		String cmd = "ps | grep " + packageName;
 		// String cmd = "ps";
 		commandPidResult = ExecShellUtil.getInstance().execShellCommand(cmd);
@@ -573,7 +581,7 @@ public class CollectDataImpl {
 	 *  这里可能会有GlobalConfig没有设置的情况存在。
 	 */
 	public static BaseTestInfo getBaseTestInfo() {
-		String packageName = GlobalConfig.PackageName;
+		String packageName = GlobalConfig.getTestPackageName();
 //		String packageName = "com.xdja.HDSafeEMailClient";
 		if (CommonUtil.strIsNull(packageName)) {
 			return null;

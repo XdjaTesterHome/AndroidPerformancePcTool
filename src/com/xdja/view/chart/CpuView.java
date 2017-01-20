@@ -72,6 +72,7 @@ public class CpuView extends BaseChartView {
 		plot.setDomainGridlinePaint(Color.white);
 		plot.setRangeGridlinePaint(Color.white);
 		plot.setAxisOffset(new RectangleInsets(5.0, 5.0, 5.0, 5.0));
+		
 		domain.setAutoRange(true);
 		domain.setLowerMargin(0.0);
 		domain.setUpperMargin(0.0);
@@ -194,7 +195,7 @@ public class CpuView extends BaseChartView {
 
 	/**
 	 * 处理静默状态的数据
-	 * 当10s内，cpu一直大于0.5时，我们认为是不正常的
+	 * 当10s内，cpu一直大于0.5时，我们认为是不正常的。
 	 * @param cpuData
 	 */
 	public void handleSlientData(CpuData cpuData) {

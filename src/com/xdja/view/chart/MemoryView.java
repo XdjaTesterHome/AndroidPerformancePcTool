@@ -101,7 +101,7 @@ public class MemoryView extends BaseChartView implements IClientChangeListener {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				// TODO Auto-generated method stub
-				AdbManager.getInstance().causeGC(GlobalConfig.PackageName);
+				AdbManager.getInstance().causeGC(GlobalConfig.getTestPackageName());
 			}
 		});
 		chartPanel.add(gcButton);
@@ -127,7 +127,7 @@ public class MemoryView extends BaseChartView implements IClientChangeListener {
 	 */
 	public void start(String packageName) {
 		if (mCurClient == null) {
-			mCurClient = AdbManager.getInstance().getClient(GlobalConfig.DeviceName, GlobalConfig.PackageName);
+			mCurClient = AdbManager.getInstance().getClient(GlobalConfig.DeviceName, GlobalConfig.getTestPackageName());
 		}
 		if (mCurClient != null) {
 			mCurClient.setHeapInfoUpdateEnabled(true);

@@ -3,10 +3,16 @@ package com.xdja.view.main;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.TreeSet;
 
 import javax.swing.JButton;
@@ -36,6 +42,7 @@ import com.xdja.database.PerformanceDB;
 import com.xdja.log.LoggerManager;
 import com.xdja.util.CommonUtil;
 import com.xdja.util.ExecShellUtil;
+import com.xdja.util.ProPertiesUtil;
 import com.xdja.util.SwingUiUtil;
 import com.xdja.util.SwingUiUtil.ClickDialogBtnListener;
 import com.xdja.view.ToolsView;
@@ -70,7 +77,11 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 			"   流   量   ", "    实用工具     " };
 	private final static int WIDTH = 1248;
 	private final static int HEIGHT = 760;
-
+	// 静默测试时，过十分钟之后再采集数据
+	private final static int SLIENT_TIME_INTERVAL = 10 * 1000;
+	private Timer mSlientWaitTimer = new Timer();
+	private String mCurTestPackageName;
+	
 	/**
 	 * constructor to init a LaunchView instance create a JPanel instance to put
 	 * other controller parts
@@ -85,7 +96,6 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 		setBounds(100, 50, WIDTH, HEIGHT);
 		createTopMenu();
 		add(frame);
-		setVisible(true);
 		AndroidDebugBridge.addDeviceChangeListener(this);
 	}
 
@@ -113,28 +123,27 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 		frame.add(comboProcess);
 		Rectangle rectProcess = new Rectangle(320, 0, 420, 30);
 		comboProcess.setBounds(rectProcess);
-		comboProcess.addActionListener(new ActionListener() {
-
+		comboProcess.addItemListener(new ItemListener() {
+			
 			@Override
-			public void actionPerformed(ActionEvent e) {
+			public void itemStateChanged(ItemEvent e) {
 				// TODO Auto-generated method stub
-				String packageNameold = GlobalConfig.PackageName;
+				String packageNameold = GlobalConfig.getTestPackageName();
 				String packageName = (String) comboProcess.getSelectedItem();
-				if (packageName != null) {
-					GlobalConfig.PackageName = packageName;
+				System.out.println("I am select, packageName = " + packageName);
+				if (CommonUtil.strIsNull(packageName)) {
+					mCurTestPackageName = packageName;
 				}
-				if (packageNameold != GlobalConfig.PackageName) {
+				if (packageNameold != packageName) {
 					kpiTestView.clear();
 				}
 			}
 		});
-
 		// 开始监控按钮
 		jb1 = new JButton("开始监控");
 		Rectangle rectjb1 = new Rectangle(800, 0, 100, 30);
 		frame.add(jb1);
 		jb1.setBounds(rectjb1);
-
 		jb1.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -152,6 +161,7 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 						comboDevices.setEnabled(false);
 						comboProcess.setEnabled(false);
 						startTest();
+						ProPertiesUtil.getInstance().writeProperties(Constants.CHOOSE_PACKAGE, mCurTestPackageName);
 					}
 				});
 
@@ -215,6 +225,11 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 							comboProcess.setEnabled(false);
 							slientBtn.setText("停止静默测试");
 							startSlientTest();
+							if (viewFps != null) {
+								viewFps.setBtnEnable(false);
+							}
+							
+							SwingUiUtil.getInstance().showTipsDialog(LaunchView.this, "提示", "静默测试，5分钟后开始采集数据", "我知道了", null);
 						}
 					});
 					
@@ -232,6 +247,9 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 							comboProcess.setEnabled(true);
 							slientBtn.setText("开始静默测试");
 							stopSlientTest();
+							if (viewFps != null) {
+								viewFps.setBtnEnable(true);
+							}
 						}
 					});
 					
@@ -251,24 +269,38 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 	 *  静默测试目前只针对CPU 和 Flow 两种类型的数据
 	 */
 	private void startSlientTest(){
-		//让设备进入静默状态
-		AdbManager.getInstance().makeDeviceSlient();
+		mSlientWaitTimer.schedule(new TimerTask() {
+			
+			@Override
+			public void run() {
+				// TODO Auto-generated method stub
+				//让设备进入静默状态
+				AdbManager.getInstance().makeDeviceSlient();
+				
+				if (viewCpu != null) {
+					viewCpu.setSlientTest(true);
+					viewCpu.start(GlobalConfig.getTestPackageName());
+				}
+				
+				if (viewFlow != null) {
+					viewFlow.setSlient(true);
+					viewFlow.start(GlobalConfig.getTestPackageName());
+				}
+			}
+		}, SLIENT_TIME_INTERVAL);
 		
-		if (viewCpu != null) {
-			viewCpu.setSlientTest(true);
-			viewCpu.start(GlobalConfig.PackageName);
-		}
-		
-		if (viewFlow != null) {
-			viewFlow.setSlient(true);
-			viewFlow.start(GlobalConfig.PackageName);
-		}
+		mSlientWaitTimer = null;
 	}
 	
 	/**
 	 * 停止静默测试
 	 */
 	private void stopSlientTest(){
+		if (mSlientWaitTimer != null) {
+			mSlientWaitTimer.cancel();
+			mSlientWaitTimer = null;
+		}
+		
 		if (viewCpu != null) {
 			viewCpu.stop();
 		}
@@ -430,21 +462,21 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 	private void startTest() {
 		if (viewCpu != null) {
 			viewCpu.setSlientTest(false);
-			viewCpu.start(GlobalConfig.PackageName);
+			viewCpu.start(GlobalConfig.getTestPackageName());
 		}
 
 		if (viewMemory != null) {
-			viewMemory.start(GlobalConfig.PackageName);
+			viewMemory.start(GlobalConfig.getTestPackageName());
 		}
 
 		if (viewFlow != null) {
 			viewFlow.setSlient(false);
-			viewFlow.start(GlobalConfig.PackageName);
+			viewFlow.start(GlobalConfig.getTestPackageName());
 		}
 
 		if (kpiTestView != null) {
 			try {
-				kpiTestView.start(GlobalConfig.PackageName);
+				kpiTestView.start(GlobalConfig.getTestPackageName());
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -563,10 +595,6 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 		for (String sn : snList) {
 			comboDevices.addItem(sn);
 		}
-
-		if (kpiTestView != null) {
-			kpiTestView.stop();
-		}
 	}
 
 	/**
@@ -582,15 +610,34 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 			IDevice dev = AdbManager.getInstance().getIDevice(selectDevice);
 			ExecShellUtil.getInstance().setDevice(dev);
 			List<String> respack = CollectDataImpl.getRunningProcess(devicesid);
+			System.out.println("I am update");
 			if (respack.size() > 0 && comboProcess != null) {
 				comboProcess.removeAllItems();
 			}
+			// 对得到的列表按照首字母排序
+			Collections.sort(respack, latterComparator);
 			for (String sn : respack) {
 				comboProcess.addItem(sn);
 			}
+			
+			String packageName = ProPertiesUtil.getInstance().getProperties(Constants.CHOOSE_PACKAGE);
+			if (!CommonUtil.strIsNull(packageName)) {
+				comboProcess.setSelectedItem(packageName);
+			}
 		}
 	}
+	
+	/**
+	 * 进程名称的首字母排序
+	 */
+	private Comparator<String> latterComparator = new Comparator<String>() {
 
+		@Override
+		public int compare(String o1, String o2) {
+			// TODO Auto-generated method stub
+			return o1.compareTo(o2);
+		}
+	};
 	/**
 	 * 初始化AdbManager
 	 */
@@ -657,6 +704,9 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 		if (kpiTestView != null) {
 			kpiTestView.destoryData();
 		}
+		
+		// 清空选择的包名数据
+		ProPertiesUtil.getInstance().removeValue(Constants.CHOOSE_PACKAGE);
 	}
 	
 	/**

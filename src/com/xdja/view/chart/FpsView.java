@@ -50,6 +50,7 @@ public class FpsView extends BaseChartView {
 	private DefaultCategoryDataset mDataset  = null;
 	private final static String  NOMESSGE = "测试帧率，请在开发者选项中找到【GPU呈现模式分析】，打开【在adb shell dumpsys gfxinfo中】选项";
 	
+	
 	public FpsView(String chartContent, String title, String yaxisName) {
 		super();
 //		setLayout(new FlowLayout(FlowLayout.LEADING));
@@ -110,7 +111,7 @@ public class FpsView extends BaseChartView {
 				// TODO Auto-generated method stub
 				startBtn.setEnabled(false);
 				pauseBtn.setEnabled(true);
-				start(GlobalConfig.PackageName);
+				start(GlobalConfig.getTestPackageName());
 			}
 		});
 		

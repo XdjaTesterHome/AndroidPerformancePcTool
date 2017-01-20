@@ -64,6 +64,7 @@ public class FlowView extends BaseChartView {
 		plot.setDomainGridlinePaint(Color.white);
 		plot.setRangeGridlinePaint(Color.white);
 		plot.setAxisOffset(new RectangleInsets(5.0, 5.0, 5.0, 5.0));
+		
 		domain.setAutoRange(true);
 		domain.setLowerMargin(0.0);
 		domain.setUpperMargin(0.0);
@@ -108,10 +109,7 @@ public class FlowView extends BaseChartView {
 	 * 
 	 * @param flowData
 	 */
-	public void handleFlowData(FlowData flowData) {
-		if (flowData == null) {
-			return;
-		}
+	public void handleFlowData(float flowData) {
 
 		FlowHandleResult flowHandle = HandleDataManager.getInstance().handleFlowData(flowData);
 		if (flowHandle == null) {
@@ -130,12 +128,8 @@ public class FlowView extends BaseChartView {
 	 * 
 	 * @param flowData
 	 */
-	public void handleSlientData(FlowData flowData) {
-		if (flowData == null) {
-			return;
-		}
-
-		FlowHandleResult flowHandle = HandleDataManager.getInstance().handleFlowSlientData(flowData);
+	public void handleSlientData(float flowTotal) {
+		FlowHandleResult flowHandle = HandleDataManager.getInstance().handleFlowSlientData(flowTotal);
 		if (flowHandle == null) {
 			return;
 		}
@@ -186,15 +180,22 @@ public class FlowView extends BaseChartView {
 					}
 
 					mFlowData = CollectDataImpl.getFlowData(packageName);
+					
 					if (mFlowData != null) {
 						if (mLastFlow == -1) {
 							addFlowObservation(0);
 							mLastFlow = mFlowData.flowTotal;
 							continue;
 						}
-						addFlowObservation(mFlowData.flowTotal - mLastFlow);
+						float value = mFlowData.flowTotal - mLastFlow;
+						addFlowObservation(value);
 						mLastFlow = mFlowData.flowTotal;
-
+						
+						if (slient) {
+							handleSlientData(value);
+						}else {
+							handleFlowData(value);
+						}
 						try {
 							Thread.sleep(GlobalConfig.collectInterval);
 						} catch (InterruptedException e) {
