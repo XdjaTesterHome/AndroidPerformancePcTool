@@ -3,8 +3,6 @@ package com.xdja.view.main;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.ArrayList;
@@ -80,8 +78,11 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 	// 静默测试时，过十分钟之后再采集数据
 	private final static int SLIENT_TIME_INTERVAL = 10 * 1000;
 	private Timer mSlientWaitTimer = new Timer();
-	private String mCurTestPackageName;
 	
+	// 当前选择的测试包名
+	private String mCurTestPackageName;
+	// 设置在更新设备的时候，不处理进程列表的点击事件
+	public boolean myIgnoreActionEvents;
 	/**
 	 * constructor to init a LaunchView instance create a JPanel instance to put
 	 * other controller parts
@@ -123,17 +124,24 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 		frame.add(comboProcess);
 		Rectangle rectProcess = new Rectangle(320, 0, 420, 30);
 		comboProcess.setBounds(rectProcess);
-		comboProcess.addItemListener(new ItemListener() {
+		comboProcess.addActionListener(new ActionListener() {
 			
 			@Override
-			public void itemStateChanged(ItemEvent e) {
+			public void actionPerformed(ActionEvent e) {
+				if (myIgnoreActionEvents) {
+					return;
+				}
 				// TODO Auto-generated method stub
 				String packageNameold = GlobalConfig.getTestPackageName();
 				String packageName = (String) comboProcess.getSelectedItem();
-				System.out.println("I am select, packageName = " + packageName);
-				if (CommonUtil.strIsNull(packageName)) {
+				System.out.println("I am select, packageName = " +packageName );
+				
+				if (!CommonUtil.strIsNull(packageName)) {
 					mCurTestPackageName = packageName;
+					// 将选择的包名记录到本地
+					ProPertiesUtil.getInstance().writeProperties(Constants.CHOOSE_PACKAGE, packageName);
 				}
+				
 				if (packageNameold != packageName) {
 					kpiTestView.clear();
 				}
@@ -161,7 +169,6 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 						comboDevices.setEnabled(false);
 						comboProcess.setEnabled(false);
 						startTest();
-						ProPertiesUtil.getInstance().writeProperties(Constants.CHOOSE_PACKAGE, mCurTestPackageName);
 					}
 				});
 
@@ -279,12 +286,12 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 				
 				if (viewCpu != null) {
 					viewCpu.setSlientTest(true);
-					viewCpu.start(GlobalConfig.getTestPackageName());
+					viewCpu.start(mCurTestPackageName);
 				}
 				
 				if (viewFlow != null) {
 					viewFlow.setSlient(true);
-					viewFlow.start(GlobalConfig.getTestPackageName());
+					viewFlow.start(mCurTestPackageName);
 				}
 			}
 		}, SLIENT_TIME_INTERVAL);
@@ -319,6 +326,15 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 	 * 将静态数据保存到数据库中
 	 */
 	private void saveSlientDataToDb(){
+		String selectProcess = (String) comboProcess.getSelectedItem();
+		if (!selectProcess.equals(mCurTestPackageName)) {
+			return;
+		}
+		
+		if (CommonUtil.strIsNull(mCurTestPackageName)) {
+			return;
+		}
+		PerformanceDB.getInstance().setTestPkg(mCurTestPackageName);
 		if (viewCpu != null) {
 			List<CpuHandleResult> handleSlientList = viewCpu.getHandleResult();
 			PerformanceDB.getInstance().insertSlientCpuData(handleSlientList);
@@ -462,28 +478,28 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 	private void startTest() {
 		if (viewCpu != null) {
 			viewCpu.setSlientTest(false);
-			viewCpu.start(GlobalConfig.getTestPackageName());
+			viewCpu.start(mCurTestPackageName);
 		}
 
 		if (viewMemory != null) {
-			viewMemory.start(GlobalConfig.getTestPackageName());
+			viewMemory.start(mCurTestPackageName);
 		}
 
 		if (viewFlow != null) {
 			viewFlow.setSlient(false);
-			viewFlow.start(GlobalConfig.getTestPackageName());
+			viewFlow.start(mCurTestPackageName);
 		}
 
 		if (kpiTestView != null) {
 			try {
-				kpiTestView.start(GlobalConfig.getTestPackageName());
+				kpiTestView.start(mCurTestPackageName);
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
 	}
-
+	
 	/**
 	 * 结束测试
 	 */
@@ -515,6 +531,16 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 	 * 
 	 */
 	private void saveDataToDB(){
+		String selectProcess = (String) comboProcess.getSelectedItem();
+		if (!selectProcess.equals(mCurTestPackageName)) {
+			return;
+		}
+		
+		if (CommonUtil.strIsNull(mCurTestPackageName)) {
+			return;
+		}
+		
+		PerformanceDB.getInstance().setTestPkg(mCurTestPackageName);
 		// cpu
 		if (viewCpu != null) {
 			List<CpuHandleResult> cpuList = viewCpu.getHandleResult();
@@ -579,6 +605,7 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 	 * 更新DeviceList
 	 */
 	private void updateDeviceList() {
+		myIgnoreActionEvents = true;
 		if (comboDevices != null && !comboDevices.isEnabled()) {
 			return;
 		}
@@ -595,12 +622,15 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 		for (String sn : snList) {
 			comboDevices.addItem(sn);
 		}
+		
+		myIgnoreActionEvents = false;
 	}
 
 	/**
 	 * 根据Device来获取进程
 	 */
 	private void updateClientList() {
+		myIgnoreActionEvents = true;
 		if (comboProcess != null && !comboProcess.isEnabled()) {
 			return;
 		}
@@ -625,6 +655,8 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 				comboProcess.setSelectedItem(packageName);
 			}
 		}
+		
+		myIgnoreActionEvents = false;
 	}
 	
 	/**

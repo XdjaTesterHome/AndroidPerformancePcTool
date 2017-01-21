@@ -18,18 +18,19 @@ import com.xdja.util.CommonUtil;
 
 public class PerformanceDB {
 	private static PerformanceDB mInstance = null;
-	private static Connection conn;
-	private static Statement stat;
-	private static ResultSet result;
-	private static String tableUrl = "jdbc:mysql://11.12.109.38:3306/performanceData";
-	private static String dbUrl = "jdbc:mysql://11.12.109.38:3306/";
+	private  Connection conn;
+	private  Statement stat;
+	private  ResultSet result;
+	private String tableUrl = "jdbc:mysql://11.12.109.38:3306/performanceData";
+	private  String dbUrl = "jdbc:mysql://11.12.109.38:3306/";
 //	private static String tableUrl = "jdbc:mysql://localhost:3306/performanceData";
 //	private static String dbUrl = "jdbc:mysql://localhost:3306/";
-	private static String driverClass = "com.mysql.jdbc.Driver";
+	private  String driverClass = "com.mysql.jdbc.Driver";
 	private final static String DBNAME = "performanceData";
-	private static String packageName ;
-	private static String version;
-
+	private  String packageName ;
+	private  String version;
+	private  String mCurTestPkgName;
+	
 	public static PerformanceDB getInstance() {
 		if (mInstance == null) {
 			synchronized (PerformanceDB.class) {
@@ -54,23 +55,6 @@ public class PerformanceDB {
 			conn = DriverManager.getConnection(tableUrl, GlobalConfig.DBUSERNAME, GlobalConfig.DBUSERPWD);
 			stat = conn.createStatement();
 
-			// 获取packageName和version
-			BaseTestInfo baseTestInfo = CollectDataImpl.getBaseTestInfo();
-			if (baseTestInfo == null) {
-				return;
-			}
-			packageName = baseTestInfo.packageName;
-			version = baseTestInfo.versionName;
-//			// 拼接表的名称
-//			cpuTableName = getFormatDbName(packageName, version, Constants.TYPE_CPU);
-//			memoryTableName = getFormatDbName(packageName, version, Constants.TYPE_MEMORY);
-//			kpiTableName = getFormatDbName(packageName, version, Constants.TYPE_KPI);
-//			fpsTableName = getFormatDbName(packageName, version, Constants.TYPE_FPS);
-//			batteryTableName = getFormatDbName(packageName, version, Constants.TYPE_BATTERY);
-//			flowTableName = getFormatDbName(packageName, version, Constants.TYPE_FLOW);
-//			cpuSlientTableName = getFormatDbName(packageName, version, Constants.TYPE_SLIENT_CPU);
-//			flowSlientTableName = getFormatDbName(packageName, version, Constants.TYPE_SLIENT_FLOW);
-			
 			cpuTableName = Constants.TYPE_CPU;
 			memoryTableName = Constants.TYPE_MEMORY;
 			kpiTableName = Constants.TYPE_KPI;
@@ -222,6 +206,7 @@ public class PerformanceDB {
 	 * @param testType
 	 * @return
 	 */
+	@SuppressWarnings("unused")
 	private String getFormatDbName(String packageName, String version, String testType) {
 		String pkg1 = packageName.replace(".", "_");
 		String version1 = version.replace(".", "_");
@@ -242,7 +227,10 @@ public class PerformanceDB {
 		if (handleDataList == null || handleDataList.size() < 1) {
 			return;
 		}
-
+		
+		if (conn == null) {
+			return;
+		}
 		String insertSql = "insert into `" + cpuTableName
 				+ "`(page,package,version ,testvalue, logPath, methodTracePath, pass) values (?,?,?,?,?,?,?)";
 		PreparedStatement psts = null;
@@ -278,7 +266,11 @@ public class PerformanceDB {
 		if (handleDataList == null || handleDataList.size() < 1) {
 			return;
 		}
-
+		
+		if (conn == null) {
+			return;
+		}
+		
 		String insertSql = "insert into `" + cpuSlientTableName
 				+ "`(page,package,version, testvalue, logPath, methodTracePath, pass) values (?,?,?,?,?,?,?)";
 		PreparedStatement psts = null;
@@ -314,7 +306,11 @@ public class PerformanceDB {
 		if (handleKpiList == null || handleKpiList.size() < 1) {
 			return;
 		}
-
+		
+		if (conn == null) {
+			return;
+		}
+		
 		String insertSql = "insert into `" + kpiTableName
 				+ "`(page,package,version, testvalue, logPath, methodTracePath, pass) values (?,?,?,?,?,?,?)";
 		PreparedStatement psts = null;
@@ -350,6 +346,10 @@ public class PerformanceDB {
 		if (handleDataList == null || handleDataList.size() < 1) {
 			return;
 		}
+		if (conn == null) {
+			return;
+		}
+		
 		String insertSql = "insert into `" + memoryTableName
 				+ "`(page,package,version, testvalue, logPath, methodTracePath, hprofPath, pass) values (?,?,?,?,?,?,?,?)";
 		PreparedStatement psts = null;
@@ -386,6 +386,11 @@ public class PerformanceDB {
 		if (handleFlowList == null || handleFlowList.size() < 1) {
 			return;
 		}
+		
+		if (conn == null) {
+			return;
+		}
+		
 		String insertSql = "insert into `" + flowTableName + "`(page,package,version, testvalue, logPath, pass) values (?,?,?,?,?,?)";
 		PreparedStatement psts = null;
 		try {
@@ -419,6 +424,10 @@ public class PerformanceDB {
 		if (handleFlowList == null || handleFlowList.size() < 1) {
 			return;
 		}
+		if (conn == null) {
+			return;
+		}
+		
 		String insertSql = "insert into `" + flowSlientTableName + "`(page,package,version, testvalue, logPath, pass) values (?,?,?,?,?,?)";
 		PreparedStatement psts = null;
 		try {
@@ -452,6 +461,10 @@ public class PerformanceDB {
 		if (handleFpsList == null || handleFpsList.size() < 1) {
 			return;
 		}
+		if (conn == null) {
+			return;
+		}
+		
 		String insertSql = "insert into `" + fpsTableName
 				+ "`(page,package,version, testvalue, logPath, methodTracePath, hprofPath, pass) values (?,?,?,?,?,?,?,?)";
 		PreparedStatement psts = null;
@@ -488,7 +501,10 @@ public class PerformanceDB {
 		if (handleBatteryList == null || handleBatteryList.size() < 1) {
 			return;
 		}
-
+		if (conn == null) {
+			return;
+		}
+		
 		String insertSql = "insert into `" + batteryTableName + "`(uid, testvalue, detailInfo) values (?,?,?)";
 		PreparedStatement psts = null;
 		try {
@@ -507,6 +523,21 @@ public class PerformanceDB {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-
+	}
+	
+	/**
+	 *  设置当前测试的包
+	 * @param pkgName
+	 */
+	public void setTestPkg(String pkgName){
+		mCurTestPkgName = pkgName;
+		
+		// 获取packageName和version
+		BaseTestInfo baseTestInfo = CollectDataImpl.getBaseTestInfo(mCurTestPkgName);
+		if (baseTestInfo == null) {
+			return;
+		}
+		packageName = baseTestInfo.packageName;
+		version = baseTestInfo.versionName;
 	}
 }

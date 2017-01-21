@@ -32,10 +32,10 @@ public class GlobalConfig {
 //	public static String DBUSERNAME = "root";
 //	public static String DBUSERPWD  = "";
 	
-	/**
-	 *  获取当前测试的包名
-	 * @return
-	 */
+//	/**
+//	 *  获取当前测试的包名
+//	 * @return
+//	 */
 	public static String getTestPackageName(){
 		String packageName = ProPertiesUtil.getInstance().getProperties(Constants.CHOOSE_PACKAGE);
 		return packageName;

@@ -111,7 +111,7 @@ public class FpsView extends BaseChartView {
 				// TODO Auto-generated method stub
 				startBtn.setEnabled(false);
 				pauseBtn.setEnabled(true);
-				start(GlobalConfig.getTestPackageName());
+				start(nowTestPackage);
 			}
 		});
 		
@@ -143,6 +143,7 @@ public class FpsView extends BaseChartView {
 	 * @param packageName
 	 */
 	public void start(String packageName) {
+		nowTestPackage = packageName;
 		fpsThread = new Thread(new Runnable() {
 			@Override
 			public void run() {

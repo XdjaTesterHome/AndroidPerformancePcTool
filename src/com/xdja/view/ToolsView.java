@@ -35,6 +35,7 @@ public class ToolsView extends JPanel implements ActionListener {
 	private final static String SCREENSHOT = "截屏";
 	private final static String MEMORYTRACE = "抓取内存快照";
 	
+	private String mCurTestPackageName = "";
 	/**
 	 * 
 	 */
@@ -100,7 +101,7 @@ public class ToolsView extends JPanel implements ActionListener {
 			});
 			break;
 		case SCREENSHOT:
-			ScreenCaptureThread screenCaptureThread = AdbManager.getInstance().screenCapture(GlobalConfig.getTestPackageName(), "", true);
+			ScreenCaptureThread screenCaptureThread = AdbManager.getInstance().screenCapture(mCurTestPackageName, "", true);
 			SwingUiUtil.getInstance().showSaveFileDialog(this, new chooseFileListener() {
 
 				@Override
@@ -128,7 +129,7 @@ public class ToolsView extends JPanel implements ActionListener {
 			});
 			break;
 		case MEMORYTRACE:
-			if (CommonUtil.strIsNull(GlobalConfig.DeviceName) || CommonUtil.strIsNull(GlobalConfig.getTestPackageName())) {
+			if (CommonUtil.strIsNull(GlobalConfig.DeviceName) || CommonUtil.strIsNull(mCurTestPackageName)) {
 				break;
 			}
 			File memoryFile = new File(Constants.MEMORY_DUMP);
@@ -143,11 +144,11 @@ public class ToolsView extends JPanel implements ActionListener {
 					// TODO Auto-generated method stub
 					if (chooseFile != null) {
 						if (chooseFile.isDirectory()) {
-							AdbManager.getInstance().dumpMemory(GlobalConfig.DeviceName, GlobalConfig.getTestPackageName(), chooseFile.getAbsolutePath() + File.separator + "unkonwName.hprof");
+							AdbManager.getInstance().dumpMemory(GlobalConfig.DeviceName, mCurTestPackageName, chooseFile.getAbsolutePath() + File.separator + "unkonwName.hprof");
 						}
 
 						if (chooseFile.isFile()) {
-							AdbManager.getInstance().dumpMemory(GlobalConfig.DeviceName, GlobalConfig.getTestPackageName(), chooseFile.getAbsolutePath());
+							AdbManager.getInstance().dumpMemory(GlobalConfig.DeviceName, mCurTestPackageName, chooseFile.getAbsolutePath());
 						}
 					}
 				}
@@ -158,5 +159,12 @@ public class ToolsView extends JPanel implements ActionListener {
 			break;
 		}
 	}
-
+	
+	/**
+	 * 设置当前的测试
+	 * @param curTestPkg
+	 */
+	public void setCurTestPackageName(String curTestPkg){
+		mCurTestPackageName = curTestPkg;
+	}
 }
