@@ -106,8 +106,6 @@ public class BatteryView extends BaseChartView {
 				// TODO Auto-generated method stub
 				startBtn.setEnabled(false);
 
-				// 记录上一次测试的packageName
-				ProPertiesUtil.getInstance().writeProperties(Constants.LAST_PACKAGENAME, nowTestPackage);
 				// 清理数据
 				boolean isSuc = CollectDataImpl.clearBatteryData();
 				if (isSuc) {
@@ -159,7 +157,7 @@ public class BatteryView extends BaseChartView {
 	 * @throws InterruptedException
 	 */
 	public void start(String packageName) throws InterruptedException {
-
+		nowTestPackage = packageName;
 		batteryThread = new Thread(new Runnable() {
 			@Override
 			public void run() {

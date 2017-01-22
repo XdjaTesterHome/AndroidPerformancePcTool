@@ -27,15 +27,23 @@ public class GlobalConfig {
 	public static String DeviceName = "";
 	
 	// 数据库配置
-//	public static String DBUSERNAME = "xdja";
-//	public static String DBUSERPWD  = "123456";
-	public static String DBUSERNAME = "root";
-	public static String DBUSERPWD  = "";
-//	
+
+
 	/**
 	 *  获取当前测试的包名
 	 * @return
 	 */
+
+	public static String DBUSERNAME = "xdja";
+	public static String DBUSERPWD  = "123456";
+//	public static String DBUSERNAME = "root";
+//	public static String DBUSERPWD  = "";
+	
+//	/**
+//	 *  获取当前测试的包名
+//	 * @return
+//	 */
+
 	public static String getTestPackageName(){
 		String packageName = ProPertiesUtil.getInstance().getProperties(Constants.CHOOSE_PACKAGE);
 		return packageName;

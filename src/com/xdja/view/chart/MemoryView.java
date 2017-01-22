@@ -4,7 +4,6 @@ import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.FlowLayout;
 import java.awt.Font;
-import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
@@ -101,7 +100,7 @@ public class MemoryView extends BaseChartView implements IClientChangeListener {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				// TODO Auto-generated method stub
-				AdbManager.getInstance().causeGC(GlobalConfig.getTestPackageName());
+				AdbManager.getInstance().causeGC(nowTestPackage);
 			}
 		});
 		chartPanel.add(gcButton);
@@ -126,8 +125,9 @@ public class MemoryView extends BaseChartView implements IClientChangeListener {
 	 * @param packageName
 	 */
 	public void start(String packageName) {
+		nowTestPackage = packageName;
 		if (mCurClient == null) {
-			mCurClient = AdbManager.getInstance().getClient(GlobalConfig.DeviceName, GlobalConfig.getTestPackageName());
+			mCurClient = AdbManager.getInstance().getClient(GlobalConfig.DeviceName, packageName);
 		}
 		if (mCurClient != null) {
 			mCurClient.setHeapInfoUpdateEnabled(true);
