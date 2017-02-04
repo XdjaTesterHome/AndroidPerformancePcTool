@@ -94,4 +94,15 @@ public class Constants {
 	public static final String TYPE_KPI = "kpi";
 	public static final String TYPE_MEMORY = "memory";
 	public static final String TYPE_BATTERY = "battery";
+	
+	// 保存数据库的名字
+	public static final String FPS_TABLE  = "FpsData";
+	public static final String FLOW_TABLE = "FlowData";
+	public static final String SLIENT_FLOW_TABLE = "FlowSilentData";
+	public static final String CPU_TABLE  = "CpuData";
+	public static final String SLIENT_CPU_TABLE = "CpuSlientData";
+	public static final String KPI_TABLE  = "KpiData";
+	public static final String MEMORY_TABLE  = "MemoryData";
+	public static final String BATTERY_TABLE = "BatteryData";
+	public static final String COMMON_TABLE  = "CommonData";
 }

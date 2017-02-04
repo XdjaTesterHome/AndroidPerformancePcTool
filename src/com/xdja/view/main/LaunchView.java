@@ -30,6 +30,7 @@ import com.android.ddmlib.IDevice;
 import com.xdja.adb.AdbManager;
 import com.xdja.adb.AndroidDevice;
 import com.xdja.collectdata.CollectDataImpl;
+import com.xdja.collectdata.entity.BaseTestInfo;
 import com.xdja.collectdata.handleData.entity.CpuHandleResult;
 import com.xdja.collectdata.handleData.entity.FlowHandleResult;
 import com.xdja.collectdata.handleData.entity.KpiHandleResult;
@@ -278,6 +279,11 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 	 *  静默测试目前只针对CPU 和 Flow 两种类型的数据
 	 */
 	private void startSlientTest(){
+		GlobalConfig.TestPackageName = mCurTestPackageName;
+		BaseTestInfo baseTestInfo = CollectDataImpl.getBaseTestInfo(mCurTestPackageName);
+		if (baseTestInfo != null) {
+			GlobalConfig.TestVersion = baseTestInfo.versionName;
+		}
 		mSlientWaitTimer.schedule(new TimerTask() {
 			
 			@Override
@@ -328,6 +334,7 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 	 * 将静态数据保存到数据库中
 	 */
 	private void saveSlientDataToDb(){
+		saveCommonData(mCurTestPackageName);
 		String selectProcess = (String) comboProcess.getSelectedItem();
 		if (!selectProcess.equals(mCurTestPackageName)) {
 			return;
@@ -336,7 +343,6 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 		if (CommonUtil.strIsNull(mCurTestPackageName)) {
 			return;
 		}
-		PerformanceDB.getInstance().setTestPkg(mCurTestPackageName);
 		if (viewCpu != null) {
 			List<CpuHandleResult> handleSlientList = viewCpu.getHandleResult();
 			PerformanceDB.getInstance().insertSlientCpuData(handleSlientList);
@@ -478,6 +484,11 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 	
 	
 	private void startTest() {
+		GlobalConfig.TestPackageName = mCurTestPackageName;
+		BaseTestInfo baseTestInfo = CollectDataImpl.getBaseTestInfo(mCurTestPackageName);
+		if (baseTestInfo != null) {
+			GlobalConfig.TestVersion = baseTestInfo.versionName;
+		}
 		if (viewCpu != null) {
 			viewCpu.setSlientTest(false);
 			viewCpu.start(mCurTestPackageName);
@@ -533,7 +544,7 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 	 * 
 	 */
 	private void saveDataToDB(){
-		
+		saveCommonData(mCurTestPackageName);
 		String selectProcess = (String) comboProcess.getSelectedItem();
 		if (!selectProcess.equals(mCurTestPackageName)) {
 			mCurTestPackageName = selectProcess;//处理mCurTestPackageName为null时不记录数据到数据库
@@ -543,7 +554,6 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 			mCurTestPackageName = selectProcess;
 //			return;
 		}
-		PerformanceDB.getInstance().setTestPkg(mCurTestPackageName);
 		// cpu
 		if (viewCpu != null) {
 			List<CpuHandleResult> cpuList = viewCpu.getHandleResult();
@@ -601,7 +611,25 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 			updateDeviceList();
 		}
 	}
-
+	
+	/**
+	 * 将测试的包名保存起来
+	 */
+	private void saveCommonData(String packageName){
+		if (CommonUtil.strIsNull(packageName)) {
+			return;
+		}
+		
+		String version = "";
+		BaseTestInfo baseTestInfo = CollectDataImpl.getBaseTestInfo(packageName);
+		if (baseTestInfo != null) {
+			version = baseTestInfo.versionName;
+		}
+		
+		// 保存测试的基本信息
+		PerformanceDB.getInstance().saveCommonData(packageName, version);
+	}
+	
 	/***
 	 * 更新DeviceList
 	 */

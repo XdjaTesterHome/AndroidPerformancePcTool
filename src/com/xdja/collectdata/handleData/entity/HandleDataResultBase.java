@@ -1,5 +1,7 @@
 package com.xdja.collectdata.handleData.entity;
 
+import com.xdja.constant.GlobalConfig;
+
 /**
  * 处理数据的结果
  * 基础方法
@@ -17,12 +19,33 @@ public class HandleDataResultBase {
 	public String activityName;
 	// 保存日志的路径
 	public String logPath;
+	// 包名
+	public String packageName;
+	public String getPackageName() {
+		return packageName;
+	}
+	public void setPackageName(String packageName) {
+		this.packageName = packageName;
+	}
+	public String getVersion() {
+		return version;
+	}
+	public void setVersion(String version) {
+		this.version = version;
+	}
+	// 版本号
+	public String version;
+	
 	public HandleDataResultBase() {
 		super();
+		setPackageName(GlobalConfig.TestPackageName);
+		setVersion(GlobalConfig.TestVersion);
 		// TODO Auto-generated constructor stub
 	}
 	public HandleDataResultBase(boolean result){
 		this.result = result;
+		setPackageName(GlobalConfig.TestPackageName);
+		setVersion(GlobalConfig.TestVersion);
 	}
 	public HandleDataResultBase(String testValue, boolean result, String activityName, String logPath) {
 		super();
@@ -30,6 +53,8 @@ public class HandleDataResultBase {
 		this.result = result;
 		this.activityName = activityName;
 		this.logPath = logPath;
+		setPackageName(GlobalConfig.TestPackageName);
+		setVersion(GlobalConfig.TestVersion);
 	}
 	public String getActivityName() {
 		return activityName;

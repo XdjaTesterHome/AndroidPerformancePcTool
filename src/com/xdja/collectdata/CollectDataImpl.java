@@ -237,7 +237,7 @@ public class CollectDataImpl {
 				totalRecv += recv_bytes;
 				totalSend += send_bytes;
 			}
-			flowData = new FlowData(getTwoPointsWithMB(totalRecv + totalSend), getTwoPointsWithMB(totalRecv), getTwoPointsWithMB(totalSend));
+			flowData = new FlowData(getTwoPointsWithKB(totalRecv + totalSend), getTwoPointsWithKB(totalRecv), getTwoPointsWithMB(totalSend));
 			return flowData;
 		}
 
@@ -252,6 +252,17 @@ public class CollectDataImpl {
 	 */
 	private static float getTwoPointsWithMB(int value){
 		float fValue = (float) (value / 1024.0 / 1024.0);
+		fValue = CommonUtil.getTwoDots(fValue);
+		return fValue;
+	}
+	
+	/**
+	 * 将int值转换成MB
+	 * @param value
+	 * @return
+	 */
+	private static float getTwoPointsWithKB(int value){
+		float fValue = (float) (value / 1024.0);
 		fValue = CommonUtil.getTwoDots(fValue);
 		return fValue;
 	}
@@ -425,7 +436,7 @@ public class CollectDataImpl {
 		}
 
 		if (commandUidResult.successMsg != null && commandUidResult.successMsg != "") {
-			System.out.println("commandUidResult.successMsg:"+commandUidResult.successMsg);//
+//			System.out.println("commandUidResult.successMsg:"+commandUidResult.successMsg);//
 			return commandUidResult.successMsg.split("\t")[1];
 		}
 
