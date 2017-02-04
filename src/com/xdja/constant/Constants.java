@@ -96,13 +96,13 @@ public class Constants {
 	public static final String TYPE_BATTERY = "battery";
 	
 	// 保存数据库的名字
-	public static final String FPS_TABLE  = "FpsData";
-	public static final String FLOW_TABLE = "FlowData";
-	public static final String SLIENT_FLOW_TABLE = "FlowSilentData";
-	public static final String CPU_TABLE  = "CpuData";
-	public static final String SLIENT_CPU_TABLE = "CpuSlientData";
-	public static final String KPI_TABLE  = "KpiData";
-	public static final String MEMORY_TABLE  = "MemoryData";
-	public static final String BATTERY_TABLE = "BatteryData";
-	public static final String COMMON_TABLE  = "CommonData";
+	public static final String FPS_TABLE  = "performance_fpsdata";
+	public static final String FLOW_TABLE = "performance_flowdata";
+	public static final String SLIENT_FLOW_TABLE = "performance_flowsilentdata";
+	public static final String CPU_TABLE  = "performance_cpudata";
+	public static final String SLIENT_CPU_TABLE = "performance_cpusilentdata";
+	public static final String KPI_TABLE  = "performance_kpidata";
+	public static final String MEMORY_TABLE  = "performance_memorydata";
+	public static final String BATTERY_TABLE = "performance_batterydata";
+	public static final String COMMON_TABLE  = "performance_commondata";
 }

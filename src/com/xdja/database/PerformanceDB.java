@@ -20,14 +20,14 @@ public class PerformanceDB {
 	private Connection conn;
 	private Statement stat;
 	private ResultSet result;
-	private String tableUrl = "jdbc:mysql://11.12.109.38:3306/performanceData";
+	private String tableUrl = "jdbc:mysql://11.12.109.38:3306/performancedata";
 	private String dbUrl = "jdbc:mysql://11.12.109.38:3306/";
 	// private static String tableUrl =
 	// "jdbc:mysql://localhost:3306/performanceData";
 	// private static String dbUrl = "jdbc:mysql://localhost:3306/";
 	private String driverClass = "com.mysql.jdbc.Driver";
 
-	private final static String DBNAME = "performanceData";
+	private final static String DBNAME = "performancedata";
 	private String packageName;
 	private String version;
 
