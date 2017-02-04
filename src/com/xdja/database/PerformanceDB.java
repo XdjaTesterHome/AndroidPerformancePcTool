@@ -566,7 +566,7 @@ public class PerformanceDB {
 		return DBSearch;
 	}
 	/**
-	 *  根据当前pkg字段，获取数据库中所有的不同测试数据，有多少个不同的数据包,返回值为列表
+	 *  根据当前pkg字段，获取数据库中所有的不同测试数据，有多少个不同的测试数据包,返回值为列表
 	 * @param 
 	 * @throws SQLException 
 	 */
@@ -595,6 +595,38 @@ public class PerformanceDB {
 		return pkg;
 		
 	}
+	
+	
+	/**
+	 *  根据当前传入的package包名，获取数据库中的当前测试包的版本号信息，有多少个不同的版本，返回值为版本号的列表。
+	 * @param 
+	 * @throws SQLException 
+	 */
+	public List<String> version(Statement stmt,String pkg) throws SQLException{
+		String sql = "select version from performancedata where package = "+pkg+"";
+		ResultSet rs = stmt.executeQuery(sql);
+		List<String> version = new ArrayList<String>();
+		int i=1;
+		while (rs.next()){
+			if (i ==1){
+				version.add(rs.getString(1));
+              }else {int j =version.size();
+                 int like = 0;
+                 for (int m =0;m<j;m++){
+                	 if (version.get(m)!=rs.getString(1)){
+                		like++;  
+                	    }
+                     }
+                 if (like == j){
+                	 version.add(rs.getString(1));
+                 }
+                 }
+              
+              i++; 
+		 }
+		return version;
+		
+		}
 	
 	
 }
