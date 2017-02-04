@@ -103,6 +103,8 @@ public class FlowView extends BaseChartView {
 	public List<FlowHandleResult> getHandleResultList() {
 		return mFlowHandleSlientResults;
 	}
+	
+	
 
 	/**
 	 * 处理数据
@@ -115,12 +117,12 @@ public class FlowView extends BaseChartView {
 		if (flowHandle == null) {
 			return;
 		}
-
+         mFlowHandleResults.add(flowHandle);
 		if (!flowHandle.result) {
 			mShowMessageView.append(formatErrorInfo(flowHandle, flowHandle.testValue, "流量消耗过高"));
 		}
 
-		mFlowHandleResults.add(flowHandle);
+		
 	}
 
 	/**
@@ -223,5 +225,10 @@ public class FlowView extends BaseChartView {
 			String normalStr = "===========结束测试=============\n\n";
 			appendErrorInfo(normalStr);
 		}
+	}
+
+	public List<FlowHandleResult> getHanResultList() {
+		// TODO Auto-generated method stub
+		return mFlowHandleResults;
 	}
 }

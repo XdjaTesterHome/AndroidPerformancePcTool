@@ -14,7 +14,7 @@ import com.xdja.collectdata.thread.TraceMethodThread;
 import com.xdja.constant.GlobalConfig;
 import com.xdja.util.CommonUtil;
 import com.xdja.util.ExecShellUtil;
-
+import com.xdja.view.main.LaunchView;
 /***
  * 用于Adb相关的操作，用到了ddmlib
  * 
@@ -187,8 +187,14 @@ public class AdbManager implements IDebugBridgeChangeListener {
 	public Client getClient(String name, String packageName) {
 		IDevice device = getIDevice(name);
 		if (device != null) {
-			Client client = device.getClient(packageName);
+			Client client;
+			if(packageName!= null){                   //处理包名为空时候的空指针错误。
+			client = device.getClient(packageName);   //处理包名为空时候的空指针错误。
+			}else{
+			client = device.getClient(LaunchView.getSelectPkg());
+			}
 			return client;
+
 		}
 		return null;
 	}

@@ -1,6 +1,7 @@
 package com.xdja.database;
 
 import java.sql.*;
+import java.util.ArrayList;
 import java.util.List;
 
 import com.xdja.collectdata.CollectDataImpl;
@@ -22,13 +23,15 @@ public class PerformanceDB {
     private  Connection conn;
 	private  Statement stat;
 	private  ResultSet result;
-	private String tableUrl = "jdbc:mysql://11.12.109.38:3306/performanceData";
-	private  String dbUrl = "jdbc:mysql://11.12.109.38:3306/";
-//	private static String tableUrl = "jdbc:mysql://localhost:3306/performanceData";
-//	private static String dbUrl = "jdbc:mysql://localhost:3306/";
+//	private String tableUrl = "jdbc:mysql://11.12.109.38:3306/performanceData";
+//	private  String dbUrl = "jdbc:mysql://11.12.109.38:3306/";
+	private static String tableUrl = "jdbc:mysql://localhost:3306/performanceData";
+	private static String dbUrl = "jdbc:mysql://localhost:3306/";
 	private  String driverClass = "com.mysql.jdbc.Driver";
 
 	private final static String DBNAME = "performanceData";
+
+	
 	private  String packageName ;
 	private  String version;
 	private  String mCurTestPkgName;
@@ -542,4 +545,56 @@ public class PerformanceDB {
 		packageName = baseTestInfo.packageName;
 		version = baseTestInfo.versionName;
 	}
+	
+	/**
+	 *  根据当前传入的包名和版本号，查询数据库中相关的其他数据；性能指标CPU、当前页面、数据是否正常
+	 * @param 
+	 */
+	public PerformanceDBSearch searchDate(Statement stmt,String pkg,String version) throws SQLException{
+		List<Float> cpuData = new ArrayList<Float>();
+		List<String> pageData = new ArrayList<String>();
+		List<Integer> passData = new ArrayList<Integer>();
+		String sql = "select page,testvalue,pass from performancedata where package ="+pkg+" and version="+version+"";    //要执行查询的SQL
+		ResultSet rs = stmt.executeQuery(sql);
+		 while (rs.next()){
+			 cpuData.add(rs.getFloat(1));
+			 pageData.add(rs.getString(2));
+			 passData.add(rs.getInt(3));
+		 }
+		PerformanceDBSearch DBSearch = null;
+		DBSearch =new PerformanceDBSearch(cpuData,pageData,passData);
+		return DBSearch;
+	}
+	/**
+	 *  根据当前pkg字段，获取数据库中所有的不同测试数据，有多少个不同的数据包,返回值为列表
+	 * @param 
+	 * @throws SQLException 
+	 */
+	public List<String> pkg(Statement stmt) throws SQLException{
+		String sql = "select package from performancedata";
+		ResultSet rs = stmt.executeQuery(sql);
+		List<String> pkg = new ArrayList<String>();
+		int i=1;
+		while (rs.next()){
+			if (i ==1){
+				pkg.add(rs.getString(1));
+              }else {int j =pkg.size();
+                 int like = 0;
+                 for (int m =0;m<j;m++){
+                	 if (pkg.get(m)!=rs.getString(1)){
+                		like++;  
+                	    }
+                     }
+                 if (like == j){
+                	 pkg.add(rs.getString(1));
+                 }
+                 }
+              
+              i++; 
+		 }
+		return pkg;
+		
+	}
+	
+	
 }

@@ -134,6 +134,7 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 				// TODO Auto-generated method stub
 				String packageNameold = GlobalConfig.getTestPackageName();
 				String packageName = (String) comboProcess.getSelectedItem();
+				
 				System.out.println("I am select, packageName = " +packageName );
 				
 				if (!CommonUtil.strIsNull(packageName)) {
@@ -145,6 +146,7 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 				if (packageNameold != packageName) {
 					kpiTestView.clear();
 				}
+				
 			}
 		});
 		// 开始监控按钮
@@ -531,15 +533,16 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 	 * 
 	 */
 	private void saveDataToDB(){
+		
 		String selectProcess = (String) comboProcess.getSelectedItem();
 		if (!selectProcess.equals(mCurTestPackageName)) {
-			return;
+			mCurTestPackageName = selectProcess;//处理mCurTestPackageName为null时不记录数据到数据库
+//			return;
 		}
-		
 		if (CommonUtil.strIsNull(mCurTestPackageName)) {
-			return;
+			mCurTestPackageName = selectProcess;
+//			return;
 		}
-		
 		PerformanceDB.getInstance().setTestPkg(mCurTestPackageName);
 		// cpu
 		if (viewCpu != null) {
@@ -555,7 +558,6 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 			if (memoryList != null && memoryList.size() > 0) {
 				PerformanceDB.getInstance().insertMemoryData(memoryList);
 			}
-			
 		}
 		
 		// 保存KPi数据
@@ -566,14 +568,13 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 			}
 			
 		}
-		
+//		System.out.println("viewFlow:"+viewFlow);//
+//		System.out.println("flowHandleResults:"+viewFlow.getHandleResultList());//
 		if (viewFlow != null) {
-			List<FlowHandleResult> flowHandleResults = viewFlow.getHandleResultList();
+			List<FlowHandleResult> flowHandleResults = viewFlow.getHanResultList();
 			if (flowHandleResults != null && flowHandleResults.size() > 0) {
 				PerformanceDB.getInstance().insertFlowData(flowHandleResults);
 			}
-			
-			
 		}
 	}
 	
@@ -786,6 +787,12 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 		launch.initAdbManager();
 		launch.addActionListener();
 		launch.setVisible(true);
+	}
+	
+	public static String getSelectPkg(){
+		String pkg = comboProcess.getSelectedItem().toString();
+		return pkg;
+		
 	}
 
 }

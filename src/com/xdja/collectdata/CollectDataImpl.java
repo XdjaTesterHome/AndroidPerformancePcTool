@@ -14,7 +14,8 @@ import com.xdja.collectdata.entity.KpiData;
 import com.xdja.log.LoggerManager;
 import com.xdja.util.CommonUtil;
 import com.xdja.util.ExecShellUtil;
-import com.xdja.util.ExecShellUtil.GetDataInterface;;
+import com.xdja.util.ExecShellUtil.GetDataInterface;
+import com.xdja.view.main.LaunchView;;
 /**
  * 获取和Android相关的一些信息
  * 
@@ -408,6 +409,9 @@ public class CollectDataImpl {
 	 * @param packageName
 	 */
 	private static String getUid(String packageName) {
+		if (packageName ==null){  //条件语句处理空指针，处理package空指针异常
+			packageName = LaunchView.getSelectPkg();
+		}
 		int pid = getPid(packageName);
 		String cmd = "cat /proc/" + pid + "/status | grep Uid";
 		commandUidResult = ExecShellUtil.getInstance().execShellCommand(cmd);
@@ -421,6 +425,7 @@ public class CollectDataImpl {
 		}
 
 		if (commandUidResult.successMsg != null && commandUidResult.successMsg != "") {
+			System.out.println("commandUidResult.successMsg:"+commandUidResult.successMsg);//
 			return commandUidResult.successMsg.split("\t")[1];
 		}
 
