@@ -28,8 +28,6 @@ public class PerformanceDB {
 	private String driverClass = "com.mysql.jdbc.Driver";
 
 	private final static String DBNAME = "performancedata";
-	private String packageName;
-	private String version;
 
 	public static PerformanceDB getInstance() {
 		if (mInstance == null) {
@@ -163,7 +161,7 @@ public class PerformanceDB {
 		String createFpsSql = "CREATE TABLE IF NOT EXISTS `" + fpsTableName + "`("
 				+ "id int(11) not null AUTO_INCREMENT, page varchar(80),package varchar(160),version varchar(160),testvalue varchar(50), logPath varchar(50),methodTracePath varchar(50),hprofPath varchar(50), isPass int, PRIMARY KEY(`id`))";
 		String createBatterySql = "CREATE TABLE IF NOT EXISTS `" + batteryTableName + "`("
-				+ "id int(11) not null AUTO_INCREMENT, uid int(11),testvalue varchar(50),  detailInfo varchar(256),PRIMARY KEY(`id`))";
+				+ "id int(11) not null AUTO_INCREMENT, uid int(11),testvalue varchar(50),  detailInfo varchar(256), package varchar(160), version varchar(160), PRIMARY KEY(`id`))";
 		String createSlientCpuSql = "CREATE TABLE IF NOT EXISTS `" + cpuSlientTableName + "`("
 				+ "id int(11) not null AUTO_INCREMENT, page varchar(80),package varchar(160),version varchar(160),testvalue varchar(50), logPath varchar(50),methodTracePath varchar(50), isPass int, PRIMARY KEY(`id`))";
 		String createSlientFlowSql = "CREATE TABLE IF NOT EXISTS `" + flowSlientTableName + "`("
@@ -232,8 +230,8 @@ public class PerformanceDB {
 			psts = conn.prepareStatement(insertSql);
 			for (CpuHandleResult result : handleDataList) {
 				psts.setString(1, result.activityName);
-				psts.setString(2, packageName); // 增加package
-				psts.setString(3, version); // 增加version
+				psts.setString(2, result.packageName); // 增加package
+				psts.setString(3, result.version); // 增加version
 				psts.setFloat(4, Float.valueOf(result.testValue));
 				psts.setString(5, result.logPath);
 				psts.setString(6, result.methodTracePath);
@@ -272,8 +270,8 @@ public class PerformanceDB {
 			psts = conn.prepareStatement(insertSql);
 			for (CpuHandleResult result : handleDataList) {
 				psts.setString(1, result.activityName);
-				psts.setString(2, packageName); // 增加package
-				psts.setString(3, version); // 增加version
+				psts.setString(2, result.packageName); // 增加package
+				psts.setString(3, result.version); // 增加version
 				psts.setFloat(4, Float.valueOf(result.testValue));
 				psts.setString(5, result.logPath);
 				psts.setString(6, result.methodTracePath);
@@ -312,8 +310,8 @@ public class PerformanceDB {
 			psts = conn.prepareStatement(insertSql);
 			for (KpiHandleResult result : handleKpiList) {
 				psts.setString(1, result.activityName);
-				psts.setString(2, packageName); // 增加package
-				psts.setString(3, version); // 增加version
+				psts.setString(2, result.packageName); // 增加package
+				psts.setString(3, result.version); // 增加version
 				psts.setFloat(4, Float.valueOf(result.testValue));
 				psts.setString(5, result.logPath);
 				psts.setString(6, result.methodTracePath);
@@ -351,8 +349,8 @@ public class PerformanceDB {
 			psts = conn.prepareStatement(insertSql);
 			for (MemoryHandleResult result : handleDataList) {
 				psts.setString(1, result.activityName);
-				psts.setString(2, packageName); // 增加package
-				psts.setString(3, version); // 增加version
+				psts.setString(2, result.packageName); // 增加package
+				psts.setString(3, result.version); // 增加version
 				psts.setFloat(4, Float.valueOf(result.testValue));
 				psts.setString(5, result.logPath);
 				psts.setString(6, result.methodTracePath);
@@ -392,8 +390,8 @@ public class PerformanceDB {
 			psts = conn.prepareStatement(insertSql);
 			for (FlowHandleResult result : handleFlowList) {
 				psts.setString(1, result.activityName);
-				psts.setString(2, packageName); // 增加package
-				psts.setString(3, version); // 增加version
+				psts.setString(2, result.packageName); // 增加package
+				psts.setString(3, result.version); // 增加version
 				psts.setFloat(4, Float.valueOf(result.testValue));
 				psts.setString(5, result.logPath);
 				// 正常数据，值是1，异常数据，值是0
@@ -430,8 +428,8 @@ public class PerformanceDB {
 			psts = conn.prepareStatement(insertSql);
 			for (FlowHandleResult result : handleFlowList) {
 				psts.setString(1, result.activityName);
-				psts.setString(2, packageName); // 增加package
-				psts.setString(3, version); // 增加version
+				psts.setString(2, result.packageName); // 增加package
+				psts.setString(3, result.version); // 增加version
 				psts.setFloat(4, Float.valueOf(result.testValue));
 				psts.setString(5, result.logPath);
 				// 正常数据，值是1，异常数据，值是0
@@ -468,8 +466,8 @@ public class PerformanceDB {
 			psts = conn.prepareStatement(insertSql);
 			for (FpsHandleResult result : handleFpsList) {
 				psts.setString(1, result.activityName);
-				psts.setString(2, packageName); // 增加package
-				psts.setString(3, version); // 增加version
+				psts.setString(2, result.packageName); // 增加package
+				psts.setString(3, result.version); // 增加version
 				psts.setFloat(4, Float.valueOf(result.testValue));
 				psts.setString(5, result.logPath);
 				psts.setString(6, result.methodTracePath);
@@ -500,7 +498,7 @@ public class PerformanceDB {
 			return;
 		}
 
-		String insertSql = "insert into `" + batteryTableName + "`(uid, testvalue, detailInfo) values (?,?,?)";
+		String insertSql = "insert into `" + batteryTableName + "`(uid, testvalue, detailInfo, package, version) values (?,?,?,?,?)";
 		PreparedStatement psts = null;
 		try {
 			conn.setAutoCommit(false);
@@ -509,6 +507,8 @@ public class PerformanceDB {
 				psts.setString(1, result.uid);
 				psts.setFloat(2, Float.valueOf(result.testValue));
 				psts.setString(3, result.detailInfo);
+				psts.setString(4, result.packageName);
+				psts.setString(5, result.version);
 				psts.addBatch();
 			}
 
