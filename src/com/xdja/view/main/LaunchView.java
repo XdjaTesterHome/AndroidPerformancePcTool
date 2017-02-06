@@ -83,7 +83,7 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 	// 当前选择的测试包名
 	private String mCurTestPackageName;
 	// 设置在更新设备的时候，不处理进程列表的点击事件
-	public boolean myIgnoreActionEvents;
+	public boolean myIgnoreActionEvents = true;
 	/**
 	 * constructor to init a LaunchView instance create a JPanel instance to put
 	 * other controller parts
@@ -578,8 +578,6 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 			}
 			
 		}
-//		System.out.println("viewFlow:"+viewFlow);//
-//		System.out.println("flowHandleResults:"+viewFlow.getHandleResultList());//
 		if (viewFlow != null) {
 			List<FlowHandleResult> flowHandleResults = viewFlow.getHanResultList();
 			if (flowHandleResults != null && flowHandleResults.size() > 0) {
@@ -679,10 +677,11 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 				comboProcess.addItem(sn);
 			}
 			
-			String packageName = ProPertiesUtil.getInstance().getProperties(Constants.CHOOSE_PACKAGE);
-			if (!CommonUtil.strIsNull(packageName)) {
-				comboProcess.setSelectedItem(packageName);
-			}
+			// 这个逻辑不正确，不应该显示上一次出现的packageName
+//			String packageName = ProPertiesUtil.getInstance().getProperties(Constants.CHOOSE_PACKAGE);
+//			if (!CommonUtil.strIsNull(packageName)) {
+//				comboProcess.setSelectedItem(packageName);
+//			}
 		}
 		
 		myIgnoreActionEvents = false;

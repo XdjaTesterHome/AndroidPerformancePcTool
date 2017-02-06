@@ -303,9 +303,13 @@ public class HandleDataManager {
 				mFpsHandleResult.setResult(false);
 				mFpsHandleResult.setMethodTracePath("");
 				mFpsHandleResult.setMemoryHprofPath("");
+				mFpsHandleResult.setPackageName(GlobalConfig.TestPackageName);
+				mFpsHandleResult.setVersion(GlobalConfig.TestVersion);
 				handleFpsDataInList(mFpsHandleResult);
 			} else {
 				mFpsHandleResult.setResult(true);
+				mFpsHandleResult.setPackageName(GlobalConfig.TestPackageName);
+				mFpsHandleResult.setVersion(GlobalConfig.TestVersion);
 				handleFpsDataInList(mFpsHandleResult);
 			}
 		}
@@ -337,9 +341,9 @@ public class HandleDataManager {
 			}
 
 			handleFpsData.testValue = String.valueOf(curFps);
+		}else {
+			fpsList.add(handleFpsData);
 		}
-
-		fpsList.add(handleFpsData);
 	}
 
 	/**
@@ -398,9 +402,9 @@ public class HandleDataManager {
 			}
 
 			kpiData.testValue = String.valueOf(curTime);
+		}else {
+			kpiList.add(kpiData);
 		}
-
-		kpiList.add(kpiData);
 	}
 
 	/**

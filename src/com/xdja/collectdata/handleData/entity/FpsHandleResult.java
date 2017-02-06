@@ -61,6 +61,6 @@ public class FpsHandleResult extends HandleDataResultBase {
 	@Override
 	public boolean equals(Object obj) {
 		// TODO Auto-generated method stub
-		return this.activityName.equals(((KpiHandleResult)obj).activityName);
+		return this.activityName.equals(((FpsHandleResult)obj).activityName);
 	}
 }

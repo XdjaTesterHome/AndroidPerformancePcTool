@@ -109,7 +109,7 @@ public class CollectDataImpl {
 	 * @return
 	 */
 	public static List<FpsData> getFpsData(String packageName) {
-		String cmd = "shell dumpsys gfxinfo " + packageName;
+		String cmd = "dumpsys gfxinfo " + packageName;
 		commandFpsResult = ExecShellUtil.getInstance().execShellCommand(cmd);
 		if (commandFpsResult == null || !"".equals(commandFpsResult.errorMsg)) {
 			LoggerManager.logDebug(LOGTAG, "getFpsData", "get fps is wrong");

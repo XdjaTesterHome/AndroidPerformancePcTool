@@ -30,9 +30,11 @@ import com.xdja.collectdata.entity.FpsData;
 import com.xdja.collectdata.handleData.HandleDataManager;
 import com.xdja.collectdata.handleData.entity.FpsHandleResult;
 import com.xdja.collectdata.handleData.entity.HandleDataResultBase;
+import com.xdja.constant.Constants;
 import com.xdja.constant.GlobalConfig;
 import com.xdja.database.PerformanceDB;
 import com.xdja.util.CommonUtil;
+import com.xdja.util.ProPertiesUtil;
 import com.xdja.util.SwingUiUtil;
 
 public class FpsView extends BaseChartView {
@@ -111,7 +113,7 @@ public class FpsView extends BaseChartView {
 				// TODO Auto-generated method stub
 				startBtn.setEnabled(false);
 				pauseBtn.setEnabled(true);
-				start(nowTestPackage);
+				start();
 			}
 		});
 		
@@ -142,8 +144,8 @@ public class FpsView extends BaseChartView {
 	 * 
 	 * @param packageName
 	 */
-	public void start(String packageName) {
-		nowTestPackage = packageName;
+	public void start() {
+		nowTestPackage = ProPertiesUtil.getInstance().getProperties(Constants.CHOOSE_PACKAGE);
 		fpsThread = new Thread(new Runnable() {
 			@Override
 			public void run() {
@@ -155,7 +157,7 @@ public class FpsView extends BaseChartView {
 						isRunning = false;
 						break;
 					}
-					fpsdataList = CollectDataImpl.getFpsData(packageName);
+					fpsdataList = CollectDataImpl.getFpsData(nowTestPackage);
 					if (fpsdataList != null ) {
 						for(FpsData fpsdata : fpsdataList){
 //							mDataset = new DefaultCategoryDataset();
