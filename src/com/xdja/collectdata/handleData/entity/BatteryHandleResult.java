@@ -9,6 +9,7 @@ public class BatteryHandleResult extends HandleDataResultBase {
 	
 	public String uid;
 	public String detailInfo;
+	public String appPackageName; //uid¶ÔÓ¦µÄpackageName
 	
 	public BatteryHandleResult() {
 		super();
@@ -25,12 +26,20 @@ public class BatteryHandleResult extends HandleDataResultBase {
 		// TODO Auto-generated constructor stub
 	}
 
+	public String getAppPackageName() {
+		return appPackageName;
+	}
+
 	public String getDetailInfo() {
 		return detailInfo;
 	}
 
 	public String getUid() {
 		return uid;
+	}
+
+	public void setAppPackageName(String appPackageName) {
+		this.appPackageName = appPackageName;
 	}
 
 	public void setDetailInfo(String detailInfo) {

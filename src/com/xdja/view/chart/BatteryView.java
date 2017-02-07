@@ -177,7 +177,13 @@ public class BatteryView extends BaseChartView {
 				}
 				if (batteryDataList != null || batteryDataList.size() > 0) {
 					for(BatteryData batteryData : batteryDataList){
-						mDataset.addValue(batteryData.getBatteryValue(), "uid", batteryData.getUid());
+						try{
+							mDataset.addValue(Float.parseFloat(batteryData.getBatteryValue()), "uid", batteryData.getUid());
+						}catch (Exception e) {
+							// TODO: handle exception
+							// 针对不是数字的项直接跳过
+							continue;
+						}
 					}
 					
 					if (mPlot != null) {

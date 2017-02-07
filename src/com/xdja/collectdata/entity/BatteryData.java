@@ -6,24 +6,29 @@ package com.xdja.collectdata.entity;
  *
  */
 public class BatteryData {
-	// 
+	// uid或者数据类型
 	public String uid;
 	// uid对应的电量值
-	public float batteryValue;
+	public String batteryValue;
 	// 关于电量的详细信息
 	public String detailInfo;
 	
+	public String appPackageName; //uid对应的包名
 	public BatteryData() {
 		super();
 		// TODO Auto-generated constructor stub
 	}
-	public BatteryData(String uid, float batteryValue, String detailInfo) {
+	public BatteryData(String uid, String batteryValue, String detailInfo) {
 		super();
 		this.uid = uid;
 		this.batteryValue = batteryValue;
 		this.detailInfo = detailInfo;
 	}
-	public float getBatteryValue() {
+	
+	public String getAppPackageName() {
+		return appPackageName;
+	}
+	public String getBatteryValue() {
 		return batteryValue;
 	}
 	public String getDetailInfo() {
@@ -32,7 +37,10 @@ public class BatteryData {
 	public String getUid() {
 		return uid;
 	}
-	public void setBatteryValue(float batteryValue) {
+	public void setAppPackageName(String appPackageName) {
+		this.appPackageName = appPackageName;
+	}
+	public void setBatteryValue(String batteryValue) {
 		this.batteryValue = batteryValue;
 	}
 	public void setDetailInfo(String detailInfo) {

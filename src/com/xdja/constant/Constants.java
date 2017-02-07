@@ -105,4 +105,11 @@ public class Constants {
 	public static final String MEMORY_TABLE  = "performance_memorydata";
 	public static final String BATTERY_TABLE = "performance_batterydata";
 	public static final String COMMON_TABLE  = "performance_commondata";
+	
+	// Properties  Ù–‘√˚≥∆
+	public static final String TABLEURL = "tableUrl";
+	public static final String DBURL = "dbUrl";
+	public static final String DBUSERNAME = "dbuserName";
+	public static final String DBPASSWD = "dbpasswd";
+	
 }
