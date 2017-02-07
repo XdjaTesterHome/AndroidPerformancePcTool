@@ -16,6 +16,7 @@ import com.xdja.util.CommonUtil;
 import com.xdja.util.ExecShellUtil;
 import com.xdja.util.ExecShellUtil.GetDataInterface;
 import com.xdja.view.main.LaunchView;;
+
 /**
  * 获取和Android相关的一些信息
  * 
@@ -30,14 +31,12 @@ public class CollectDataImpl {
 	private static KpiData kpiData = null;
 	private static FpsData fpsData = null;
 	private static List<KpiData> kpiList = new ArrayList<>(12);
-	private static List<FpsData> fpsList = new ArrayList<>(12);
 
 	private static GetDataInterface mGetDataListener = new GetDataInterface() {
 
 		@Override
 		public void getString(String content) {
 			// TODO Auto-generated method stub
-			System.out.println("content = " + content);
 			if (content != null && content.contains("Displayed")) {
 				String[] contents = content.split("Displayed");
 				if (contents.length > 1) {
@@ -45,7 +44,7 @@ public class CollectDataImpl {
 					String nowPageName = kpiStr.split(":")[0].trim();
 					int index = nowPageName.lastIndexOf(".");
 					nowPageName = nowPageName.substring(index + 1);
-					
+
 					String costtimeStr = kpiStr.split(":")[1].trim();
 					int costTime = formatStrToms(costtimeStr);
 					if (nowPageName == null || "".equals(nowPageName)) {
@@ -53,11 +52,6 @@ public class CollectDataImpl {
 					}
 
 					kpiData = new KpiData(nowPageName, costTime);
-					if (kpiList.contains(kpiData)) {
-						int lastCostTime = kpiList.get(kpiList.indexOf(kpiData)).loadTime;
-						costTime = (costTime + lastCostTime) / 2;
-						kpiData.setLoadTime(costTime);
-					}
 					kpiList.add(kpiData);
 				}
 			}
@@ -79,17 +73,16 @@ public class CollectDataImpl {
 	public static void startCollectKpiData(String packageName) {
 		kpiList.clear();
 		String cmd = "adb logcat -v time -s ActivityManager | grep " + packageName;
-		System.out.println(cmd);
 		String clearcmd = "adb logcat -c";
 		ExecShellUtil.getInstance().execShellCommand(clearcmd);
 		System.out.println(clearcmd);
 		ExecShellUtil.getInstance().execCmdCommand(cmd, mGetDataListener);
 	}
-	
+
 	/**
-	 *  停止收集Kpi数据
+	 * 停止收集Kpi数据
 	 */
-	public static void stopCollectKpiData(){
+	public static void stopCollectKpiData() {
 		ExecShellUtil.getInstance().stopProcess();
 	}
 
@@ -108,7 +101,7 @@ public class CollectDataImpl {
 	 * @param packageName
 	 * @return
 	 */
-	public static List<FpsData> getFpsData(String packageName) {
+	public static FpsData getFpsData(String packageName) {
 		String cmd = "dumpsys gfxinfo " + packageName;
 		commandFpsResult = ExecShellUtil.getInstance().execShellCommand(cmd);
 		if (commandFpsResult == null || !"".equals(commandFpsResult.errorMsg)) {
@@ -205,7 +198,8 @@ public class CollectDataImpl {
 		String cmd = "cat /proc/net/xt_qtaguid/stats";
 		commandFlowResult = ExecShellUtil.getInstance().execShellCommand(cmd);
 		int flowSend = 0, flowRecv = 0;
-		if (commandFlowResult == null || CommonUtil.strIsNull(commandFlowResult.successMsg) || commandFlowResult.successMsg.contains("No such file or directory")) {
+		if (commandFlowResult == null || CommonUtil.strIsNull(commandFlowResult.successMsg)
+				|| commandFlowResult.successMsg.contains("No such file or directory")) {
 			String cmdSnd = "cat /proc/uid_stat/" + uid + "/tcp_snd";
 			String cmdRec = "cat /proc/uid_stat/" + uid + "+/tcp_rcv";
 			commandFlowResult = ExecShellUtil.getInstance().execShellCommand(cmdSnd);
@@ -218,7 +212,8 @@ public class CollectDataImpl {
 			if (commandFlowResult != null && !commandFlowResult.errorMsg.contains("No such file or directory")) {
 				flowRecv = Integer.parseInt(commandFlowResult.successMsg);
 			}
-			flowData = new FlowData(getTwoPointsWithMB(flowSend + flowRecv), getTwoPointsWithMB(flowRecv), getTwoPointsWithMB(flowSend));
+			flowData = new FlowData(getTwoPointsWithMB(flowSend + flowRecv), getTwoPointsWithMB(flowRecv),
+					getTwoPointsWithMB(flowSend));
 			return flowData;
 		}
 
@@ -237,35 +232,39 @@ public class CollectDataImpl {
 				totalRecv += recv_bytes;
 				totalSend += send_bytes;
 			}
-			flowData = new FlowData(getTwoPointsWithKB(totalRecv + totalSend), getTwoPointsWithKB(totalRecv), getTwoPointsWithMB(totalSend));
+			flowData = new FlowData(getTwoPointsWithKB(totalRecv + totalSend), getTwoPointsWithKB(totalRecv),
+					getTwoPointsWithMB(totalSend));
 			return flowData;
 		}
 
 		flowData = new FlowData(0, 0, 0);
 		return flowData;
 	}
-	
+
 	/**
 	 * 将int值转换成MB
+	 * 
 	 * @param value
 	 * @return
 	 */
-	private static float getTwoPointsWithMB(int value){
+	private static float getTwoPointsWithMB(int value) {
 		float fValue = (float) (value / 1024.0 / 1024.0);
 		fValue = CommonUtil.getTwoDots(fValue);
 		return fValue;
 	}
-	
+
 	/**
 	 * 将int值转换成MB
+	 * 
 	 * @param value
 	 * @return
 	 */
-	private static float getTwoPointsWithKB(int value){
+	private static float getTwoPointsWithKB(int value) {
 		float fValue = (float) (value / 1024.0);
 		fValue = CommonUtil.getTwoDots(fValue);
 		return fValue;
 	}
+
 	/**
 	 * 获取内存数据, 返回的数据单位是KB
 	 * 
@@ -333,7 +332,7 @@ public class CollectDataImpl {
 			activityName = activityName.trim();
 			activityName = activityName.split("/")[1];
 			activityName = activityName.split(" ")[0];
-			activityName = activityName.substring(activityName.lastIndexOf(".")+1);
+			activityName = activityName.substring(activityName.lastIndexOf(".") + 1);
 			return activityName;
 		}
 
@@ -420,7 +419,7 @@ public class CollectDataImpl {
 	 * @param packageName
 	 */
 	private static String getUid(String packageName) {
-		if (packageName ==null){  //条件语句处理空指针，处理package空指针异常
+		if (packageName == null) { // 条件语句处理空指针，处理package空指针异常
 			packageName = LaunchView.getSelectPkg();
 		}
 		int pid = getPid(packageName);
@@ -436,7 +435,7 @@ public class CollectDataImpl {
 		}
 
 		if (commandUidResult.successMsg != null && commandUidResult.successMsg != "") {
-//			System.out.println("commandUidResult.successMsg:"+commandUidResult.successMsg);//
+			// System.out.println("commandUidResult.successMsg:"+commandUidResult.successMsg);//
 			return commandUidResult.successMsg.split("\t")[1];
 		}
 
@@ -466,14 +465,14 @@ public class CollectDataImpl {
 	 * @param content
 	 * @return
 	 */
-	private static List<FpsData> handleFpsData(String content) {
+	private static FpsData handleFpsData(String content) {
 		if (content == null || "".equals(content)) {
-			return fpsList;
+			return fpsData;
 		}
 		String activityName = CollectDataImpl.getCurActivity();
 		content = handleFps(content);
 		if (content == null) {
-			return fpsList;
+			return fpsData;
 		}
 
 		String[] firstSpilt = content.split("Execute");
@@ -486,7 +485,7 @@ public class CollectDataImpl {
 					System.out.println("handleFpsData thirdSpilt == null");
 					// LoggerManager.logDebug(LOGTAG, "handleFpsData", "no
 					// operation mobilephone");
-					return fpsList;
+					return fpsData;
 				}
 
 				String[] fpsSplit;
@@ -498,7 +497,7 @@ public class CollectDataImpl {
 					fpsSplit = thirdSpilt[i].split("\t");
 					// 判断是否是4列数字，不是4列数字，直接跳过
 					if (fpsSplit.length % 4 != 0) {
-						System.out.println("handleFpsData fpsSplit.length % 4");
+//						System.out.println("handleFpsData fpsSplit.length % 4");
 						// LoggerManager.logDebug(LOGTAG, "handleFpsData", "fps
 						// count is wrong");
 						continue;
@@ -520,22 +519,10 @@ public class CollectDataImpl {
 					}
 				}
 				int fps = frameCount * 60 / (frameCount + vsync_count);
-
 				fpsData = new FpsData(fps, jank_count, frameCount, activityName);
-				System.out.println(fpsData);
-				if (fpsList.contains(fpsData)) {
-					int lastjankCount = fpsList.get(fpsList.indexOf(fpsData)).dropcount;
-					int lastframeCount = fpsList.get(fpsList.indexOf(fpsData)).framecount;
-					int lastfps = fpsList.get(fpsList.indexOf(fpsData)).fps;
-					fpsData.fps = (fpsData.fps + lastfps) / 2;
-					fpsData.framecount = (fpsData.framecount + lastframeCount) / 2;
-					fpsData.dropcount = (fpsData.dropcount + lastjankCount) / 2;
-				}
-
-				fpsList.add(fpsData);
 			}
 		}
-		return fpsList;
+		return fpsData;
 	}
 
 	/**
@@ -571,15 +558,15 @@ public class CollectDataImpl {
 		}
 		return 0;
 	}
-	
+
 	/**
-	 *  清理电量数据
+	 * 清理电量数据
 	 */
-	public static boolean clearBatteryData(){
+	public static boolean clearBatteryData() {
 		String enableBatteryCmd = "dumpsys batterystats --enable full-wake-history";
 		String getBatteryCmd = "dumpsys batterystats --reset";
 		boolean isTrue = false;
-		
+
 		try {
 			ExecShellUtil.getInstance().execShellCommand(enableBatteryCmd, false);
 			ExecShellUtil.getInstance().execShellCommand(getBatteryCmd, false);
@@ -590,10 +577,9 @@ public class CollectDataImpl {
 		}
 		return isTrue;
 	}
-	
+
 	/**
-	 *  获取基本的测试信息
-	 *  这里可能会有GlobalConfig没有设置的情况存在。
+	 * 获取基本的测试信息 这里可能会有GlobalConfig没有设置的情况存在。
 	 */
 	public static BaseTestInfo getBaseTestInfo(String packageName) {
 		if (CommonUtil.strIsNull(packageName)) {
@@ -611,9 +597,10 @@ public class CollectDataImpl {
 				return baseTestInfo;
 			}
 		}
-		
+
 		return null;
 	}
+
 	/**
 	 * 将timeStr转成毫秒
 	 * 

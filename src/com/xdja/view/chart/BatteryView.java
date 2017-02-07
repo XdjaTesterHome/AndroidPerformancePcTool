@@ -36,6 +36,7 @@ import com.xdja.database.PerformanceDB;
 import com.xdja.util.CommonUtil;
 import com.xdja.util.ProPertiesUtil;
 import com.xdja.util.SwingUiUtil;
+import com.xdja.view.main.LaunchView;
 
 public class BatteryView extends BaseChartView {
 
@@ -50,6 +51,7 @@ public class BatteryView extends BaseChartView {
 	private CategoryPlot mPlot;
 	private DefaultCategoryDataset mDataset = null;
 
+	private JButton startBtn,parseBtn;
 	public BatteryView(String chartContent, String title, String yaxisName) {
 		super();
 		mDataset = new DefaultCategoryDataset();
@@ -97,18 +99,21 @@ public class BatteryView extends BaseChartView {
 				BorderFactory.createLineBorder(Color.black)));
 		chartPanel.setLayout(new FlowLayout(FlowLayout.RIGHT));
 		// 添加【开始测试】、【分析数据】按钮
-		JButton startBtn = SwingUiUtil.getInstance().createBtnWithColor("开始测试", Color.green);
-		JButton parseBtn = SwingUiUtil.getInstance().createBtnWithColor("分析数据", Color.RED);
+		startBtn = SwingUiUtil.getInstance().createBtnWithColor("开始测试", Color.green);
+		parseBtn = SwingUiUtil.getInstance().createBtnWithColor("分析数据", Color.RED);
 		startBtn.addActionListener(new ActionListener() {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				// TODO Auto-generated method stub
 				startBtn.setEnabled(false);
-
+				LaunchView.setComboxEnable(false);
+				LaunchView.setBtnEnable(false);
 				// 清理数据
 				boolean isSuc = CollectDataImpl.clearBatteryData();
 				if (isSuc) {
+					// 记录测试包名
+					ProPertiesUtil.getInstance().writeProperties(Constants.LAST_PACKAGENAME, ProPertiesUtil.getInstance().getProperties(Constants.CHOOSE_PACKAGE));
 					// show dialog
 					SwingUiUtil.getInstance().showTipsDialog(BatteryView.this, "提示", "测试电量，请拔掉usb，然后执行自己的测试用例即可", "好的",
 							null);
@@ -122,10 +127,12 @@ public class BatteryView extends BaseChartView {
 			public void actionPerformed(ActionEvent e) {
 				// TODO Auto-generated method stub
 				startBtn.setEnabled(true);
-
+				LaunchView.setComboxEnable(true);
+				LaunchView.setBtnEnable(true);
 				try {
 					String lastPackageName = ProPertiesUtil.getInstance().getProperties(Constants.LAST_PACKAGENAME);
-					if (CommonUtil.strIsNull(lastPackageName) || !lastPackageName.equals(nowTestPackage)) {
+					String nowPackageName = ProPertiesUtil.getInstance().getProperties(Constants.CHOOSE_PACKAGE);
+					if (CommonUtil.strIsNull(lastPackageName) || !lastPackageName.equals(nowPackageName)) {
 						SwingUiUtil.getInstance().showTipsDialog(BatteryView.this, "提示", "请选择上次测试的应用包名之后再执行解析数据操作",
 								"好的", null);
 						return;
@@ -157,7 +164,6 @@ public class BatteryView extends BaseChartView {
 	 * @throws InterruptedException
 	 */
 	public void start(String packageName) throws InterruptedException {
-		nowTestPackage = packageName;
 		batteryThread = new Thread(new Runnable() {
 			@Override
 			public void run() {
@@ -230,5 +236,23 @@ public class BatteryView extends BaseChartView {
 			batteryDataList.clear();
 			batteryDataList = null;
 		}
+	}
+	
+	/**
+	 *  设置当前界面的按钮是否是可以点击的。
+	 * @param enable
+	 */
+	public void setBtnEnable(boolean enable){
+		if (startBtn == null || parseBtn == null) {
+			return;
+		}
+		if (enable) {
+			startBtn.setEnabled(true);
+			parseBtn.setEnabled(false);
+		}else {
+			startBtn.setEnabled(false);
+			parseBtn.setEnabled(false);
+		}
+		
 	}
 }

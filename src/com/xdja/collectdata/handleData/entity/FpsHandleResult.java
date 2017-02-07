@@ -8,7 +8,8 @@ package com.xdja.collectdata.handleData.entity;
 public class FpsHandleResult extends HandleDataResultBase {
 	public String methodTracePath;
 	public String memoryHprofPath;
-	public int dropcount;
+	public int dropCount;
+	public int frameCount;
 	
 	public FpsHandleResult() {
 		super();
@@ -25,8 +26,10 @@ public class FpsHandleResult extends HandleDataResultBase {
 		// TODO Auto-generated constructor stub
 	}
 
-	public int getDropcount() {
-		return dropcount;
+	@Override
+	public boolean equals(Object obj) {
+		// TODO Auto-generated method stub
+		return this.activityName.equals(((FpsHandleResult)obj).activityName);
 	}
 
 	public String getMemoryHprofPath() {
@@ -37,18 +40,7 @@ public class FpsHandleResult extends HandleDataResultBase {
 		return methodTracePath;
 	}
 
-	public void setDropcount(int dropcount) {
-		this.dropcount = dropcount;
-	}
 
-	public void setMemoryHprofPath(String memoryHprofPath) {
-		this.memoryHprofPath = memoryHprofPath;
-	}
-
-	public void setMethodTracePath(String methodTracePath) {
-		this.methodTracePath = methodTracePath;
-	}
-	
 	@Override
 	public int hashCode() {
 		// TODO Auto-generated method stub
@@ -57,10 +49,29 @@ public class FpsHandleResult extends HandleDataResultBase {
 		}
 		return super.hashCode();
 	}
-	
-	@Override
-	public boolean equals(Object obj) {
-		// TODO Auto-generated method stub
-		return this.activityName.equals(((FpsHandleResult)obj).activityName);
+
+	public void setMemoryHprofPath(String memoryHprofPath) {
+		this.memoryHprofPath = memoryHprofPath;
 	}
+	
+	public void setMethodTracePath(String methodTracePath) {
+		this.methodTracePath = methodTracePath;
+	}
+
+	public int getDropCount() {
+		return dropCount;
+	}
+
+	public void setDropCount(int dropCount) {
+		this.dropCount = dropCount;
+	}
+
+	public int getFrameCount() {
+		return frameCount;
+	}
+
+	public void setFrameCount(int frameCount) {
+		this.frameCount = frameCount;
+	}
+	
 }
