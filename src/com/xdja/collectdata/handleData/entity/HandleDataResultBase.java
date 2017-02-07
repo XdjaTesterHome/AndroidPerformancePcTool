@@ -21,6 +21,15 @@ public class HandleDataResultBase {
 	public String logPath;
 	// 包名
 	public String packageName;
+	// 是否显示错误信息
+	public boolean isShowErrorMsg;
+	
+	public boolean isShowErrorMsg() {
+		return isShowErrorMsg;
+	}
+	public void setShowErrorMsg(boolean isShowErrorMsg) {
+		this.isShowErrorMsg = isShowErrorMsg;
+	}
 	public String getPackageName() {
 		return packageName;
 	}

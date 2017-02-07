@@ -221,15 +221,15 @@ public class CCRDFile {
 			   file.mkdir();//创建文件夹
 			  }
 //		CCRDFile.createDir(filepath);// 调用方法创建目录
-		String filedemopath =  oldName+"/powerresult/demo.txt";
+		String filedemopath =  oldName+"/powerresult/batteryData.txt";
 		File filedemo = new File(filedemopath);
 		if (!filedemo.exists()){
-		FileWriter fw=new FileWriter(filepath+"demo.txt",true);//创建文件
+		FileWriter fw=new FileWriter(filepath+"batteryData.txt",true);//创建文件
 		fw.write(a);
         fw.close();
         }else{
         	new CCRDFile().deleteFile(filedemopath); 
-        	FileWriter fw=new FileWriter(filepath+"demo.txt",true);//创建文件
+        	FileWriter fw=new FileWriter(filepath+"batteryData.txt",true);//创建文件
     		fw.write(a);
             fw.close();
         }

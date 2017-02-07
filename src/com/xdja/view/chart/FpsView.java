@@ -26,6 +26,7 @@ import org.jfree.chart.title.TextTitle;
 import org.jfree.data.category.DefaultCategoryDataset;
 
 import com.xdja.collectdata.CollectDataImpl;
+import com.xdja.collectdata.SaveEnvironmentManager;
 import com.xdja.collectdata.entity.FpsData;
 import com.xdja.collectdata.handleData.HandleDataManager;
 import com.xdja.collectdata.handleData.entity.FpsHandleResult;
@@ -36,6 +37,7 @@ import com.xdja.database.PerformanceDB;
 import com.xdja.util.CommonUtil;
 import com.xdja.util.ProPertiesUtil;
 import com.xdja.util.SwingUiUtil;
+import com.xdja.view.main.LaunchView;
 
 public class FpsView extends BaseChartView {
 
@@ -45,11 +47,12 @@ public class FpsView extends BaseChartView {
 	private static final long serialVersionUID = -9002331611054515951L;
 	private JButton startBtn, pauseBtn;
 	private Thread fpsThread;
-	private List<FpsData> fpsdataList = null;
 	private List<FpsHandleResult> fpsHandleList = new ArrayList<>(12);
 	private List<FpsHandleResult> errorList = new ArrayList<>(12);
 	private CategoryPlot mPlot;
 	private DefaultCategoryDataset mDataset  = null;
+	private FpsData mFpsData;
+	private FpsHandleResult mFpsHandleResult;
 	private final static String  NOMESSGE = "测试帧率，请在开发者选项中找到【GPU呈现模式分析】，打开【在adb shell dumpsys gfxinfo中】选项";
 	
 	
@@ -113,6 +116,8 @@ public class FpsView extends BaseChartView {
 				// TODO Auto-generated method stub
 				startBtn.setEnabled(false);
 				pauseBtn.setEnabled(true);
+				LaunchView.setComboxEnable(false);
+				LaunchView.setBtnEnable(false);
 				start();
 			}
 		});
@@ -124,8 +129,9 @@ public class FpsView extends BaseChartView {
 				// TODO Auto-generated method stub
 				startBtn.setEnabled(true);
 				pauseBtn.setEnabled(false);
+				LaunchView.setComboxEnable(true);
+				LaunchView.setBtnEnable(true);
 				stop();
-				
 				//保存数据
 				saveDataToDb();
 			}
@@ -157,20 +163,21 @@ public class FpsView extends BaseChartView {
 						isRunning = false;
 						break;
 					}
-					fpsdataList = CollectDataImpl.getFpsData(nowTestPackage);
-					if (fpsdataList != null ) {
-						for(FpsData fpsdata : fpsdataList){
+					mFpsData = CollectDataImpl.getFpsData(nowTestPackage);
+					handleFpsData(mFpsData);
+					handleFpsHandleList();
+					if (mFpsData != null ) {
+						for(FpsHandleResult fpsdata : fpsHandleList){
 //							mDataset = new DefaultCategoryDataset();
-							mDataset.addValue(fpsdata.fps, "帧率", fpsdata.activityName);
-							mDataset.addValue(fpsdata.dropcount, "丢帧数", fpsdata.activityName);
-							mDataset.addValue(fpsdata.framecount, "总帧数", fpsdata.activityName);
+							mDataset.addValue(Integer.parseInt(fpsdata.testValue), "帧率", fpsdata.activityName);
+							mDataset.addValue(fpsdata.dropCount, "丢帧数", fpsdata.activityName);
+							mDataset.addValue(fpsdata.frameCount, "总帧数", fpsdata.activityName);
 							if (mPlot != null) {
 								mPlot.setDataset(mDataset);
 							}
 						}
 					}
 					
-					handleFpsData(fpsdataList);
 					try {
 						Thread.sleep(GlobalConfig.collectMIDDLEInterval);
 					} catch (InterruptedException e) {
@@ -188,20 +195,75 @@ public class FpsView extends BaseChartView {
 		stopFlag = true;
 	}
 	
-	private void handleFpsData(List<FpsData> fpsDatas){
-		fpsHandleList = HandleDataManager.getInstance().handleFpsData(fpsDatas);
-		
-		if (fpsHandleList != null && fpsHandleList.size() > 0) {
-			// 展示错误信息
-			for(FpsHandleResult fpsData : fpsHandleList){
-				if (!fpsData.result) {
-					if (errorList.contains(fpsData)) {
-						continue;
-					}
-					
-					errorList.add(fpsData);
-					mShowMessageView.append(formatErrorInfo(fpsData, String.valueOf(fpsData.testValue), "页面出现卡顿"));
+	/**
+	 * 处理结果列表中重复的元素，取平均值
+	 * 
+	 */
+	private void handleFpsHandleList(){
+		if (fpsHandleList == null || fpsHandleList.size() < 1) {
+			return ;
+		}
+		FpsHandleResult handleResult = null, handleResult2 = null;
+		int count = 1;
+		int fps = 0;
+		for(int i = 0; i < fpsHandleList.size(); i++){
+			handleResult = fpsHandleList.get(i);
+			if (handleResult == null) {
+				continue;
+			}
+			fps += Integer.parseInt(handleResult.testValue);
+			
+			for(int j = i+1; j < fpsHandleList.size(); j++){
+				handleResult2 = fpsHandleList.get(j);
+				if (handleResult2 == null) {
+					continue;
 				}
+				
+				if (handleResult.equals(handleResult2)) {
+					count +=1;
+					fps += Integer.parseInt(handleResult2.testValue);
+					fpsHandleList.remove(handleResult2);
+				}
+				
+			}
+			fps = fps / count;
+			fpsHandleList.get(fpsHandleList.indexOf(handleResult)).testValue = String.valueOf(fps);
+			fps = 0;
+			count = 1;
+		}
+	}
+	/**
+	 *  处理获得的FpsData
+	 * @param fpsData
+	 */
+	private void handleFpsData(FpsData fpsData){
+		if (fpsData == null) {
+			return;
+		}
+		mFpsHandleResult = HandleDataManager.getInstance().handleFpsData(fpsData);
+		// 对数据进行判断
+		if (mFpsHandleResult != null) {
+			// 将检查结果添加到列表中，为了在PC端展示
+			fpsHandleList.add(mFpsHandleResult);
+			
+			// 判断数据是否通过判断
+			if (!mFpsHandleResult.result) {  // 数据有问题，帧率小于某个值
+				if (errorList.contains(mFpsHandleResult)) {
+					return;
+				}
+				
+				//记录错误信息并展示
+				errorList.add(mFpsHandleResult);
+				mShowMessageView.append(formatErrorInfo(mFpsHandleResult, String.valueOf(mFpsHandleResult.testValue), "页面出现卡顿"));
+				
+				// 保存测试环境
+				// 保存log
+				String logPath = SaveEnvironmentManager.getInstance().saveCurrentLog(GlobalConfig.DeviceName,
+						nowTestPackage, Constants.TYPE_FPS);
+				// 保存method trace
+				mFpsHandleResult.setLogPath(logPath);
+				mFpsHandleResult.setMethodTracePath("");
+				mFpsHandleResult.setMemoryHprofPath("");
 			}
 		}
 	}
@@ -219,7 +281,7 @@ public class FpsView extends BaseChartView {
 		}
     	sbBuilder.append("ActivityName = ").append(fpsHandleResult.activityName).append("\n");
     	sbBuilder.append("当前帧率值= ").append(value).append("\n");
-    	sbBuilder.append("当前丢帧数= ").append(fpsHandleResult.dropcount).append("\n");
+    	sbBuilder.append("当前丢帧数= ").append(fpsHandleResult.dropCount).append("\n");
     	sbBuilder.append("Logfile= ").append(result.logPath).append("\n");
     	sbBuilder.append("===================== \n\n\n\n");
     	return sbBuilder.toString();
@@ -274,5 +336,4 @@ public class FpsView extends BaseChartView {
 		
 	}
 }
-
 

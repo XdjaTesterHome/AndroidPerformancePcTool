@@ -37,11 +37,10 @@ public class KpiTestView extends BaseChartView {
 	private Thread kpiThread, kdatathread;
 	private List<KpiData> KpiData = null;
 	private List<KpiHandleResult> kpiHandleList = new ArrayList<>(12);
-	private List<KpiHandleResult> errorList = new ArrayList<>(12);
+	
 
 	private CategoryPlot mPlot;
 	private DefaultCategoryDataset mDataset = null;
-
 	public KpiTestView(String chartContent, String title, String yaxisName) {
 		super();
 		mDataset = new DefaultCategoryDataset();
@@ -120,6 +119,7 @@ public class KpiTestView extends BaseChartView {
 					}
 
 					KpiData = CollectDataImpl.getKpiData();
+					handleKpiData(KpiData);
 					if (KpiData != null) {
 						int listSize = KpiData.size();
 						// mDataset = new DefaultCategoryDataset();
@@ -131,7 +131,6 @@ public class KpiTestView extends BaseChartView {
 						}
 					}
 					
-					handleKpiData(KpiData);
 					try {
 						Thread.sleep(GlobalConfig.collectMIDDLEInterval);
 					} catch (InterruptedException e) {
@@ -155,11 +154,10 @@ public class KpiTestView extends BaseChartView {
 		}
 		//将错误信息展示
 		for(KpiHandleResult kpiHandle : kpiHandleList){
-			if (!kpiHandle.result) {
-				if (errorList.contains(kpiHandle)) {
-					continue;
-				}
-				errorList.add(kpiHandle);
+			if (kpiHandle == null) {
+				continue;
+			}
+			if (kpiHandle.isShowErrorMsg) {
 				mShowMessageView.append(formatErrorInfo(kpiHandle, kpiHandle.testValue, "页面加载时间过长"));
 			}
 		}
@@ -188,11 +186,6 @@ public class KpiTestView extends BaseChartView {
 		if (kpiHandleList != null) {
 			kpiHandleList.clear();
 			kpiHandleList = null;
-		}
-		
-		if (errorList != null) {
-			errorList.clear();
-			errorList = null;
 		}
 	}
 }
