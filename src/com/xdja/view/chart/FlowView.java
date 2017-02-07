@@ -101,6 +101,7 @@ public class FlowView extends BaseChartView {
 	}
 
 	public List<FlowHandleResult> getHandleResultList() {
+		
 		return mFlowHandleSlientResults;
 	}
 	
@@ -140,7 +141,7 @@ public class FlowView extends BaseChartView {
 			mShowMessageView.append(formatErrorInfo(flowHandle, flowHandle.testValue, "静默状态有流量消耗"));
 		}
 
-		mFlowHandleResults.add(flowHandle);
+		mFlowHandleSlientResults.add(flowHandle);
 	}
 
 	/**

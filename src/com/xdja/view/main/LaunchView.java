@@ -78,7 +78,7 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 	private final static int HEIGHT = 760;
 	// 静默测试时，过十分钟之后再采集数据
 	private final static int SLIENT_TIME_INTERVAL = 10 * 1000;
-	private Timer mSlientWaitTimer = new Timer();
+	private Timer mSlientWaitTimer =null;
 	
 	// 当前选择的测试包名
 	private String mCurTestPackageName;
@@ -284,6 +284,7 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 		if (baseTestInfo != null) {
 			GlobalConfig.TestVersion = baseTestInfo.versionName;
 		}
+		mSlientWaitTimer =new Timer();
 		mSlientWaitTimer.schedule(new TimerTask() {
 			
 			@Override
