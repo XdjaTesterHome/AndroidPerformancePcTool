@@ -44,14 +44,17 @@ public class HandleDataManager {
 	private final static int KPI_TIME = 2000;
 
 	// flow相关配置 单位是MB
-	private final static int FLOW_VALUE = 1;
-	private final static float FLOW_SLIENT_VALUE = 0.5f;
+	private final static int FLOW_VALUE = 1024;
+	private final static float FLOW_SLIENT_VALUE = 512;
 
 	// fps相关配置
 	private final static int FPS_COUNT = 40;
 
 	// 存放错误数据列表
 	private List<KpiHandleResult> kpiErrorList = new ArrayList<>(12);
+	private List<CpuHandleResult> cpuErrorList = new ArrayList<>(12);
+	private List<FlowHandleResult> flowErrorList = new ArrayList<>(12);
+	private List<MemoryHandleResult> memoryErrorList = new ArrayList<>(12);
 
 	public static HandleDataManager getInstance() {
 		if (mInstance == null) {
@@ -135,7 +138,8 @@ public class HandleDataManager {
 	/**
 	 * 处理电量相关数据 问题模型：暂时还没确定，电量场景比较多，标准不好定
 	 */
-	public List<BatteryHandleResult> handleBatteryData(List<BatteryData> batteryDatas) {
+	public List<BatteryHandleResult> handleBatteryData(List<BatteryData> batteryDatas, String packageName,
+			String version) {
 		// 用于存放Battery数据
 		List<BatteryHandleResult> batteryList = new ArrayList<>(12);
 		BatteryHandleResult batteryHandleResult = null;
@@ -148,42 +152,76 @@ public class HandleDataManager {
 			batteryHandleResult.setResult(true);
 			batteryHandleResult.setUid(batteryData.uid);
 			batteryHandleResult.setTestValue(String.valueOf(batteryData.batteryValue));
+			batteryHandleResult.setPackageName(packageName);
+			batteryHandleResult.setVersion(version);
+			batteryHandleResult.setAppPackageName(batteryData.appPackageName);
+			batteryHandleResult.setDetailInfo(batteryData.detailInfo);
 			batteryList.add(batteryHandleResult);
 		}
 
 		return batteryList;
 	}
 
-	// handleCpu处理非静默测试的数据模型,原则上2点：其一大于50%；其二连续三次数据大于30%//
+	/**
+	 * handleCpu处理非静默测试的数据模型,原则上2点：其一大于50%；其二连续三次数据大于30%
+	 * 
+	 * @param cpuData
+	 * @param cpu
+	 * @return
+	 */
 	public CpuHandleResult handleCpu(CpuData cpuData, double cpu) {
-		// 静默测试数据的判断//
-		boolean result;
-		CpuHandleResult upcpu = null;
 		cpuList(cpuData);
+		CpuHandleResult handleResult = new CpuHandleResult();
+		handleResult.setTestValue(String.valueOf(cpu));
+		handleResult.setActivityName(CollectDataImpl.getCurActivity());
 		if (cpuData.cpuUsage > CPU_MAX) {
-			upcpu = saveCpuEnvironment(false, cpu);
+
+			// 设置测试结果
+			handleResult.setResult(false);
+			// 判断错误列表中是否存在
+			if (cpuErrorList.contains(handleResult)) {
+				return handleResult;
+			}
+
+			// 设置需要显示错误信息
+			handleResult.setShowErrorMsg(true);
+			// 保存测试环境
+			handleResult = saveCpuEnvironment(handleResult);
+
+			// 不存在就添加到ErrorList中
+			cpuErrorList.add(handleResult);
+
 		} else {
 			int i = cpuList.size();
 			if (i == 3) {
 				if (cpuList.get(0) > CPU_CONTINUE_MAX && cpuList.get(1) > CPU_CONTINUE_MAX
 						&& cpuList.get(2) > CPU_CONTINUE_MAX) {
-					upcpu = saveCpuEnvironment(false, cpu);
+					// 设置测试结果
+					handleResult.setResult(false);
+					// 判断错误列表中是否存在
+					if (cpuErrorList.contains(handleResult)) {
+						return handleResult;
+					}
+
+					// 设置需要显示错误信息
+					handleResult.setShowErrorMsg(true);
+					// 保存测试环境
+					handleResult = saveCpuEnvironment(handleResult);
+
+					// 不存在就添加到ErrorList中
+					cpuErrorList.add(handleResult);
 				} else {
-					result = true;
-					upcpu = new CpuHandleResult(result);
-					upcpu.setTestValue(String.valueOf(cpu));
-					upcpu.setActivityName(CollectDataImpl.getCurActivity());
+					// 设置测试结果
+					handleResult.setResult(true);
+					handleResult.setShowErrorMsg(false);
 				}
 			} else {
-				result = true;
-				upcpu = new CpuHandleResult(result);
-				upcpu.setTestValue(String.valueOf(cpu));
-				upcpu.setActivityName(CollectDataImpl.getCurActivity());
+				// 设置测试结果
+				handleResult.setResult(true);
+				handleResult.setShowErrorMsg(false);
 			}
-
 		}
-
-		return upcpu;
+		return handleResult;
 	}
 
 	// 处理静默CPU数据，异常捕获模型，返回处理后认为有问题的数据,修改传入参数;//
@@ -225,9 +263,24 @@ public class HandleDataManager {
 		 * 超过三次就认为是有耗时行为
 		 */
 		if (valueCount >= 3) {
+			// 设置测试结果
 			upcpu.setResult(false);
+			// 判断错误列表中是否存在
+			if (cpuErrorList.contains(upcpu)) {
+				return upcpu;
+			}
+
+			// 设置需要显示错误信息
+			upcpu.setShowErrorMsg(true);
+			// 保存测试环境
+			upcpu = saveCpuEnvironment(upcpu);
+
+			// 不存在就添加到ErrorList中
+			cpuErrorList.add(upcpu);
 		} else {
+			// 设置测试结果
 			upcpu.setResult(true);
+			upcpu.setShowErrorMsg(false);
 		}
 
 		return upcpu;
@@ -241,17 +294,29 @@ public class HandleDataManager {
 	 */
 	public FlowHandleResult handleFlowData(float flowData) {
 		mFlowHandleResult = new FlowHandleResult();
-
+		// 设置公共的值
+		mFlowHandleResult.setActivityName(CollectDataImpl.getCurActivity());
+		mFlowHandleResult.setTestValue(String.valueOf(flowData));
 		if (flowData > FLOW_VALUE) {
-			mFlowHandleResult.setActivityName(CollectDataImpl.getCurActivity());
+
 			mFlowHandleResult.setResult(false);
-			mFlowHandleResult.setTestValue(String.valueOf(flowData));
+			if (flowErrorList.contains(mFlowHandleResult)) {
+				return mFlowHandleResult;
+			}
+
+			// 保存测试环境
+			String logPath = SaveEnvironmentManager.getInstance().saveCurrentLog(GlobalConfig.DeviceName,
+					mCurTestPackage, Constants.TYPE_FLOW);
+			mFlowHandleSlientResult.setLogPath(logPath);
+
+			// 设置显示错误信息
+			mFlowHandleResult.setShowErrorMsg(true);
+			flowErrorList.add(mFlowHandleResult);
+
 			return mFlowHandleResult;
 		}
 
-		mFlowHandleResult.setActivityName(CollectDataImpl.getCurActivity());
 		mFlowHandleResult.setResult(true);
-		mFlowHandleResult.setTestValue(String.valueOf(flowData));
 		return mFlowHandleResult;
 	}
 
@@ -261,21 +326,31 @@ public class HandleDataManager {
 	 * @return
 	 */
 	public FlowHandleResult handleFlowSlientData(float flowData) {
-		mFlowHandleSlientResult = new FlowHandleResult();
-
+		mFlowHandleResult = new FlowHandleResult();
+		// 设置公共的值
+		mFlowHandleResult.setActivityName(CollectDataImpl.getCurActivity());
+		mFlowHandleResult.setTestValue(String.valueOf(flowData));
 		if (flowData > FLOW_SLIENT_VALUE) {
-			mFlowHandleSlientResult.setResult(false);
-			mFlowHandleSlientResult.setTestValue(String.valueOf(flowData));
+
+			mFlowHandleResult.setResult(false);
+			if (flowErrorList.contains(mFlowHandleResult)) {
+				return mFlowHandleResult;
+			}
+
+			// 保存测试环境
 			String logPath = SaveEnvironmentManager.getInstance().saveCurrentLog(GlobalConfig.DeviceName,
 					mCurTestPackage, Constants.TYPE_FLOW);
 			mFlowHandleSlientResult.setLogPath(logPath);
 
-			return mFlowHandleSlientResult;
+			// 设置显示错误信息
+			mFlowHandleResult.setShowErrorMsg(true);
+			flowErrorList.add(mFlowHandleResult);
+
+			return mFlowHandleResult;
 		}
 
-		mFlowHandleSlientResult.setResult(true);
-		mFlowHandleSlientResult.setTestValue(String.valueOf(flowData));
-		return mFlowHandleSlientResult;
+		mFlowHandleResult.setResult(true);
+		return mFlowHandleResult;
 	}
 
 	/**
@@ -317,7 +392,7 @@ public class HandleDataManager {
 		if (KpiDatas == null || KpiDatas.size() < 1) {
 			return null;
 		}
-		
+
 		for (KpiData kpiData : KpiDatas) {
 			mKpiHandleResult = new KpiHandleResult();
 			mKpiHandleResult.setActivityName(kpiData.currentPage);
@@ -330,7 +405,7 @@ public class HandleDataManager {
 				}
 				mKpiHandleResult.setShowErrorMsg(true);
 				kpiErrorList.add(mKpiHandleResult);
-				
+
 				// 保存log
 				String logPath = SaveEnvironmentManager.getInstance().saveCurrentLog(GlobalConfig.DeviceName,
 						mCurTestPackage, Constants.TYPE_KPI);
@@ -338,57 +413,57 @@ public class HandleDataManager {
 				mKpiHandleResult.setLogPath(logPath);
 				mKpiHandleResult.setResult(false);
 				mKpiHandleResult.setMethodTracePath("");
-				
+
 			} else {
 				mKpiHandleResult.setResult(true);
 			}
-			
+
 			kpiList.add(mKpiHandleResult);
 		}
 
 		return kpiList;
 	}
-	
+
 	/**
 	 * 处理结果列表中重复的元素，取平均值
 	 * 
 	 */
-	private List<KpiData> handleKpiHandleList(List<KpiData> KpiDatas){
+	private List<KpiData> handleKpiHandleList(List<KpiData> KpiDatas) {
 		if (KpiDatas == null || KpiDatas.size() < 1) {
 			return null;
 		}
 		KpiData kpiData = null, kpiData2 = null;
 		int count = 1;
 		int kpi = 0;
-		for(int i = 0; i < KpiDatas.size(); i++){
+		for (int i = 0; i < KpiDatas.size(); i++) {
 			kpiData = KpiDatas.get(i);
 			if (kpiData == null) {
 				continue;
 			}
 			kpi += kpiData.loadTime;
-			
-			for(int j = i+1; j < KpiDatas.size(); j++){
+
+			for (int j = i + 1; j < KpiDatas.size(); j++) {
 				kpiData2 = KpiDatas.get(j);
 				if (kpiData2 == null) {
 					continue;
 				}
-				
+
 				if (kpiData.equals(kpiData2)) {
-					count +=1;
+					count += 1;
 					kpi += kpiData2.loadTime;
 					KpiDatas.remove(kpiData2);
 				}
-				
+
 			}
 			kpi = kpi / count;
 			KpiDatas.get(KpiDatas.indexOf(kpiData)).loadTime = kpi;
 			kpi = 0;
 			count = 1;
 		}
-		
+
 		return KpiDatas;
 	}
-	
+
 	/**
 	 * 处理得到的内存数据 内存的问题暂时有如下几种 待扩展： 一、对当前版本的内存数据进行判定
 	 * 1.内存抖动。（暂定的标准是10s内超过2次内存波动），我们只记录判定为内存抖动时的页面。
@@ -413,6 +488,10 @@ public class HandleDataManager {
 		}
 
 		nowTime = System.currentTimeMillis();
+		memoryResult = new MemoryHandleResult();
+		// 设置公共的值
+		memoryResult.setTestValue(String.valueOf(CommonUtil.getTwoDots(value)));
+		memoryResult.setActivityName(CollectDataImpl.getCurActivity());
 		/**
 		 * 如果超过30s，清空条件，重新开始。
 		 */
@@ -421,19 +500,31 @@ public class HandleDataManager {
 			lastTime = 0;
 			nowTime = 0;
 			int shakeCount = getShakeCount();
-			System.out.println("shakeCount = " + shakeCount);
 			memoryList.clear();
 			if (shakeCount > MEMORY_SHAKECOUNT) {
-				memoryResult = saveMemoryEnvironment(false, CommonUtil.getTwoDots(value));
+
+				// 设置结果为false
+				memoryResult.setResult(false);
+				if (memoryErrorList.contains(memoryResult)) {
+					return memoryResult;
+				}
+				
+				// 设置显示错误信息
+				memoryResult.setShowErrorMsg(true);
+				// 保存测试环境
+				memoryResult = saveMemoryEnvironment(memoryResult);
+				// 将结果放到错误列表中
+				memoryErrorList.add(memoryResult);
+				
 				return memoryResult;
 			}
 		} else {
+			// 设置显示错误信息
+			memoryResult.setShowErrorMsg(false);
+			memoryResult.setResult(true);
 			memoryList.add(memoryData);
 		}
 
-		memoryResult = new MemoryHandleResult(true);
-		memoryResult.setTestValue(String.valueOf(CommonUtil.getTwoDots(value)));
-		memoryResult.setActivityName(CollectDataImpl.getCurActivity());
 		return memoryResult;
 	}
 
@@ -442,8 +533,7 @@ public class HandleDataManager {
 	 * 
 	 * @param result
 	 */
-	private CpuHandleResult saveCpuEnvironment(boolean result, double value) {
-		String activityName = CollectDataImpl.getCurActivity();
+	private CpuHandleResult saveCpuEnvironment(CpuHandleResult handleResult) {
 		// String screenshotsPath =
 		// SaveEnvironmentManager.getInstance().screenShots(GlobalConfig.DeviceName,
 		// Constants.TYPE_CPU);
@@ -453,11 +543,8 @@ public class HandleDataManager {
 		// String methodTrace =
 		// SaveEnvironmentManager.getInstance().methodTracing(GlobalConfig.DeviceName,
 		// GlobalConfig.PackageName, Constants.TYPE_CPU);
-		CpuHandleResult handleResult = new CpuHandleResult(result);
-		handleResult.setActivityName(activityName);
 		handleResult.setLogPath(logPath);
 		handleResult.setMethodTracePath("");
-		handleResult.setTestValue(String.valueOf(value));
 		return handleResult;
 	}
 
@@ -467,8 +554,7 @@ public class HandleDataManager {
 	 * @param result
 	 * @return
 	 */
-	private MemoryHandleResult saveMemoryEnvironment(boolean result, float testValue) {
-		MemoryHandleResult memoryResult = new MemoryHandleResult(false);
+	private MemoryHandleResult saveMemoryEnvironment(MemoryHandleResult memoryResult) {
 		// dumpsys memory
 		// String filePath =
 		// SaveEnvironmentManager.getInstance().dumpMemory(GlobalConfig.DeviceName,
@@ -478,13 +564,10 @@ public class HandleDataManager {
 		// String screenPath =
 		// SaveEnvironmentManager.getInstance().screenShots(GlobalConfig.DeviceName,
 		// Constants.TYPE_MEMORY);
-		String activityName = CollectDataImpl.getCurActivity();
 
 		memoryResult.setMemoryHprofPath("");
 		memoryResult.setMethodTracePath("");
 		memoryResult.setLogPath(logPath);
-		memoryResult.setActivityName(activityName);
-		memoryResult.setTestValue(String.valueOf(CommonUtil.getTwoDots(testValue)));
 
 		return memoryResult;
 	}

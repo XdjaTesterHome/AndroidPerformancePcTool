@@ -28,6 +28,7 @@ import org.jfree.data.category.DefaultCategoryDataset;
 
 import com.xdja.collectdata.CCRDFile;
 import com.xdja.collectdata.CollectDataImpl;
+import com.xdja.collectdata.entity.BaseTestInfo;
 import com.xdja.collectdata.entity.BatteryData;
 import com.xdja.collectdata.handleData.HandleDataManager;
 import com.xdja.collectdata.handleData.entity.BatteryHandleResult;
@@ -52,6 +53,7 @@ public class BatteryView extends BaseChartView {
 	private DefaultCategoryDataset mDataset = null;
 
 	private JButton startBtn,parseBtn;
+	private String testPackageName, testVersion;
 	public BatteryView(String chartContent, String title, String yaxisName) {
 		super();
 		mDataset = new DefaultCategoryDataset();
@@ -107,6 +109,7 @@ public class BatteryView extends BaseChartView {
 			public void actionPerformed(ActionEvent e) {
 				// TODO Auto-generated method stub
 				startBtn.setEnabled(false);
+				parseBtn.setEnabled(true);
 				LaunchView.setComboxEnable(false);
 				LaunchView.setBtnEnable(false);
 				// 清理数据
@@ -117,6 +120,7 @@ public class BatteryView extends BaseChartView {
 					// show dialog
 					SwingUiUtil.getInstance().showTipsDialog(BatteryView.this, "提示", "测试电量，请拔掉usb，然后执行自己的测试用例即可", "好的",
 							null);
+					
 				}
 			}
 		});
@@ -127,6 +131,7 @@ public class BatteryView extends BaseChartView {
 			public void actionPerformed(ActionEvent e) {
 				// TODO Auto-generated method stub
 				startBtn.setEnabled(true);
+				parseBtn.setEnabled(false);
 				LaunchView.setComboxEnable(true);
 				LaunchView.setBtnEnable(true);
 				try {
@@ -164,6 +169,11 @@ public class BatteryView extends BaseChartView {
 	 * @throws InterruptedException
 	 */
 	public void start(String packageName) throws InterruptedException {
+		testPackageName = packageName;
+		BaseTestInfo baseTestInfo = CollectDataImpl.getBaseTestInfo(testPackageName);
+		if (baseTestInfo != null) {
+			testVersion = baseTestInfo.versionName;
+		}
 		batteryThread = new Thread(new Runnable() {
 			@Override
 			public void run() {
@@ -207,7 +217,7 @@ public class BatteryView extends BaseChartView {
 			return;
 		}
 		
-		List<BatteryHandleResult> batteryHandleResults = HandleDataManager.getInstance().handleBatteryData(batteryDataList);
+		List<BatteryHandleResult> batteryHandleResults = HandleDataManager.getInstance().handleBatteryData(batteryDataList, testPackageName, testVersion);
 		if (batteryHandleResults == null || batteryHandleResults.size() < 1) {
 			return;
 			

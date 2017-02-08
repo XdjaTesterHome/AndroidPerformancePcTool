@@ -97,6 +97,17 @@ public class HandleDataResultBase {
 		// TODO Auto-generated method stub
 		return "result = " + result + ", testValue = " + testValue + ", activityName = " + activityName + ",logPath =" + logPath;
 	}
-
+	
+	@Override
+	public boolean equals(Object obj) {
+		// TODO Auto-generated method stub
+		return this.activityName.equals(((HandleDataResultBase)obj).activityName);
+	}
+	
+	@Override
+	public int hashCode() {
+		// TODO Auto-generated method stub
+		return this.activityName.hashCode();
+	}
 	
 }

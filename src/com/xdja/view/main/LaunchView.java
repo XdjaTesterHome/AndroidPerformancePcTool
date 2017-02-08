@@ -342,16 +342,6 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 	 */
 	private void saveSlientDataToDb() {
 		saveCommonData(mCurTestPackageName);
-		String selectProcess = (String) comboProcess.getSelectedItem();
-		if (!selectProcess.equals(mCurTestPackageName)) {
-			mCurTestPackageName= selectProcess;
-//			return;
-		}
-
-		if (CommonUtil.strIsNull(mCurTestPackageName)) {
-			mCurTestPackageName= selectProcess;
-//			return;
-		}
 		if (viewCpu != null) {
 			List<CpuHandleResult> handleSlientList = viewCpu.getHandleResult();
 			PerformanceDB.getInstance().insertSlientCpuData(handleSlientList);
@@ -643,7 +633,6 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 			return;
 		}
 		TreeSet<AndroidDevice> devices = AdbManager.getInstance().getDevices();
-		System.out.println("updateDeviceList = " + devices.size());
 		List<String> snList = new ArrayList<>(2);
 		for (AndroidDevice device : devices) {
 			snList.add(device.getName());
@@ -684,11 +673,10 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 			}
 
 			// 这个逻辑不正确，不应该显示上一次出现的packageName
-			// String packageName =
-			// ProPertiesUtil.getInstance().getProperties(Constants.CHOOSE_PACKAGE);
-			// if (!CommonUtil.strIsNull(packageName)) {
-			// comboProcess.setSelectedItem(packageName);
-			// }
+			String packageName = ProPertiesUtil.getInstance().getProperties(Constants.CHOOSE_PACKAGE);
+			if (!CommonUtil.strIsNull(packageName)) {
+				comboProcess.setSelectedItem(packageName);
+			}
 		}
 
 		myIgnoreActionEvents = false;

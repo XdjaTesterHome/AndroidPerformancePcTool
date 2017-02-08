@@ -58,7 +58,7 @@ public class Constants {
 	public static final String CPU_UNIT = "%";
 	
 	public static final String BATTERY = "Battery";
-	public static final String BATTERY_UNIT = "%";
+	public static final String BATTERY_UNIT = "mAh";
 	public static final String USB_POWERED = "Usb Powered";
 	public static final String LEVEL = "level:";
 	public static final String SCALE = "scale:";

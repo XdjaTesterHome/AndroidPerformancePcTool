@@ -7,6 +7,10 @@ public class MemoryHandleResult extends HandleDataResultBase {
 	// 抓取的方法trace 的path
 	public String methodTracePath;
 	
+	public MemoryHandleResult(){
+		super();
+	}
+	
 	public MemoryHandleResult(boolean result){
 		super(result);
 	}

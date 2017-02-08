@@ -119,7 +119,7 @@ public class FlowView extends BaseChartView {
 			return;
 		}
          mFlowHandleResults.add(flowHandle);
-		if (!flowHandle.result) {
+		if (flowHandle.isShowErrorMsg) {
 			mShowMessageView.append(formatErrorInfo(flowHandle, flowHandle.testValue, "流量消耗过高"));
 		}
 

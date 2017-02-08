@@ -188,7 +188,7 @@ public class CpuView extends BaseChartView {
 		cpuHandleResults.add(handleDataResult);
 
 		// 填充错误信息
-		if (handleDataResult != null && !handleDataResult.result) {
+		if (handleDataResult.isShowErrorMsg) {
 			appendErrorInfo(formatErrorInfo(handleDataResult, String.valueOf(cpuData.cpuUsage), "cpu使用率过高"));
 		}
 	}
