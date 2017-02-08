@@ -162,7 +162,7 @@ public class PerformanceDB {
 		String createFpsSql = "CREATE TABLE IF NOT EXISTS `" + fpsTableName + "`("
 				+ "id int(11) not null AUTO_INCREMENT, page varchar(80),package varchar(160),version varchar(160),testvalue varchar(50), logPath varchar(50),methodTracePath varchar(50),hprofPath varchar(50), isPass int, PRIMARY KEY(`id`))";
 		String createBatterySql = "CREATE TABLE IF NOT EXISTS `" + batteryTableName + "`("
-				+ "id int(11) not null AUTO_INCREMENT, uid varchar(50),testvalue varchar(50), appPackageName varchar(50), detailInfo varchar(256), package varchar(160), version varchar(160), PRIMARY KEY(`id`))";
+				+ "id int(11) not null AUTO_INCREMENT, uid varchar(50),testvalue varchar(50), appPackageName varchar(50), detailInfo varchar(1024), package varchar(160), version varchar(160), PRIMARY KEY(`id`))";
 		String createSlientCpuSql = "CREATE TABLE IF NOT EXISTS `" + cpuSlientTableName + "`("
 				+ "id int(11) not null AUTO_INCREMENT, page varchar(80),package varchar(160),version varchar(160),testvalue varchar(50), logPath varchar(50),methodTracePath varchar(50), isPass int, PRIMARY KEY(`id`))";
 		String createSlientFlowSql = "CREATE TABLE IF NOT EXISTS `" + flowSlientTableName + "`("

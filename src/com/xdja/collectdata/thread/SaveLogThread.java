@@ -41,9 +41,9 @@ public class SaveLogThread extends Thread{
 		
 		String serialName = AdbManager.getInstance().getSerialNumber(deviceName);
 		if (CommonUtil.strIsNull(serialName)) {
-			cmds = "adb logcat *:v -v time";
+			cmds = "adb logcat  -v time *:v";
 		}else {
-			cmds = "adb -s " + serialName + " logcat *:v -v time";
+			cmds = "adb -s " + serialName + " logcat  -v time *:v";
 		}
 	}
 	

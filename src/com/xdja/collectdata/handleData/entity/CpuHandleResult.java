@@ -5,6 +5,10 @@ public class CpuHandleResult extends HandleDataResultBase {
 	// ×¥È¡method trace µÄpath
 	public String methodTracePath;
 	
+	public CpuHandleResult(){
+		super();
+	}
+	
 	public CpuHandleResult(boolean result){
 		super(result);
 	}

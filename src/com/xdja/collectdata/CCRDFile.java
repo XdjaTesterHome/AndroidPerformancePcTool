@@ -5,12 +5,17 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.xdja.collectdata.entity.BaseTestInfo;
 import com.xdja.collectdata.entity.BatteryData;
 import com.xdja.collectdata.entity.CommandResult;
+import com.xdja.collectdata.handleData.HandleDataManager;
+import com.xdja.collectdata.handleData.entity.BatteryHandleResult;
+import com.xdja.database.PerformanceDB;
 import com.xdja.util.CommonUtil;
 import com.xdja.util.ExecShellUtil;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 
@@ -22,7 +27,8 @@ public class CCRDFile {
 	// sPath 为路径字符串
 	boolean flag = false;
 	private static BatteryData batteryData = null;
-
+	private static String nowTestPackageName = "";
+	
 	public boolean DeleteFolder(String deletePath) {// 根据路径删除指定的目录或文件，无论存在与否
 		flag = false;
 		if (deletePath.matches(matches)) {
@@ -182,8 +188,8 @@ public class CCRDFile {
 		if (uid.contains("u0")) {
 			uid = "u0_" + uid.substring(2);
 		}
-		String cmd = "ps | grep " + uid;
-		CommandResult data = ExecShellUtil.getInstance().execShellCommand(cmd);
+		String cmd = "adb shell ps | grep " + uid;
+		CommandResult data = ExecShellUtil.getInstance().execCmdCommand(cmd, false, true);
 		String result = null;
 		if (data.successMsg != null) {
 			result = data.successMsg;
@@ -273,8 +279,7 @@ public class CCRDFile {
 
 		// 匹配我们关心的数据
 		String result = handlere(message);
-		String resus = result.trim();
-		if (CommonUtil.strIsNull(resus)) {
+		if (CommonUtil.strIsNull(result)) {
 			return batteryDatas;
 		}
 
@@ -282,6 +287,7 @@ public class CCRDFile {
 		float computerDrain = 0;
 		String actualDrain = "";
 		String[] captureValue = batterys[0].trim().split("\n");
+		String detailInfo = batterys[1].trim();
 		for (int i = 0; i < captureValue.length; i++) {
 			batteryData = new BatteryData();
 			if (i == 0) {
@@ -290,14 +296,15 @@ public class CCRDFile {
 				actualDrain = totalBatterys[2].split(":")[1].trim();
 				if (computerDrain > 0) {
 					batteryData.setBatteryValue(String.valueOf(computerDrain));
-					batteryData.setUid("Computed drain");
+					batteryData.setAppPackageName("Computed drain");
 					batteryDatas.add(batteryData);
 				}
 
 				if (!"".equals(actualDrain)) {
 					batteryData = new BatteryData();
 					batteryData.setBatteryValue(actualDrain);
-					batteryData.setUid("actual drain");
+					// 对于一般的不包含uid的我们用uid本身替代。
+					batteryData.setAppPackageName("actual drain");
 					batteryDatas.add(batteryData);
 				}
 				continue;
@@ -312,6 +319,12 @@ public class CCRDFile {
 				batteryData.setUid(uid);
 				batteryData.setBatteryValue(String.valueOf(value));
 				String appPackageName = get_package_name_by_uid(uid);
+				if (nowTestPackageName != null && nowTestPackageName.equals(appPackageName)) {
+					if (detailInfo.length() > 1024) {
+						detailInfo = detailInfo.substring(0, 1024);
+					}
+					batteryData.setDetailInfo(detailInfo);
+				}
 				batteryData.setAppPackageName(appPackageName);
 				batteryDatas.add(batteryData);
 			} else {
@@ -321,14 +334,21 @@ public class CCRDFile {
 				float value = Float.parseFloat(UidBatterys[1].trim());
 				batteryData.setUid(uid);
 				batteryData.setBatteryValue(String.valueOf(value));
+				// 对于一般的不包含uid的我们用uid本身替代。
+				batteryData.setAppPackageName(uid);
 				batteryDatas.add(batteryData);
 			}
 		}
 
 		return batteryDatas;
 	}
-
+	
+	
 	public static List<BatteryData> getpowerdata(String pac) throws IOException {
+		if (CommonUtil.strIsNull(pac)) {
+			return null;
+		}
+		
 		CommandResult data = get_battery_data(pac);
 		writetofile(data.successMsg);
 		System.out.println(data.successMsg);
@@ -337,23 +357,27 @@ public class CCRDFile {
 	}
 
 	public static void main(String[] args) throws IOException {
-		//// CommandResult data = get_battery_data("com.xdja.safekeyservice");
-		//// writetofile(data.successMsg);
-		// String oldName = System.getProperty("user.dir");
-		// String filedemopath = oldName+"/powerresult/batteryData.txt";
-		// BufferedReader bufferedReader = new BufferedReader(new
-		//// FileReader(filedemopath));
-		// StringBuffer sbBuffer = new StringBuffer();
-		// String newLine= "";
-		// while(true){
-		// newLine = bufferedReader.readLine();
-		// if (newLine == null) {
-		// break;
-		// }
-		// sbBuffer.append(newLine);
-		// }
-		//
-		// System.out.println(handlePowerData(sbBuffer.toString()));
-		System.out.println(get_package_name_by_uid("1000"));
+		// CommandResult data = get_battery_data("com.xdja.safekeyservice");
+		// writetofile(data.successMsg);
+		String oldName = System.getProperty("user.dir");
+		String filedemopath = oldName + "/powerresult/batteryData.txt";
+		FileInputStream fileInputStream = new FileInputStream(filedemopath);
+		byte[] buffer = new byte[1024];
+		StringBuffer sbBuffer = new StringBuffer();
+		int length = 0;
+		while((length = fileInputStream.read(buffer, 0, buffer.length))!= -1){
+			String bu = new String(buffer, 0, length);
+			sbBuffer.append(bu);
+		}
+		
+//		System.out.println(handlePowerData(sbBuffer.toString()));
+		nowTestPackageName = "com.xdja.HDSafeEMailClient";
+		BaseTestInfo baseTestInfo = CollectDataImpl.getBaseTestInfo(nowTestPackageName);
+		String testVersion = "";
+		if (baseTestInfo != null) {
+			testVersion = baseTestInfo.versionName;
+		}
+		List<BatteryHandleResult> handleResults = HandleDataManager.getInstance().handleBatteryData(handlePowerData(sbBuffer.toString()), nowTestPackageName, testVersion);
+		PerformanceDB.getInstance().insertBatteryData(handleResults);
 	}
 }
