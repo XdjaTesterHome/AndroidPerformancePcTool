@@ -342,16 +342,6 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 	 */
 	private void saveSlientDataToDb() {
 		saveCommonData(mCurTestPackageName);
-		String selectProcess = (String) comboProcess.getSelectedItem();
-		if (!selectProcess.equals(mCurTestPackageName)) {
-			mCurTestPackageName= selectProcess;
-//			return;
-		}
-
-		if (CommonUtil.strIsNull(mCurTestPackageName)) {
-			mCurTestPackageName= selectProcess;
-//			return;
-		}
 		if (viewCpu != null) {
 			List<CpuHandleResult> handleSlientList = viewCpu.getHandleResult();
 			PerformanceDB.getInstance().insertSlientCpuData(handleSlientList);
