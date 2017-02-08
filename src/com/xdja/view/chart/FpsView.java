@@ -48,6 +48,7 @@ public class FpsView extends BaseChartView {
 	private JButton startBtn, pauseBtn;
 	private Thread fpsThread;
 	private List<FpsHandleResult> fpsHandleList = new ArrayList<>(12);
+	private List<FpsHandleResult> tempHandleList = new ArrayList<>(12);
 	private List<FpsHandleResult> errorList = new ArrayList<>(12);
 	private CategoryPlot mPlot;
 	private DefaultCategoryDataset mDataset  = null;
@@ -197,7 +198,8 @@ public class FpsView extends BaseChartView {
 	
 	/**
 	 * 处理结果列表中重复的元素，取平均值
-	 * 
+	 * 这里需要注意，直接在List中remove元素是不安全的，因为remove元素会改变原有的结构。
+	 * 这里还是用这种方式。效率不高
 	 */
 	private void handleFpsHandleList(){
 		if (fpsHandleList == null || fpsHandleList.size() < 1) {
@@ -227,10 +229,19 @@ public class FpsView extends BaseChartView {
 				
 			}
 			fps = fps / count;
-			fpsHandleList.get(fpsHandleList.indexOf(handleResult)).testValue = String.valueOf(fps);
+			handleResult.setTestValue(String.valueOf(fps));
+			if (!tempHandleList.contains(handleResult)) {
+				tempHandleList.add(handleResult);
+			}
 			fps = 0;
 			count = 1;
 		}
+		
+		//处理临时数据
+		fpsHandleList.clear();
+		fpsHandleList.addAll(tempHandleList);
+		tempHandleList.clear();
+		
 	}
 	/**
 	 *  处理获得的FpsData

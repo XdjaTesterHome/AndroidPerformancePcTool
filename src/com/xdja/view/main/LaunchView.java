@@ -31,6 +31,7 @@ import com.xdja.adb.AdbManager;
 import com.xdja.adb.AndroidDevice;
 import com.xdja.collectdata.CollectDataImpl;
 import com.xdja.collectdata.entity.BaseTestInfo;
+import com.xdja.collectdata.handleData.HandleDataManager;
 import com.xdja.collectdata.handleData.entity.CpuHandleResult;
 import com.xdja.collectdata.handleData.entity.FlowHandleResult;
 import com.xdja.collectdata.handleData.entity.KpiHandleResult;
@@ -209,6 +210,7 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 						if (viewBattery != null) {
 							viewBattery.setEnabled(true);
 						}
+						HandleDataManager.getInstance().destoryData();
 						stopTest();
 					}
 				});
@@ -218,7 +220,7 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 		});
 
 		// ¾²Ä¬²âÊÔ
-		slientBtn = new JButton("¿ªÊ¼¾²Ä¬²âÊÔ");
+		slientBtn = new JButton("¾²Ä¬²âÊÔ");
 		Rectangle slientRect = new Rectangle(1040, 0, 120, 30);
 		frame.add(slientBtn);
 		slientBtn.setBounds(slientRect);
@@ -267,6 +269,7 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 							if (viewFps != null) {
 								viewFps.setBtnEnable(true);
 							}
+							HandleDataManager.getInstance().destoryData();
 						}
 					});
 
@@ -766,6 +769,7 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 		ProPertiesUtil.getInstance().removeValue(Constants.LAST_PACKAGENAME);
 		GlobalConfig.TestPackageName = "";
 		GlobalConfig.TestVersion = "";
+		HandleDataManager.getInstance().destoryData();
 	}
 
 	/**

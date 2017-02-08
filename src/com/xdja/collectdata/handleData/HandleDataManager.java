@@ -79,6 +79,7 @@ public class HandleDataManager {
 	private List<CpuData> slientCpuList = new ArrayList<>(4);
 	// 用于存放kpi数据
 	private List<KpiHandleResult> kpiList = new ArrayList<>(12);
+	private List<KpiData> kpidataList = new ArrayList<>(12);
 
 	// 声明处理数据结果的对象
 	private MemoryHandleResult memoryResult = null;
@@ -383,14 +384,20 @@ public class HandleDataManager {
 
 	/**
 	 * 处理kpi相关的数据 判断问题的标准： 页面加载时间大于2s，但是暂时还没有区分首次启动、冷启动
-	 * 
+	 * 这个方法按照目前的方法效率低。但貌似没好的解决方案了。
 	 * @param cpuData
 	 * @return
 	 */
 	public List<KpiHandleResult> handleKpiData(List<KpiData> KpiDatas) {
-		KpiDatas = handleKpiHandleList(KpiDatas);
+		// 首先将所有的值都记录下来
+		kpidataList.addAll(KpiDatas);
+		// 过滤重复的项
+		KpiDatas = handleKpiHandleList(kpidataList);
+		
+		// 清空Klist
+		kpiList.clear();
 		if (KpiDatas == null || KpiDatas.size() < 1) {
-			return null;
+			return kpiList;
 		}
 
 		for (KpiData kpiData : KpiDatas) {
@@ -433,6 +440,7 @@ public class HandleDataManager {
 			return null;
 		}
 		KpiData kpiData = null, kpiData2 = null;
+		List<KpiData> tempKpiData = new ArrayList<>(12);
 		int count = 1;
 		int kpi = 0;
 		for (int i = 0; i < KpiDatas.size(); i++) {
@@ -453,15 +461,19 @@ public class HandleDataManager {
 					kpi += kpiData2.loadTime;
 					KpiDatas.remove(kpiData2);
 				}
-
+				
 			}
 			kpi = kpi / count;
-			KpiDatas.get(KpiDatas.indexOf(kpiData)).loadTime = kpi;
+			kpiData.setLoadTime(kpi);
+			if (!tempKpiData.contains(kpiData)) {
+				tempKpiData.add(kpiData);
+			}
 			kpi = 0;
 			count = 1;
 		}
-
-		return KpiDatas;
+		
+		
+		return tempKpiData;
 	}
 
 	/**
@@ -571,5 +583,43 @@ public class HandleDataManager {
 
 		return memoryResult;
 	}
-
+	
+	/**
+	 *  清空测试数据
+	 */
+	public void destoryData(){
+		if (kpiErrorList != null) {
+			kpiErrorList.clear();
+		}
+		
+		if (cpuErrorList != null) {
+			cpuErrorList.clear();
+		}
+		
+		if (flowErrorList != null) {
+			flowErrorList.clear();
+		}
+		if (memoryList != null) {
+			memoryErrorList.clear();
+		}
+		if (memoryErrorList != null) {
+			memoryErrorList.clear();
+		}
+		
+		if (cpuList != null) {
+			cpuList.clear();
+		}
+		
+		if (kpiList != null) {
+			kpiList.clear();
+		}
+		
+		if (slientCpuList != null) {
+			slientCpuList.clear();
+		}
+		
+		if (kpidataList != null) {
+			kpidataList.clear();
+		}
+	}
 }

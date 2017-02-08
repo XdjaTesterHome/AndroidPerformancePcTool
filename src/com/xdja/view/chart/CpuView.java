@@ -131,14 +131,6 @@ public class CpuView extends BaseChartView {
 				stopFlag = false;
 				mCurCpuData = null;
 				isRunning = true;
-				// 判断错误提示区域显示内容
-				if (slient) {
-					String slientStr = "===========开始CPU静默测试=============\n\n";
-					appendErrorInfo(slientStr);
-				} else {
-					String normalStr = "===========开始CPU测试=============\n\n";
-					appendErrorInfo(normalStr);
-				}
 				while (true) {
 					if (stopFlag) {
 						isRunning = false;
@@ -208,7 +200,7 @@ public class CpuView extends BaseChartView {
 		cpuHandleResults.add(handleCpu);
 		// 填充错误信息
 		if (handleCpu != null && !handleCpu.result) {
-			appendErrorInfo(formatErrorInfo(handleCpu, String.valueOf(cpuData.cpuUsage), "静默状态使用CPU"));
+			appendErrorInfo(formatErrorInfo(handleCpu, String.valueOf(cpuData.cpuUsage), "静默状态cpu过高"));
 		}
 	}
 
