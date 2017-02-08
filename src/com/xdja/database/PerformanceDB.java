@@ -2,7 +2,6 @@ package com.xdja.database;
 
 import java.sql.*;
 import java.util.List;
-
 import com.xdja.collectdata.handleData.entity.BatteryHandleResult;
 import com.xdja.collectdata.handleData.entity.CpuHandleResult;
 import com.xdja.collectdata.handleData.entity.FlowHandleResult;
@@ -10,9 +9,9 @@ import com.xdja.collectdata.handleData.entity.FpsHandleResult;
 import com.xdja.collectdata.handleData.entity.KpiHandleResult;
 import com.xdja.collectdata.handleData.entity.MemoryHandleResult;
 import com.xdja.constant.Constants;
-import com.xdja.constant.GlobalConfig;
 import com.xdja.log.LoggerManager;
 import com.xdja.util.CommonUtil;
+import com.xdja.util.ProPertiesUtil;
 
 public class PerformanceDB {
 	private static PerformanceDB mInstance = null;
@@ -20,14 +19,13 @@ public class PerformanceDB {
 	private Connection conn;
 	private Statement stat;
 	private ResultSet result;
-//	private String tableUrl = "jdbc:mysql://11.12.109.38:3306/performancedata";
-//	private String dbUrl = "jdbc:mysql://11.12.109.38:3306/";
-	private static String tableUrl ="jdbc:mysql://localhost:3306/performanceData";
-	private static String dbUrl = "jdbc:mysql://localhost:3306/";
 	private String driverClass = "com.mysql.jdbc.Driver";
 
 	private final static String DBNAME = "performancedata";
-
+	private String mDBUser;
+	private String mDBPwd;
+	
+	
 	public static PerformanceDB getInstance() {
 		if (mInstance == null) {
 			synchronized (PerformanceDB.class) {
@@ -49,7 +47,10 @@ public class PerformanceDB {
 			// 创建数据库
 			createDb();
 			// 创建表的连接
-			conn = DriverManager.getConnection(tableUrl, GlobalConfig.DBUSERNAME, GlobalConfig.DBUSERPWD);
+			String tableUrl = ProPertiesUtil.getInstance().getProperties(Constants.TABLEURL);
+			mDBUser = ProPertiesUtil.getInstance().getProperties(Constants.DBUSERNAME);
+			mDBPwd  = ProPertiesUtil.getInstance().getProperties(Constants.DBPASSWD);
+			conn = DriverManager.getConnection(tableUrl, mDBUser, mDBPwd);
 			stat = conn.createStatement();
 
 			cpuTableName = Constants.CPU_TABLE;
@@ -100,7 +101,8 @@ public class PerformanceDB {
 		Connection connection = null;
 		Statement stat = null;
 		try {
-			connection = DriverManager.getConnection(dbUrl, GlobalConfig.DBUSERNAME, GlobalConfig.DBUSERPWD);
+			String dbUrl = ProPertiesUtil.getInstance().getProperties(Constants.DBURL);
+			connection = DriverManager.getConnection(dbUrl, mDBUser, mDBPwd);
 			stat = connection.createStatement();
 			String sql = "create database if not exists " + DBNAME;
 			stat.executeUpdate(sql);
@@ -160,7 +162,7 @@ public class PerformanceDB {
 		String createFpsSql = "CREATE TABLE IF NOT EXISTS `" + fpsTableName + "`("
 				+ "id int(11) not null AUTO_INCREMENT, page varchar(80),package varchar(160),version varchar(160),testvalue varchar(50), logPath varchar(50),methodTracePath varchar(50),hprofPath varchar(50), isPass int, PRIMARY KEY(`id`))";
 		String createBatterySql = "CREATE TABLE IF NOT EXISTS `" + batteryTableName + "`("
-				+ "id int(11) not null AUTO_INCREMENT, uid int(11),testvalue varchar(50),  detailInfo varchar(256), package varchar(160), version varchar(160), PRIMARY KEY(`id`))";
+				+ "id int(11) not null AUTO_INCREMENT, uid varchar(50),testvalue varchar(50), appPackageName varchar(50), detailInfo varchar(256), package varchar(160), version varchar(160), PRIMARY KEY(`id`))";
 		String createSlientCpuSql = "CREATE TABLE IF NOT EXISTS `" + cpuSlientTableName + "`("
 				+ "id int(11) not null AUTO_INCREMENT, page varchar(80),package varchar(160),version varchar(160),testvalue varchar(50), logPath varchar(50),methodTracePath varchar(50), isPass int, PRIMARY KEY(`id`))";
 		String createSlientFlowSql = "CREATE TABLE IF NOT EXISTS `" + flowSlientTableName + "`("
@@ -497,17 +499,18 @@ public class PerformanceDB {
 			return;
 		}
 
-		String insertSql = "insert into `" + batteryTableName + "`(uid, testvalue, detailInfo, package, version) values (?,?,?,?,?)";
+		String insertSql = "insert into `" + batteryTableName + "`(uid, testvalue, appPackageName, detailInfo, package, version) values (?,?,?,?,?,?)";
 		PreparedStatement psts = null;
 		try {
 			conn.setAutoCommit(false);
 			psts = conn.prepareStatement(insertSql);
 			for (BatteryHandleResult result : handleBatteryList) {
 				psts.setString(1, result.uid);
-				psts.setFloat(2, Float.valueOf(result.testValue));
-				psts.setString(3, result.detailInfo);
-				psts.setString(4, result.packageName);
-				psts.setString(5, result.version);
+				psts.setString(2, result.testValue);
+				psts.setString(3, result.appPackageName);
+				psts.setString(4, result.detailInfo);
+				psts.setString(5, result.packageName);
+				psts.setString(6, result.version);
 				psts.addBatch();
 			}
 

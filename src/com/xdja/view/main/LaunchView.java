@@ -775,6 +775,7 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 
 		// 清空选择的包名数据
 		ProPertiesUtil.getInstance().removeValue(Constants.CHOOSE_PACKAGE);
+		ProPertiesUtil.getInstance().removeValue(Constants.LAST_PACKAGENAME);
 		GlobalConfig.TestPackageName = "";
 		GlobalConfig.TestVersion = "";
 	}

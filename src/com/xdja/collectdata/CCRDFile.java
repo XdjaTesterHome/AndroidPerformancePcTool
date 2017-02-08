@@ -1,7 +1,6 @@
 package com.xdja.collectdata;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -141,8 +140,7 @@ public class CCRDFile {
 	}
 
 	// 创建临时文件
-	public static String createTempFile(String prefix, String suffix,
-			String dirName) {
+	public static String createTempFile(String prefix, String suffix, String dirName) {
 		File tempFile = null;
 		if (dirName == null) {// 目录如果为空
 			try {
@@ -173,275 +171,189 @@ public class CCRDFile {
 			}
 		}
 	}
-	//get_package_name_by_uid获取当前应用包名//
-	public static String get_package_name_by_uid(String uid){
-		String packagename ="";
-		String cmd = "adb shell ps | findStr "+ uid;
-		CommandResult data = ExecShellUtil.getInstance().execShellCommand(cmd, true);
-		String result = null ;
-		if(data.successMsg!=null){
-			result = data.successMsg;
-//		System.out.println(result);	
-		String pattern = "com.*";
-		String resu = null;
-		Pattern r = Pattern.compile(pattern);
-		Matcher m = r.matcher(result);
-		if (m.find()) {
-			resu = m.group(0);
-		} else {
-//			System.out.println("NO MATCH do");
+
+	// get_package_name_by_uid获取当前应用包名//
+	public static String get_package_name_by_uid(String uid) {
+		if (CommonUtil.strIsNull(uid)) {
+			return "";
 		}
-		result = packagename;
+
+		String packagename = "";
+		if (uid.contains("u0")) {
+			uid = "u0_" + uid.substring(2);
+		}
+		String cmd = "ps | grep " + uid;
+		CommandResult data = ExecShellUtil.getInstance().execShellCommand(cmd);
+		String result = null;
+		if (data.successMsg != null) {
+			result = data.successMsg;
+			String pattern = "com.*";
+			Pattern r = Pattern.compile(pattern);
+			Matcher m = r.matcher(result);
+			if (m.find()) {
+				packagename = m.group(0);
+			} else {
+				// System.out.println("NO MATCH do");
+			}
+			result = packagename;
 		}
 		return result;
-		
+
 	}
-	
-	
-	//@@get_battery_data：获取电量数据@@//
-	public static CommandResult get_battery_data(String pkg_name){
-        String cmd ;
-        if (pkg_name ==null || pkg_name == ""){
-              cmd = "dumpsys batterystats";}
-            else{
-             cmd ="dumpsys batterystats "+ pkg_name;}
-        CommandResult data = ExecShellUtil.getInstance().execShellCommand(cmd);
-        if( (data != null) ){
-            return data;}
-        else{
-            return null;}
-     }
-	
-	//@@writetofile：写入cmd中输出的结果到demo文件中@@//
-	public static void writetofile(String a) throws IOException{
+
+	// @@get_battery_data：获取电量数据@@//
+	public static CommandResult get_battery_data(String pkg_name) {
+		String cmd;
+		if (pkg_name == null || pkg_name == "") {
+			cmd = "dumpsys batterystats";
+		} else {
+			cmd = "dumpsys batterystats " + pkg_name;
+		}
+		CommandResult data = ExecShellUtil.getInstance().execShellCommand(cmd);
+		if ((data != null)) {
+			return data;
+		} else {
+			return null;
+		}
+	}
+
+	// @@writetofile：写入cmd中输出的结果到demo文件中@@//
+	public static void writetofile(String a) throws IOException {
 		String oldName = System.getProperty("user.dir");
-		String filepath =  oldName+"/powerresult/";
+		String filepath = oldName + "/powerresult/";
 		File file = new File(filepath);
 		if (!file.exists()) {
-			   file.mkdir();//创建文件夹
-			  }
-//		CCRDFile.createDir(filepath);// 调用方法创建目录
-		String filedemopath =  oldName+"/powerresult/batteryData.txt";
+			file.mkdir();// 创建文件夹
+		}
+		// CCRDFile.createDir(filepath);// 调用方法创建目录
+		String filedemopath = oldName + "/powerresult/batteryData.txt";
 		File filedemo = new File(filedemopath);
-		if (!filedemo.exists()){
-		FileWriter fw=new FileWriter(filepath+"batteryData.txt",true);//创建文件
-		fw.write(a);
-        fw.close();
-        }else{
-        	new CCRDFile().deleteFile(filedemopath); 
-        	FileWriter fw=new FileWriter(filepath+"batteryData.txt",true);//创建文件
-    		fw.write(a);
-            fw.close();
-        }
-	}
-	
-	//insert动态添加二维数组元素的方法//
-	 private static String[][] insert(String[][] arr, String str,String str2,String str3)
-     {
-	  int size ;
-	  if (arr != null){
-	    size = arr.length;}
-	  else{size =0;
-	  }
-		String[][] tmp = new String[size + 1][3];
-		System.arraycopy(arr, 0, tmp, 0, size);
-		tmp[size][0] = str;
-		tmp[size][1] = str2;
-		tmp[size][2] = str3;
-		String[][] ary = new String[tmp.length-1][3];
-		int index = 0;
-		if (tmp[0].length ==0){
-		System.arraycopy(tmp, 0, ary, 0, index);
-		System.arraycopy(tmp, index+1, ary, index, ary.length-index);
-		}else{
-		ary = tmp ;
+		if (!filedemo.exists()) {
+			FileWriter fw = new FileWriter(filepath + "batteryData.txt", true);// 创建文件
+			fw.write(a);
+			fw.close();
+		} else {
+			new CCRDFile().deleteFile(filedemopath);
+			FileWriter fw = new FileWriter(filepath + "batteryData.txt", true);// 创建文件
+			fw.write(a);
+			fw.close();
 		}
-		return ary;
 	}
-	
-	 
-	//正则表达式处理方法//
-	 private static String handlere(String powerdata) {
-			String line = powerdata;
-			String resu = null;
-			String pattern = "\\(mAh\\):([\\s\\S]*)";
-			// 创建 Pattern 对象
-			Pattern r = Pattern.compile(pattern);
-			// 现在创建 matcher 对象
-			Matcher m = r.matcher(line);
-//			System.out.println(m.find());
-			if (m.find()) {
-				resu = (String) m.group(1);
-			} else {
-				System.out.println("NO MATCH");
-			}
-			return resu;
 
+	// 正则表达式处理方法//
+	private static String handlere(String powerdata) {
+		String line = powerdata;
+		String resu = null;
+		String pattern = "\\(mAh\\):([\\s\\S]*)";
+		// 创建 Pattern 对象
+		Pattern r = Pattern.compile(pattern);
+		// 现在创建 matcher 对象
+		Matcher m = r.matcher(line);
+		// System.out.println(m.find());
+		if (m.find()) {
+			resu = (String) m.group(1);
+		} else {
+			System.out.println("NO MATCH");
 		}
-	 
-	//handlepowerdata处理电量数据//
-	@SuppressWarnings("null")
-	public static String[][] handlepowerdata(String message){
-//		System.out.println(message);
-//		String resu = message.split("Estimated power use (mAh):")[1].trim();
-		String[] powerdata;
-		String[][] alldata={{}} ; 
-		String resu = handlere(message);
-//		System.out.println("resu:"+resu);
-		String resus = resu.trim();
-		if (CommonUtil.strIsNull(resus)) {
-			return alldata;
-		}
-//		System.out.println("resus:"+resus);
-		powerdata = resus.split("\n\n");
-//		System.out.println(Arrays.toString(powerdata));//
-		String pkg_name = "", compute_drain, actual_drain;
-		// 处理整体电流情况
-		powerdata = powerdata[0].split("\n");
-		for (int i=0 ;i< powerdata.length;i++){
-			if (i==0){
-				String battery_total_data;
-				String[] battery_total_datas;
-				battery_total_data = powerdata[i];
-				battery_total_datas = battery_total_data.split(",");
-				compute_drain = battery_total_datas[1];
-			    actual_drain = battery_total_datas[2];
-			}
-			//处理单个uid消耗电量的情况
-			String battery_str = powerdata[i];
-	        if (battery_str == null || battery_str == ""){
-	            break;
-	        }
-	        String[] battery_strs = battery_str.split(": ");
-//	        System.out.println(Arrays.toString(battery_strs));//
-	        if (battery_strs.length ==0){
-	        	continue;
-	        }
-	        String uid;
-	        uid= battery_strs[0].trim();
-//	        System.out.println(uid);
-	        //处理uid，查找出packagename
-	        if (uid != null && uid.indexOf("Uid")!=-1){
-	        	String uid_uid = uid.split(" ")[1];
-	        	if (((String) uid_uid).indexOf("u0")!=-1){
-	        		uid_uid = "u0_" + ((String) uid_uid).substring(2);
-	        		pkg_name = CCRDFile.get_package_name_by_uid(uid_uid);
-	        	}
-	        	
-	        }
-	        String battery_str_data;
-	        if (battery_strs.length >1){
-	        battery_str_data = battery_strs[1];	
-	        
-	        }else{
-	        	continue;
-	        }
-	        
-	        
-	        if(uid != null &&  isDouble(battery_str_data)){
-	        	String[][] tmp= insert(alldata, uid,pkg_name, battery_str_data);
-	        	alldata = tmp;
-	        }
-	        else{
-//	        	uid = "";
-//	        	String[][] tmp= insert(alldata, uid,pkg_name, battery_str_data);
-//	        	alldata = tmp;
-	        }
-	        pkg_name = "";
-	        
-		}
-		
-		return alldata;
-		
+		return resu;
+
 	}
-	
+
 	/**
 	 * 处理采集到的电量数据
+	 * 
 	 * @param message
 	 * @return
 	 */
-	public static List<BatteryData> handlePowerData(String message){
+	public static List<BatteryData> handlePowerData(String message) {
 		List<BatteryData> batteryDatas = new ArrayList<>(12);
 		if (CommonUtil.strIsNull(message)) {
 			return batteryDatas;
 		}
-		
+
 		// 匹配我们关心的数据
 		String result = handlere(message);
 		String resus = result.trim();
 		if (CommonUtil.strIsNull(resus)) {
 			return batteryDatas;
 		}
-		
+
 		String[] batterys = result.split("\n\n");
-		int computerDrain = 0;
-		int actualDrain = 0;
-		
-		for(int i = 0; i< batterys.length; i++){
+		float computerDrain = 0;
+		String actualDrain = "";
+		String[] captureValue = batterys[0].trim().split("\n");
+		for (int i = 0; i < captureValue.length; i++) {
 			batteryData = new BatteryData();
 			if (i == 0) {
-				String totalBattery = CommonUtil.formatBlanksToBlank(batterys[0]);
-				String[] totalBatterys = totalBattery.split(",");
-				computerDrain = Integer.parseInt(totalBatterys[1].split(":")[1]);
-				actualDrain  = Integer.parseInt(totalBatterys[2].split(":")[1]);
+				String[] totalBatterys = captureValue[0].split(",");
+				computerDrain = Float.parseFloat(totalBatterys[1].split(":")[1].trim());
+				actualDrain = totalBatterys[2].split(":")[1].trim();
 				if (computerDrain > 0) {
-					batteryData.setBatteryValue(computerDrain);
+					batteryData.setBatteryValue(String.valueOf(computerDrain));
 					batteryData.setUid("Computed drain");
 					batteryDatas.add(batteryData);
 				}
-				
-				if (actualDrain > 0) {
+
+				if (!"".equals(actualDrain)) {
 					batteryData = new BatteryData();
 					batteryData.setBatteryValue(actualDrain);
 					batteryData.setUid("actual drain");
 					batteryDatas.add(batteryData);
 				}
+				continue;
 			}
-			
+
 			// 判断字符串中是否包含Uid
-			if (batterys[i].contains("Uid")) {
-				String tempStr = CommonUtil.formatBlanksToBlank(batterys[i]);
+			if (captureValue[i].contains("Uid")) {
+				String tempStr = CommonUtil.formatBlanksToBlank(captureValue[i]);
 				String[] Uidbatterys = tempStr.split(" ");
 				String uid = Uidbatterys[1].substring(0, Uidbatterys[1].length() - 1);
 				float value = Float.parseFloat(Uidbatterys[2]);
 				batteryData.setUid(uid);
-				batteryData.setBatteryValue(value);
+				batteryData.setBatteryValue(String.valueOf(value));
+				String appPackageName = get_package_name_by_uid(uid);
+				batteryData.setAppPackageName(appPackageName);
 				batteryDatas.add(batteryData);
-			}else{
-				String tempStr = CommonUtil.formatBlanksToBlank(batterys[i]);
+			} else {
+				String tempStr = CommonUtil.formatBlanksToBlank(captureValue[i]);
 				String[] UidBatterys = tempStr.split(":");
 				String uid = UidBatterys[0].trim();
 				float value = Float.parseFloat(UidBatterys[1].trim());
 				batteryData.setUid(uid);
-				batteryData.setBatteryValue(value);
+				batteryData.setBatteryValue(String.valueOf(value));
 				batteryDatas.add(batteryData);
 			}
 		}
-		
+
 		return batteryDatas;
 	}
-	//判断是否为isDouble类型的数据//
-	private static boolean isDouble(String str)
-	{
-	   try
-	   {
-	      Double.parseDouble(str);
-	      return true;
-	   }
-	   catch(NumberFormatException ex){}
-	   return false;
-	}
-	
-	public static List<BatteryData> getpowerdata(String pac) throws IOException{
+
+	public static List<BatteryData> getpowerdata(String pac) throws IOException {
 		CommandResult data = get_battery_data(pac);
 		writetofile(data.successMsg);
+		System.out.println(data.successMsg);
 		List<BatteryData> batteryDatas = handlePowerData(data.successMsg);
 		return batteryDatas;
 	}
-	
-	public static void main(String[] args) throws IOException  {
-        CommandResult data = get_battery_data("com.xdja.safekeyservice");
-		writetofile(data.successMsg);
-		System.out.println(Arrays.deepToString(handlepowerdata(data.successMsg)));
+
+	public static void main(String[] args) throws IOException {
+		//// CommandResult data = get_battery_data("com.xdja.safekeyservice");
+		//// writetofile(data.successMsg);
+		// String oldName = System.getProperty("user.dir");
+		// String filedemopath = oldName+"/powerresult/batteryData.txt";
+		// BufferedReader bufferedReader = new BufferedReader(new
+		//// FileReader(filedemopath));
+		// StringBuffer sbBuffer = new StringBuffer();
+		// String newLine= "";
+		// while(true){
+		// newLine = bufferedReader.readLine();
+		// if (newLine == null) {
+		// break;
+		// }
+		// sbBuffer.append(newLine);
+		// }
+		//
+		// System.out.println(handlePowerData(sbBuffer.toString()));
+		System.out.println(get_package_name_by_uid("1000"));
 	}
 }
