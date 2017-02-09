@@ -107,9 +107,24 @@ public class Constants {
 	public static final String COMMON_TABLE  = "performance_commondata";
 	
 	// Properties 属性名称
-	public static final String TABLEURL = "tableUrl";
-	public static final String DBURL = "dbUrl";
-	public static final String DBUSERNAME = "dbuserName";
-	public static final String DBPASSWD = "dbpasswd";
+	public static final String TOOLSVERSION = "toolsVersion";
+	// 性能配置名称
+	public static final String MEMORY_SETTING = "memory_setting";
+	public static final String KPI_SETTING = "kpi_setting";
+	public static final String CPU_SETTING = "cpu_setting";
+	public static final String FPS_SETTING = "fps_setting";
+	public static final String FLOW_SETTING = "flow_setting";
+	public static final String SILENT_FLOW_SETTING = "flow_silent_setting";
+	public static final String SILENT_CPU_SETTING = "cpu_silent_setting";
+	// 数据库配置
+	public static final String DBIP_SETTING = "dbIp_setting";
+	public static final String DBPORT_SETTING = "dbPort_setting";
+	public static final String DBNAME_SETTING = "dbName_setting";
+	public static final String DBUSER_SETTING = "dbUser_setting";
+	public static final String DBPWD_SETTING  = "dbPwd_setting";
+	// 保存数据路径配置
+	public static final String LOCALSAVE_SETTING = "saveLocal_setting";
+	public static final String DBSAVE_CHOOSE = "is_choose_db";
+	
 	
 }

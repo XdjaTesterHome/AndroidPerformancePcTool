@@ -9,6 +9,7 @@ import com.xdja.collectdata.handleData.entity.FpsHandleResult;
 import com.xdja.collectdata.handleData.entity.KpiHandleResult;
 import com.xdja.collectdata.handleData.entity.MemoryHandleResult;
 import com.xdja.constant.Constants;
+import com.xdja.exception.SettingException;
 import com.xdja.log.LoggerManager;
 import com.xdja.util.CommonUtil;
 import com.xdja.util.ProPertiesUtil;
@@ -21,16 +22,23 @@ public class PerformanceDB {
 	private ResultSet result;
 	private String driverClass = "com.mysql.jdbc.Driver";
 
-	private final static String DBNAME = "performancedata";
 	private String mDBUser;
 	private String mDBPwd;
+	private String mdbUrl;
+	private String mtableUrl;
+	private String mDBName;
 	
 	
 	public static PerformanceDB getInstance() {
 		if (mInstance == null) {
 			synchronized (PerformanceDB.class) {
 				if (mInstance == null) {
-					mInstance = new PerformanceDB();
+					try {
+						mInstance = new PerformanceDB();
+					} catch (SettingException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 				}
 			}
 		}
@@ -41,16 +49,29 @@ public class PerformanceDB {
 	private String cpuTableName, cpuSlientTableName, memoryTableName, kpiTableName, fpsTableName, batteryTableName,
 			flowTableName, flowSlientTableName, commonTableName;
 
-	private PerformanceDB() {
+	private PerformanceDB() throws SettingException {
 		try {
 			Class.forName(driverClass);
+			// 根据用户配置构建数据库的配置
+			String ip = ProPertiesUtil.getInstance().getProperties(Constants.DBIP_SETTING);
+			String port = ProPertiesUtil.getInstance().getProperties(Constants.DBPORT_SETTING);
+			mDBName = ProPertiesUtil.getInstance().getProperties(Constants.DBNAME_SETTING);
+			String user = ProPertiesUtil.getInstance().getProperties(Constants.DBUSER_SETTING);
+			String pwd = ProPertiesUtil.getInstance().getProperties(Constants.DBPWD_SETTING);
+			if (CommonUtil.strIsNull(ip) || CommonUtil.strIsNull(port) || CommonUtil.strIsNull(mDBName)
+					|| CommonUtil.strIsNull(user) || CommonUtil.strIsNull(pwd)) {
+				throw new SettingException("数据库端口号或者ip或者数据库名称 设置不正确");
+			}
+			
+			mdbUrl = String.format("jdbc:mysql://%s:%s/", ip, port);
+			mtableUrl = String.format("jdbc:mysql://%s:%s/%s", ip, port, mDBName);
+			
 			// 创建数据库
 			createDb();
 			// 创建表的连接
-			String tableUrl = ProPertiesUtil.getInstance().getProperties(Constants.TABLEURL);
-			mDBUser = ProPertiesUtil.getInstance().getProperties(Constants.DBUSERNAME);
-			mDBPwd  = ProPertiesUtil.getInstance().getProperties(Constants.DBPASSWD);
-			conn = DriverManager.getConnection(tableUrl, mDBUser, mDBPwd);
+			mDBUser = ProPertiesUtil.getInstance().getProperties(user);
+			mDBPwd  = ProPertiesUtil.getInstance().getProperties(pwd);
+			conn = DriverManager.getConnection(mtableUrl, mDBUser, mDBPwd);
 			stat = conn.createStatement();
 
 			cpuTableName = Constants.CPU_TABLE;
@@ -101,14 +122,14 @@ public class PerformanceDB {
 		Connection connection = null;
 		Statement stat = null;
 		try {
-			String dbUrl = ProPertiesUtil.getInstance().getProperties(Constants.DBURL);
+			String dbUrl = ProPertiesUtil.getInstance().getProperties(mdbUrl);
 			connection = DriverManager.getConnection(dbUrl, mDBUser, mDBPwd);
 			stat = connection.createStatement();
-			String sql = "create database if not exists " + DBNAME;
+			String sql = "create database if not exists " + mDBName;
 			stat.executeUpdate(sql);
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
-			LoggerManager.logError(PerformanceDB.class.getSimpleName(), "createDb", "数据库已经存在：" + DBNAME);
+			LoggerManager.logError(PerformanceDB.class.getSimpleName(), "createDb", "数据库已经存在：" + mDBName);
 			return;
 		} finally {
 			if (stat != null) {
