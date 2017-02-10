@@ -78,7 +78,6 @@ public class Constants {
 	public static final String LAST_PACKAGENAME = "lastPackageName";
 	public static final String CHOOSE_PACKAGE = "choosePackage";
 	
-	
 	//´æ´¢½ØÍ¼ºÍdump memoryµÄÂ·¾¶
 	public static final String SCREEN_SHOTS = "screenshots";
 	public static final String MEMORY_DUMP  = "memorydump";

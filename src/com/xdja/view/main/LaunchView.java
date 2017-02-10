@@ -146,6 +146,11 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 
 				if (!CommonUtil.strIsNull(packageName)) {
 					mCurTestPackageName = packageName;
+					GlobalConfig.TestPackageName = packageName;
+					BaseTestInfo baseTestInfo = CollectDataImpl.getBaseTestInfo(packageName);
+					if (baseTestInfo != null) {
+						GlobalConfig.TestVersion = baseTestInfo.versionName;
+					}
 					// 将选择的包名记录到本地
 					ProPertiesUtil.getInstance().writeProperties(Constants.CHOOSE_PACKAGE, packageName);
 				}
@@ -293,12 +298,7 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 	 * 开启静默测试 静默测试目前只针对CPU 和 Flow 两种类型的数据
 	 */
 	private void startSlientTest() {
-		GlobalConfig.TestPackageName = mCurTestPackageName;
-		BaseTestInfo baseTestInfo = CollectDataImpl.getBaseTestInfo(mCurTestPackageName);
-		if (baseTestInfo != null) {
-			GlobalConfig.TestVersion = baseTestInfo.versionName;
-		}
-		mSlientWaitTimer = new Timer();
+		mSlientWaitTimer =new Timer();
 		mSlientWaitTimer.schedule(new TimerTask() {
 
 			@Override
@@ -520,11 +520,6 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 	}
 
 	private void startTest() {
-		GlobalConfig.TestPackageName = mCurTestPackageName;
-		BaseTestInfo baseTestInfo = CollectDataImpl.getBaseTestInfo(mCurTestPackageName);
-		if (baseTestInfo != null) {
-			GlobalConfig.TestVersion = baseTestInfo.versionName;
-		}
 		if (viewCpu != null) {
 			viewCpu.setSlientTest(false);
 			viewCpu.start(mCurTestPackageName);
