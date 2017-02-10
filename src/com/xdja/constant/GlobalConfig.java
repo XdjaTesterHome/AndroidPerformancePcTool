@@ -29,6 +29,23 @@ public class GlobalConfig {
 	// 选中的设备名称
 	public static String DeviceName = "";
 	
+	// 默认的性能标准
+	public static final int MEMORY_MAX = 40;
+	// 10s内抖动4次
+	public static final int MEMORY_SHAKE_COUNT = 4;
+	// cpu最大值(默认不超过40%)
+	public static final int CPU_MAX = 40;
+	// cpu静默默认值
+	public static final int SILENT_CPU_MAX = 0;
+	// kpi默认最大值（ms）
+	public static final int MAX_KPI_DATA = 2000;
+	// fps默认最低值（fps）
+	public static final int MIN_FPS_DATA = 40;
+	// 流量默认最大值(KB)
+	public static final int MAX_FLOW_DATA = 1024;
+	public static final int SILENT_FLOW_DATA = 0;
+	
+	
 //	/**
 //	 *  获取当前测试的包名
 //	 * @return

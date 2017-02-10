@@ -138,7 +138,7 @@ public class FlowView extends BaseChartView {
 		}
 
 		if (!flowHandle.result) {
-			mShowMessageView.append(formatErrorInfo(flowHandle, flowHandle.testValue, "静默状态有流量消耗"));
+			mShowMessageView.append(formatErrorInfo(flowHandle, flowHandle.testValue, "静默状态流量消耗过高"));
 		}
 
 		mFlowHandleSlientResults.add(flowHandle);

@@ -31,6 +31,7 @@ import com.xdja.adb.AdbManager;
 import com.xdja.adb.AndroidDevice;
 import com.xdja.collectdata.CollectDataImpl;
 import com.xdja.collectdata.entity.BaseTestInfo;
+import com.xdja.collectdata.handleData.HandleDataManager;
 import com.xdja.collectdata.handleData.entity.CpuHandleResult;
 import com.xdja.collectdata.handleData.entity.FlowHandleResult;
 import com.xdja.collectdata.handleData.entity.KpiHandleResult;
@@ -44,6 +45,8 @@ import com.xdja.util.ExecShellUtil;
 import com.xdja.util.ProPertiesUtil;
 import com.xdja.util.SwingUiUtil;
 import com.xdja.util.SwingUiUtil.ClickDialogBtnListener;
+import com.xdja.view.PerformanceSettingDialog;
+import com.xdja.view.SaveTestDataSettingDialog;
 import com.xdja.view.ToolsView;
 import com.xdja.view.chart.BatteryView;
 import com.xdja.view.chart.CpuView;
@@ -94,7 +97,8 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 	public LaunchView() {
 		this.author = Constants.PRODUCT_NAME;
 		this.frame = new JPanel();
-		setTitle(String.format("%s v1.0", author));
+		String version = ProPertiesUtil.getInstance().getProperties(Constants.TOOLSVERSION);
+		setTitle(String.format("%s %s", author, version));
 		setBounds(100, 50, WIDTH, HEIGHT);
 		createTopMenu();
 		add(frame);
@@ -214,6 +218,7 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 						if (viewBattery != null) {
 							viewBattery.setEnabled(true);
 						}
+						HandleDataManager.getInstance().destoryData();
 						stopTest();
 					}
 				});
@@ -223,7 +228,7 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 		});
 
 		// 静默测试
-		slientBtn = new JButton("开始静默测试");
+		slientBtn = new JButton("静默测试");
 		Rectangle slientRect = new Rectangle(1040, 0, 120, 30);
 		frame.add(slientBtn);
 		slientBtn.setBounds(slientRect);
@@ -272,6 +277,7 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 							if (viewFps != null) {
 								viewFps.setBtnEnable(true);
 							}
+							HandleDataManager.getInstance().destoryData();
 						}
 					});
 
@@ -701,7 +707,8 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 		setJMenuBar(menuBar);
 
 		// 添加菜单选项
-		JMenu aboutMenu = new JMenu("Help");
+		JMenu aboutMenu = new JMenu("帮助");
+		JMenu settingMenu = new JMenu("设置");
 
 		JMenuItem aboutItem = new JMenuItem("关于");
 		aboutItem.addActionListener(new ActionListener() {
@@ -724,10 +731,54 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 
 		aboutMenu.add(aboutItem);
 		aboutMenu.add(helpItem);
-
+		
+		// 处理设置选项
+		JMenuItem performanceItem = new JMenuItem("性能阈值");
+		performanceItem.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// TODO Auto-generated method stub
+				performanceSetting();
+			}
+		});
+		
+		JMenuItem saveDataItem = new JMenuItem("存储测试数据");
+		saveDataItem.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// TODO Auto-generated method stub
+				saveTestDataSetting();
+			}
+		});
+		
+		settingMenu.add(performanceItem);
+		settingMenu.add(saveDataItem);
+		
+		// 将menu添加到工具栏
+		menuBar.add(settingMenu);
 		menuBar.add(aboutMenu);
 	}
-
+	
+	/**
+	 *  展示PerformanceSetting的配置页面
+	 */
+	private void performanceSetting(){
+		PerformanceSettingDialog performanceSettingDialog  = new PerformanceSettingDialog(this, "设置性能指标阈值");
+		performanceSettingDialog.setVisible(true);
+	}
+	
+	
+	/**
+	 *  保存测试数据的配置页面
+	 */
+	private void saveTestDataSetting(){
+		SaveTestDataSettingDialog saveTestSettingDialog = new SaveTestDataSettingDialog(this, "设置保存数据的方式");
+		saveTestSettingDialog.setVisible(true);
+	}
+	
+	
 	/**
 	 * 销毁view中的数据
 	 */
@@ -761,6 +812,7 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 		ProPertiesUtil.getInstance().removeValue(Constants.LAST_PACKAGENAME);
 		GlobalConfig.TestPackageName = "";
 		GlobalConfig.TestVersion = "";
+		HandleDataManager.getInstance().destoryData();
 	}
 
 	/**

@@ -120,11 +120,11 @@ public class KpiTestView extends BaseChartView {
 
 					KpiData = CollectDataImpl.getKpiData();
 					handleKpiData(KpiData);
-					if (KpiData != null) {
-						int listSize = KpiData.size();
+					if (kpiHandleList != null) {
+						int listSize = kpiHandleList.size();
 						// mDataset = new DefaultCategoryDataset();
 						for (int i = 0; i < listSize; i++) {
-							mDataset.addValue(KpiData.get(i).loadTime, "kpi", KpiData.get(i).currentPage);
+							mDataset.addValue(Integer.parseInt(kpiHandleList.get(i).testValue), "kpi", kpiHandleList.get(i).activityName);
 						}
 						if (mPlot != null) {
 							mPlot.setDataset(mDataset);
@@ -148,6 +148,9 @@ public class KpiTestView extends BaseChartView {
 	 *  处理kpi相关的数据
 	 */
 	private void handleKpiData(List<KpiData> kpiList){
+		if (kpiList == null || kpiList.size() < 1) {
+			return;
+		}
 		kpiHandleList = HandleDataManager.getInstance().handleKpiData(kpiList);
 		if (kpiHandleList == null || kpiHandleList.size() < 1) {
 			return;
