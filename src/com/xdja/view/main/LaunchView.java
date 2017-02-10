@@ -39,6 +39,8 @@ import com.xdja.collectdata.handleData.entity.MemoryHandleResult;
 import com.xdja.constant.Constants;
 import com.xdja.constant.GlobalConfig;
 import com.xdja.database.PerformanceDB;
+import com.xdja.database.SaveLocalManager;
+import com.xdja.exception.SettingException;
 import com.xdja.log.LoggerManager;
 import com.xdja.util.CommonUtil;
 import com.xdja.util.ExecShellUtil;
@@ -81,7 +83,7 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 	private final static int HEIGHT = 760;
 	// 静默测试时，过十分钟之后再采集数据
 	private final static int SLIENT_TIME_INTERVAL = 10 * 1000;
-	private Timer mSlientWaitTimer =null;
+	private Timer mSlientWaitTimer = null;
 	// 当前选择的测试包名
 	private String mCurTestPackageName;
 	// 设置在更新设备的时候，不处理进程列表的点击事件
@@ -296,7 +298,7 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 		if (baseTestInfo != null) {
 			GlobalConfig.TestVersion = baseTestInfo.versionName;
 		}
-		mSlientWaitTimer =new Timer();
+		mSlientWaitTimer = new Timer();
 		mSlientWaitTimer.schedule(new TimerTask() {
 
 			@Override
@@ -337,10 +339,41 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 			viewFlow.stop();
 		}
 
-		saveSlientDataToDb();
+		saveSilentData();
+	}
 
-		// 关闭数据库
-		PerformanceDB.getInstance().closeDB();
+	// 保存静默数据
+	private void saveSilentData() {
+		String saveWay = ProPertiesUtil.getInstance().getProperties(Constants.DBSAVE_CHOOSE);
+		if ("true".equals(saveWay)) {
+			saveSlientDataToDb();
+
+			// 关闭数据库
+			PerformanceDB.getInstance().closeDB();
+		} else {
+			saveSilentDataToLocal();
+		}
+	}
+
+	/**
+	 * 保存静默数据到本地
+	 */
+	private void saveSilentDataToLocal() {
+		SaveLocalManager.getInstance().setTestPackageAndVersion(GlobalConfig.TestPackageName,
+				GlobalConfig.TestVersion);
+
+		try {
+			if (viewCpu != null) {
+				SaveLocalManager.getInstance().saveSilentCpuDataToLocal(viewCpu.getHandleResult());
+			}
+
+			if (viewFlow != null) {
+				SaveLocalManager.getInstance().saveSilentFlowDataToLocal(viewFlow.getHandleResultList());
+			}
+		} catch (SettingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	/**
@@ -536,10 +569,53 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 			kpiTestView.stop();
 		}
 
-		// 将数据保存到数据库中
-		saveDataToDB();
+		saveData();
+	}
 
-		PerformanceDB.getInstance().closeDB();
+	/**
+	 * 保存数据
+	 */
+	private void saveData() {
+		String saveWay = ProPertiesUtil.getInstance().getProperties(Constants.DBSAVE_CHOOSE);
+		if ("true".equals(saveWay)) {
+			// 将数据保存到数据库中
+			saveDataToDB();
+
+			PerformanceDB.getInstance().closeDB();
+		} else {
+			saveDataToLocal();
+		}
+	}
+
+	/**
+	 * 将测试数据保存到本地
+	 * 
+	 */
+	private void saveDataToLocal() {
+		SaveLocalManager.getInstance().setTestPackageAndVersion(GlobalConfig.TestPackageName,
+				GlobalConfig.TestVersion);
+
+		try {
+			if (viewMemory != null) {
+				SaveLocalManager.getInstance().saveMemoryDataToLocal(viewMemory.getHandleResult());
+			}
+
+			if (viewCpu != null) {
+				SaveLocalManager.getInstance().saveCpuDataToLocal(viewCpu.getHandleResult());
+			}
+
+			if (viewFlow != null) {
+				SaveLocalManager.getInstance().saveFlowDataToLocal(viewFlow.getHanResultList());
+			}
+
+			if (kpiTestView != null) {
+				SaveLocalManager.getInstance().saveKpiDataToLocal(kpiTestView.getHandleKpiList());
+			}
+		} catch (SettingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
 	}
 
 	/**
@@ -548,15 +624,6 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 	 */
 	private void saveDataToDB() {
 		saveCommonData(mCurTestPackageName);
-		String selectProcess = (String) comboProcess.getSelectedItem();
-		if (!selectProcess.equals(mCurTestPackageName)) {
-			mCurTestPackageName = selectProcess;// 处理mCurTestPackageName为null时不记录数据到数据库
-			// return;
-		}
-		if (CommonUtil.strIsNull(mCurTestPackageName)) {
-			mCurTestPackageName = selectProcess;
-			// return;
-		}
 		// cpu
 		if (viewCpu != null) {
 			List<CpuHandleResult> cpuList = viewCpu.getHandleResult();
@@ -736,54 +803,52 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 
 		aboutMenu.add(aboutItem);
 		aboutMenu.add(helpItem);
-		
+
 		// 处理设置选项
 		JMenuItem performanceItem = new JMenuItem("性能阈值");
 		performanceItem.addActionListener(new ActionListener() {
-			
+
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				// TODO Auto-generated method stub
 				performanceSetting();
 			}
 		});
-		
+
 		JMenuItem saveDataItem = new JMenuItem("存储测试数据");
 		saveDataItem.addActionListener(new ActionListener() {
-			
+
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				// TODO Auto-generated method stub
 				saveTestDataSetting();
 			}
 		});
-		
+
 		settingMenu.add(performanceItem);
 		settingMenu.add(saveDataItem);
-		
+
 		// 将menu添加到工具栏
 		menuBar.add(settingMenu);
 		menuBar.add(aboutMenu);
 	}
-	
+
 	/**
-	 *  展示PerformanceSetting的配置页面
+	 * 展示PerformanceSetting的配置页面
 	 */
-	private void performanceSetting(){
-		PerformanceSettingDialog performanceSettingDialog  = new PerformanceSettingDialog(this, "设置性能指标阈值");
+	private void performanceSetting() {
+		PerformanceSettingDialog performanceSettingDialog = new PerformanceSettingDialog(this, "设置性能指标阈值");
 		performanceSettingDialog.setVisible(true);
 	}
-	
-	
+
 	/**
-	 *  保存测试数据的配置页面
+	 * 保存测试数据的配置页面
 	 */
-	private void saveTestDataSetting(){
+	private void saveTestDataSetting() {
 		SaveTestDataSettingDialog saveTestSettingDialog = new SaveTestDataSettingDialog(this, "设置保存数据的方式");
 		saveTestSettingDialog.setVisible(true);
 	}
-	
-	
+
 	/**
 	 * 销毁view中的数据
 	 */
@@ -872,31 +937,33 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 		String pkg = comboProcess.getSelectedItem().toString();
 		return pkg;
 	}
-	
+
 	/**
-	 *  设置设备和进程是否可以选择
+	 * 设置设备和进程是否可以选择
+	 * 
 	 * @param enable
 	 */
-	public static void setComboxEnable(boolean enable){
+	public static void setComboxEnable(boolean enable) {
 		if (comboDevices != null) {
 			comboDevices.setEnabled(enable);
 		}
-		
+
 		if (comboProcess != null) {
 			comboProcess.setEnabled(enable);
 		}
 	}
-	
+
 	/**
 	 * 设置开始、结束、静默开关是否可以点击
+	 * 
 	 * @param enable
 	 */
-	public static void setBtnEnable(boolean enable){
+	public static void setBtnEnable(boolean enable) {
 		if (enable) {
 			jb1.setEnabled(true);
 			jb2.setEnabled(false);
 			slientBtn.setEnabled(true);
-		}else {
+		} else {
 			jb1.setEnabled(false);
 			jb2.setEnabled(false);
 			slientBtn.setEnabled(false);

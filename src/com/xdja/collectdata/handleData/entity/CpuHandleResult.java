@@ -21,4 +21,11 @@ public class CpuHandleResult extends HandleDataResultBase {
 		this.methodTracePath = methodTracePath;
 	}
 	
+	@Override
+	public String[] formatDataToArray() {
+		// TODO Auto-generated method stub
+		String resulutStr = result ? "true" : "false";
+		String[] dataArray = new String[]{activityName, testValue, logPath, methodTracePath, resulutStr};
+		return dataArray;
+	}
 }

@@ -34,6 +34,8 @@ import com.xdja.collectdata.handleData.HandleDataManager;
 import com.xdja.collectdata.handleData.entity.BatteryHandleResult;
 import com.xdja.constant.Constants;
 import com.xdja.database.PerformanceDB;
+import com.xdja.database.SaveLocalManager;
+import com.xdja.exception.SettingException;
 import com.xdja.util.CommonUtil;
 import com.xdja.util.ProPertiesUtil;
 import com.xdja.util.SwingUiUtil;
@@ -224,7 +226,12 @@ public class BatteryView extends BaseChartView {
 		}
 		
 		// 保存到数据库
-		saveDataToDb(batteryHandleResults);
+		try {
+			saveData(batteryHandleResults);
+		} catch (SettingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		
 		// 显示异常信息
 		for(BatteryHandleResult result : batteryHandleResults){
@@ -234,6 +241,24 @@ public class BatteryView extends BaseChartView {
 		}
 	}
 	
+	/**
+	 * 保存数据
+	 * @param list
+	 * @throws SettingException
+	 */
+	private void saveData(List<BatteryHandleResult> list) throws SettingException{
+		if (list == null || list.size() < 1) {
+			return;
+		}
+		String useDbStr = ProPertiesUtil.getInstance().getProperties(Constants.DBSAVE_CHOOSE);
+		if ("true".equals(useDbStr)) {
+			saveDataToDb(list);
+		}else {
+			BaseTestInfo baseTestInfo = CollectDataImpl.getBaseTestInfo(nowTestPackage);
+			SaveLocalManager.getInstance().setTestPackageAndVersion(nowTestPackage, baseTestInfo.versionName);
+			SaveLocalManager.getInstance().saveBatteryDataToLocal(list);
+		}
+	}
 	/**
 	 * 将数据保存到数据库中
 	 */

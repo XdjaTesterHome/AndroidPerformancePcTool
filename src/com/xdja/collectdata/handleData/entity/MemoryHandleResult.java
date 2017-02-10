@@ -28,4 +28,11 @@ public class MemoryHandleResult extends HandleDataResultBase {
 		this.methodTracePath = methodTracePath;
 	}
 	
+	@Override
+	public String[] formatDataToArray() {
+		// TODO Auto-generated method stub
+		String resulutStr = result ? "true" : "false";
+		String[] dataArray = new String[]{activityName, testValue, logPath, memoryHprofPath, resulutStr};
+		return dataArray;
+	}
 }

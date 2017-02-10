@@ -27,6 +27,7 @@ import org.jfree.data.category.DefaultCategoryDataset;
 
 import com.xdja.collectdata.CollectDataImpl;
 import com.xdja.collectdata.SaveEnvironmentManager;
+import com.xdja.collectdata.entity.BaseTestInfo;
 import com.xdja.collectdata.entity.FpsData;
 import com.xdja.collectdata.handleData.HandleDataManager;
 import com.xdja.collectdata.handleData.entity.FpsHandleResult;
@@ -34,6 +35,8 @@ import com.xdja.collectdata.handleData.entity.HandleDataResultBase;
 import com.xdja.constant.Constants;
 import com.xdja.constant.GlobalConfig;
 import com.xdja.database.PerformanceDB;
+import com.xdja.database.SaveLocalManager;
+import com.xdja.exception.SettingException;
 import com.xdja.util.CommonUtil;
 import com.xdja.util.ProPertiesUtil;
 import com.xdja.util.SwingUiUtil;
@@ -134,7 +137,12 @@ public class FpsView extends BaseChartView {
 				LaunchView.setBtnEnable(true);
 				stop();
 				//±£´æÊý¾Ý
-				saveDataToDb();
+				try {
+					saveData();
+				} catch (SettingException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
 			}
 		});
 		
@@ -144,6 +152,17 @@ public class FpsView extends BaseChartView {
 		chartPanel.add(startBtn);
 		chartPanel.add(pauseBtn);
 		addJpanel(chartPanel);
+	}
+	
+	private void saveData() throws SettingException{
+		String useDbStr = ProPertiesUtil.getInstance().getProperties(Constants.DBSAVE_CHOOSE);
+		if ("true".equals(useDbStr)) {
+			saveDataToDb();
+		}else {
+			BaseTestInfo baseTestInfo = CollectDataImpl.getBaseTestInfo(nowTestPackage);
+			SaveLocalManager.getInstance().setTestPackageAndVersion(nowTestPackage, baseTestInfo.versionName);
+			SaveLocalManager.getInstance().saveFpsDataToLocal(fpsHandleList);
+		}
 	}
 	
 	/**
@@ -210,6 +229,9 @@ public class FpsView extends BaseChartView {
 		int fps = 0;
 		for(int i = 0; i < fpsHandleList.size(); i++){
 			handleResult = fpsHandleList.get(i);
+			if (tempHandleList.contains(handleResult)) {
+				continue;
+			}
 			if (handleResult == null) {
 				continue;
 			}

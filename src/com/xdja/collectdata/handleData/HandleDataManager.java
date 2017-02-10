@@ -170,10 +170,10 @@ public class HandleDataManager {
 	 * @param cpu
 	 * @return
 	 */
-	public CpuHandleResult handleCpu(CpuData cpuData, double cpu) {
+	public CpuHandleResult handleCpu(CpuData cpuData, float cpu) {
 		cpuList(cpuData);
 		CpuHandleResult handleResult = new CpuHandleResult();
-		handleResult.setTestValue(String.valueOf(cpu));
+		handleResult.setTestValue(String.valueOf(CommonUtil.getTwoDots(cpu)));
 		handleResult.setActivityName(CollectDataImpl.getCurActivity());
 		if (cpuData.cpuUsage > CPU_MAX) {
 
@@ -394,12 +394,10 @@ public class HandleDataManager {
 		// 过滤重复的项
 		KpiDatas = handleKpiHandleList(kpidataList);
 		
-		// 清空Klist
-		kpiList.clear();
 		if (KpiDatas == null || KpiDatas.size() < 1) {
 			return kpiList;
 		}
-
+		
 		for (KpiData kpiData : KpiDatas) {
 			mKpiHandleResult = new KpiHandleResult();
 			mKpiHandleResult.setActivityName(kpiData.currentPage);
@@ -424,8 +422,13 @@ public class HandleDataManager {
 			} else {
 				mKpiHandleResult.setResult(true);
 			}
-
-			kpiList.add(mKpiHandleResult);
+			
+			// 若存在，则直接修改值
+			if (kpiList.contains(mKpiHandleResult)) {
+				kpiList.set(kpiList.indexOf(mKpiHandleResult), mKpiHandleResult);
+			} else {
+				kpiList.add(mKpiHandleResult);
+			}
 		}
 
 		return kpiList;
@@ -445,6 +448,9 @@ public class HandleDataManager {
 		int kpi = 0;
 		for (int i = 0; i < KpiDatas.size(); i++) {
 			kpiData = KpiDatas.get(i);
+			if (tempKpiData.contains(kpiData)) {
+				continue;
+			}
 			if (kpiData == null) {
 				continue;
 			}

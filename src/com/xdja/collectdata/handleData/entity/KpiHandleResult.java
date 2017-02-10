@@ -44,4 +44,13 @@ public class KpiHandleResult extends HandleDataResultBase{
 		
 		return this.activityName.equals(((KpiHandleResult)obj).activityName);
 	}
+	
+	@Override
+	public String[] formatDataToArray() {
+		// TODO Auto-generated method stub
+		String resulutStr = result ? "true" : "false";
+		String[] dataArray = new String[]{activityName, testValue, logPath, methodTracePath, resulutStr};
+		return dataArray;
+	}
+	
 }
