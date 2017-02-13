@@ -210,10 +210,15 @@ public class MemoryView extends BaseChartView implements IClientChangeListener {
 		}
 		// 记录数据
 		memoryHandleResults.add(result);
-
+		
 		if (result.isShowErrorMsg) {
 			// 在界面上展示问题数据
 			appendErrorInfo(formatErrorInfo(result, String.valueOf(memoryValue) + "MB", "发生内存抖动"));
+		}
+		
+		//  展示内存值过大
+		if (result.mIsErrorMemory) {
+			appendErrorInfo(formatErrorInfo(result, String.valueOf(memoryValue) + "MB", "分配内存值过大"));
 		}
 	}
 	

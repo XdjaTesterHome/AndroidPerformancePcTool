@@ -37,6 +37,7 @@ public class KpiTestView extends BaseChartView {
 	private Thread kpiThread, kdatathread;
 	private List<KpiData> KpiData = null;
 	private List<KpiHandleResult> kpiHandleList = new ArrayList<>(12);
+	private List<KpiHandleResult> tempKpiResult;
 	
 
 	private CategoryPlot mPlot;
@@ -96,7 +97,11 @@ public class KpiTestView extends BaseChartView {
 	 * @throws InterruptedException
 	 */
 	public void start(String packageName) throws InterruptedException {
-
+		
+		if (kpiHandleList != null) {
+			kpiHandleList.clear();
+		}
+		
 		kdatathread = new Thread(new Runnable() {
 
 			public void run() {
@@ -151,7 +156,12 @@ public class KpiTestView extends BaseChartView {
 		if (kpiList == null || kpiList.size() < 1) {
 			return;
 		}
-		kpiHandleList = HandleDataManager.getInstance().handleKpiData(kpiList);
+		tempKpiResult = HandleDataManager.getInstance().handleKpiData(kpiList);
+		if (tempKpiResult != null && tempKpiResult.size() > 0) {
+			kpiHandleList.clear();
+			kpiHandleList.addAll(tempKpiResult);
+		}
+		
 		if (kpiHandleList == null || kpiHandleList.size() < 1) {
 			return;
 		}

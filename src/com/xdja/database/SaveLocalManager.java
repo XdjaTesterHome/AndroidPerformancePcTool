@@ -149,6 +149,7 @@ public class SaveLocalManager {
 		if (CommonUtil.strIsNull(mFilePath)) {
 			throw new SettingException("请先调用setTestPackageAndVersion方法设置保存包名和版本号");
 		}
+		System.out.println("saveKpiDataToLocal handleResults size = " + handleResults.size());
 		if (handleResults == null || handleResults.size() < 1) {
 			return;
 		}

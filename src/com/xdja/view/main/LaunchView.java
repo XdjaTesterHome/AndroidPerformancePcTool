@@ -82,12 +82,12 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 	private final static int WIDTH = 1248;
 	private final static int HEIGHT = 760;
 	// 静默测试时，过十分钟之后再采集数据
-	private final static int SLIENT_TIME_INTERVAL = 10 * 1000;
+	private final static int SLIENT_TIME_INTERVAL = 5 * 1000;
 	private Timer mSlientWaitTimer = null;
 	// 当前选择的测试包名
 	private String mCurTestPackageName;
 	// 设置在更新设备的时候，不处理进程列表的点击事件
-	public boolean myIgnoreActionEvents = true;
+	public volatile boolean myIgnoreActionEvents = false;
 
 	/**
 	 * constructor to init a LaunchView instance create a JPanel instance to put
@@ -122,6 +122,9 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 		comboDevices.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				// comboProcess.removeAllItems();
+				if (myIgnoreActionEvents) {
+					return;
+				}
 				updateClientList();
 			}
 		});
@@ -135,13 +138,12 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
+				System.out.println("myIgnoreActionEvents ....." + myIgnoreActionEvents + " ActionEvent " + e.getActionCommand());
 				if (myIgnoreActionEvents) {
 					return;
 				}
 				// TODO Auto-generated method stub
-				String packageNameold = GlobalConfig.getTestPackageName();
 				String packageName = (String) comboProcess.getSelectedItem();
-
 				System.out.println("I am select, packageName = " + packageName);
 
 				if (!CommonUtil.strIsNull(packageName)) {
@@ -153,10 +155,6 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 					}
 					// 将选择的包名记录到本地
 					ProPertiesUtil.getInstance().writeProperties(Constants.CHOOSE_PACKAGE, packageName);
-				}
-
-				if (packageNameold != packageName) {
-					kpiTestView.clear();
 				}
 
 			}
@@ -604,7 +602,10 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 			}
 
 			if (kpiTestView != null) {
-				SaveLocalManager.getInstance().saveKpiDataToLocal(kpiTestView.getHandleKpiList());
+				List<KpiHandleResult> kpiHandleResults = kpiTestView.getHandleKpiList();
+				if (kpiHandleResults != null && kpiHandleResults.size() > 0) {
+					SaveLocalManager.getInstance().saveKpiDataToLocal(kpiTestView.getHandleKpiList());
+				}
 			}
 		} catch (SettingException e) {
 			// TODO Auto-generated catch block
@@ -696,6 +697,7 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 	 * 更新DeviceList
 	 */
 	private void updateDeviceList() {
+		System.out.println("updateDeviceList .....");
 		myIgnoreActionEvents = true;
 		if (comboDevices != null && !comboDevices.isEnabled()) {
 			return;
@@ -720,6 +722,7 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 	 * 根据Device来获取进程
 	 */
 	private void updateClientList() {
+		System.out.println("updateClientList .....");
 		myIgnoreActionEvents = true;
 		if (comboProcess != null && !comboProcess.isEnabled()) {
 			return;
@@ -730,7 +733,6 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 			IDevice dev = AdbManager.getInstance().getIDevice(selectDevice);
 			ExecShellUtil.getInstance().setDevice(dev);
 			List<String> respack = CollectDataImpl.getRunningProcess(devicesid);
-			System.out.println("I am update");
 			if (respack.size() > 0 && comboProcess != null) {
 				comboProcess.removeAllItems();
 			}
@@ -871,7 +873,10 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 		if (kpiTestView != null) {
 			kpiTestView.destoryData();
 		}
-
+		
+		if (mSlientWaitTimer != null) {
+			mSlientWaitTimer.cancel();
+		}
 		// 清空选择的包名数据
 		ProPertiesUtil.getInstance().removeValue(Constants.CHOOSE_PACKAGE);
 		ProPertiesUtil.getInstance().removeValue(Constants.LAST_PACKAGENAME);
