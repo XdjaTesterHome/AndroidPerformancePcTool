@@ -50,5 +50,11 @@ public class BatteryHandleResult extends HandleDataResultBase {
 		this.uid = uid;
 	}
 	
+	@Override
+	public String[] formatDataToArray() {
+		// TODO Auto-generated method stub
+		String[] dataArray = new String[]{appPackageName, testValue, detailInfo};
+		return dataArray;
+	}
 	
 }

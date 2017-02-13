@@ -19,6 +19,7 @@ import com.xdja.collectdata.handleData.entity.MemoryHandleResult;
 import com.xdja.constant.Constants;
 import com.xdja.constant.GlobalConfig;
 import com.xdja.util.CommonUtil;
+import com.xdja.util.ProPertiesUtil;
 
 /**
  * 问题模型：用于对上报的数据进行处理，判断是否存在问题。
@@ -29,26 +30,28 @@ import com.xdja.util.CommonUtil;
 public class HandleDataManager {
 	private static HandleDataManager mInstance = null;
 	// CPU相关配置常量
-	private final static int CPU_MAX = 50;
-	private final static int CPU_CONTINUE_MAX = 30;
-	private final static float CPU_SLIENT_VALUE = 0.5f;
+	private static int CPU_MAX = 50;
+	private static int CPU_CONTINUE_MAX = 30;
+	private static float CPU_SLIENT_VALUE = 0.5f;
 	private static int cpuCount = 0;
 	private static int slientCount = 0;
 	// 内存相关配置常量
 	// 默认内存上下波动不超过2M
-	private final static int MEMORY_STANDARD = 2;
+	private static int MEMORY_STANDARD = 2;
 	// 内存抖动不超过3次
-	private final static int MEMORY_SHAKECOUNT = 4;
+	private static int MEMORY_SHAKECOUNT = 4;
+	private static int memoryMaxValue = 0;
+	
 	// kpi相关配置
 	// kpi数据超过多少判定有问题，单位是ms
-	private final static int KPI_TIME = 2000;
+	private static int KPI_TIME = 2000;
 
 	// flow相关配置 单位是MB
-	private final static int FLOW_VALUE = 1024;
-	private final static float FLOW_SLIENT_VALUE = 512;
+	private static int FLOW_VALUE = 1024;
+	private static float FLOW_SLIENT_VALUE = 512;
 
 	// fps相关配置
-	private final static int FPS_COUNT = 40;
+	private static int FPS_COUNT = 40;
 
 	// 存放错误数据列表
 	private List<KpiHandleResult> kpiErrorList = new ArrayList<>(12);
@@ -95,6 +98,16 @@ public class HandleDataManager {
 
 	private HandleDataManager() {
 		mCurTestPackage = GlobalConfig.getTestPackageName();
+		FPS_COUNT = Integer.parseInt(ProPertiesUtil.getInstance().getProperties(Constants.FPS_SETTING));
+		FLOW_VALUE = Integer.parseInt(ProPertiesUtil.getInstance().getProperties(Constants.FLOW_SETTING)) * 1024;
+		FLOW_SLIENT_VALUE = Integer.parseInt(ProPertiesUtil.getInstance().getProperties(Constants.SILENT_FLOW_SETTING))
+				* 1024;
+		CPU_MAX = Integer.parseInt(ProPertiesUtil.getInstance().getProperties(Constants.CPU_SETTING));
+		CPU_SLIENT_VALUE = Integer.parseInt(ProPertiesUtil.getInstance().getProperties(Constants.SILENT_CPU_SETTING));
+		// MEMORY_STANDARD =
+		memoryMaxValue = Integer.parseInt(ProPertiesUtil.getInstance().getProperties(Constants.MEMORY_SETTING));
+		KPI_TIME = Integer.parseInt(ProPertiesUtil.getInstance().getProperties(Constants.KPI_SETTING)) * 1000;
+
 	}
 
 	// cpuList列表中依次添加元素，直到添加长度为3的元素后，每次只更新列表元素，删除第一个和添加最后一个，列表长度适中为3//
@@ -170,10 +183,10 @@ public class HandleDataManager {
 	 * @param cpu
 	 * @return
 	 */
-	public CpuHandleResult handleCpu(CpuData cpuData, double cpu) {
+	public CpuHandleResult handleCpu(CpuData cpuData, float cpu) {
 		cpuList(cpuData);
 		CpuHandleResult handleResult = new CpuHandleResult();
-		handleResult.setTestValue(String.valueOf(cpu));
+		handleResult.setTestValue(String.valueOf(CommonUtil.getTwoDots(cpu)));
 		handleResult.setActivityName(CollectDataImpl.getCurActivity());
 		if (cpuData.cpuUsage > CPU_MAX) {
 
@@ -385,17 +398,24 @@ public class HandleDataManager {
 	/**
 	 * 处理kpi相关的数据 判断问题的标准： 页面加载时间大于2s，但是暂时还没有区分首次启动、冷启动
 	 * 这个方法按照目前的方法效率低。但貌似没好的解决方案了。
+	 * 
 	 * @param cpuData
 	 * @return
 	 */
 	public List<KpiHandleResult> handleKpiData(List<KpiData> KpiDatas) {
+		if (KpiDatas == null || KpiDatas.size() < 1) {
+			return kpiList;
+		}
 		// 首先将所有的值都记录下来
 		kpidataList.addAll(KpiDatas);
 		// 过滤重复的项
 		KpiDatas = handleKpiHandleList(kpidataList);
-		
-		// 清空Klist
-		kpiList.clear();
+		System.out.println("handleKpiData = size" + KpiDatas.size());
+		System.out.println("handleKpiData = kpidataList size" + kpidataList.size());
+		// 将结果赋值到KpidataList中
+		kpidataList.clear();
+		kpidataList.addAll(KpiDatas);
+
 		if (KpiDatas == null || KpiDatas.size() < 1) {
 			return kpiList;
 		}
@@ -425,7 +445,12 @@ public class HandleDataManager {
 				mKpiHandleResult.setResult(true);
 			}
 
-			kpiList.add(mKpiHandleResult);
+			// 若存在，则直接修改值
+			if (kpiList.contains(mKpiHandleResult)) {
+				kpiList.set(kpiList.indexOf(mKpiHandleResult), mKpiHandleResult);
+			} else {
+				kpiList.add(mKpiHandleResult);
+			}
 		}
 
 		return kpiList;
@@ -445,6 +470,9 @@ public class HandleDataManager {
 		int kpi = 0;
 		for (int i = 0; i < KpiDatas.size(); i++) {
 			kpiData = KpiDatas.get(i);
+			if (tempKpiData.contains(kpiData)) {
+				continue;
+			}
 			if (kpiData == null) {
 				continue;
 			}
@@ -461,7 +489,7 @@ public class HandleDataManager {
 					kpi += kpiData2.loadTime;
 					KpiDatas.remove(kpiData2);
 				}
-				
+
 			}
 			kpi = kpi / count;
 			kpiData.setLoadTime(kpi);
@@ -471,8 +499,7 @@ public class HandleDataManager {
 			kpi = 0;
 			count = 1;
 		}
-		
-		
+
 		return tempKpiData;
 	}
 
@@ -504,6 +531,15 @@ public class HandleDataManager {
 		// 设置公共的值
 		memoryResult.setTestValue(String.valueOf(CommonUtil.getTwoDots(value)));
 		memoryResult.setActivityName(CollectDataImpl.getCurActivity());
+		
+		/**
+		 *  提示内存超过最大内存值
+		 */
+		if (memoryData.memAlloc > memoryMaxValue) {
+			memoryResult.setmIsErrorMemory(true);
+		}else {
+			memoryResult.setmIsErrorMemory(false);
+		}
 		/**
 		 * 如果超过30s，清空条件，重新开始。
 		 */
@@ -520,14 +556,14 @@ public class HandleDataManager {
 				if (memoryErrorList.contains(memoryResult)) {
 					return memoryResult;
 				}
-				
+
 				// 设置显示错误信息
 				memoryResult.setShowErrorMsg(true);
 				// 保存测试环境
 				memoryResult = saveMemoryEnvironment(memoryResult);
 				// 将结果放到错误列表中
 				memoryErrorList.add(memoryResult);
-				
+
 				return memoryResult;
 			}
 		} else {
@@ -583,19 +619,19 @@ public class HandleDataManager {
 
 		return memoryResult;
 	}
-	
+
 	/**
-	 *  清空测试数据
+	 * 清空测试数据
 	 */
-	public void destoryData(){
+	public void destoryData() {
 		if (kpiErrorList != null) {
 			kpiErrorList.clear();
 		}
-		
+
 		if (cpuErrorList != null) {
 			cpuErrorList.clear();
 		}
-		
+
 		if (flowErrorList != null) {
 			flowErrorList.clear();
 		}
@@ -605,19 +641,19 @@ public class HandleDataManager {
 		if (memoryErrorList != null) {
 			memoryErrorList.clear();
 		}
-		
+
 		if (cpuList != null) {
 			cpuList.clear();
 		}
-		
+
 		if (kpiList != null) {
 			kpiList.clear();
 		}
-		
+
 		if (slientCpuList != null) {
 			slientCpuList.clear();
 		}
-		
+
 		if (kpidataList != null) {
 			kpidataList.clear();
 		}

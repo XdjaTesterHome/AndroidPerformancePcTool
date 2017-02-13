@@ -6,7 +6,17 @@ public class MemoryHandleResult extends HandleDataResultBase {
 	public String memoryHprofPath;
 	// 抓取的方法trace 的path
 	public String methodTracePath;
+	// 内存值是否超过最大值
+	public boolean mIsErrorMemory;
 	
+	public boolean ismIsErrorMemory() {
+		return mIsErrorMemory;
+	}
+
+	public void setmIsErrorMemory(boolean mIsErrorMemory) {
+		this.mIsErrorMemory = mIsErrorMemory;
+	}
+
 	public MemoryHandleResult(){
 		super();
 	}
@@ -28,4 +38,11 @@ public class MemoryHandleResult extends HandleDataResultBase {
 		this.methodTracePath = methodTracePath;
 	}
 	
+	@Override
+	public String[] formatDataToArray() {
+		// TODO Auto-generated method stub
+		String resulutStr = result ? "true" : "false";
+		String[] dataArray = new String[]{activityName, testValue, logPath, memoryHprofPath, resulutStr};
+		return dataArray;
+	}
 }

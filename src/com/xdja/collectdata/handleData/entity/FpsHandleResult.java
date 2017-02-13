@@ -74,4 +74,11 @@ public class FpsHandleResult extends HandleDataResultBase {
 		this.frameCount = frameCount;
 	}
 	
+	@Override
+	public String[] formatDataToArray() {
+		// TODO Auto-generated method stub
+		String resulutStr = result ? "true" : "false";
+		String[] dataArray = new String[]{activityName, testValue, String.valueOf(dropCount), String.valueOf(frameCount),logPath, methodTracePath, resulutStr};
+		return dataArray;
+	}
 }

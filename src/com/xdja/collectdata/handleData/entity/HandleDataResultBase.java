@@ -110,4 +110,10 @@ public class HandleDataResultBase {
 		return this.activityName.hashCode();
 	}
 	
+	public String[] formatDataToArray(){
+		String resulutStr = result ? "true" : "false";
+		String[] dataArray = new String[]{activityName, testValue, logPath, resulutStr};
+		return dataArray;
+	}
+	
 }

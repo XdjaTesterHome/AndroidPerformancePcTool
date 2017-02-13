@@ -63,6 +63,7 @@ public class SaveTestDataSettingDialog extends JDialog implements ItemListener, 
 		add(dbSettingPanel);
 		add(localCheckbox);
 		add(localSettingPanel);
+		add(mSaveButton);
 		setLayout(new FlowLayout(FlowLayout.LEFT));
 		setBounds(600, 260, 700, 600);
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
@@ -99,19 +100,19 @@ public class SaveTestDataSettingDialog extends JDialog implements ItemListener, 
 		// 数据库名称
 		JLabel dbUsertitle = new JLabel("数据库用户名：");
 		dbUserTextField = new JTextField(30);
-		dbUserTextField.setText("Performancedata");
+		dbUserTextField.setText("root");
 		jPanel.add(dbUsertitle);
 		jPanel.add(dbUserTextField);
 		// 数据库名称
-		JLabel dbPwdtitle = new JLabel("数据库名称：");
+		JLabel dbPwdtitle = new JLabel("数据库密码：");
 		dbPwdTextField = new JTextField(30);
-		dbPwdTextField.setText("Performancedata");
+		dbPwdTextField.setText("123456");
 		jPanel.add(dbPwdtitle);
 		jPanel.add(dbPwdTextField);
 		
 
 		jPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
-		jPanel.setPreferredSize(new Dimension(500, 100));
+		jPanel.setPreferredSize(new Dimension(500, 150));
 		return jPanel;
 	}
 
@@ -126,7 +127,8 @@ public class SaveTestDataSettingDialog extends JDialog implements ItemListener, 
 		// 本地路径
 		JLabel localNametitle = new JLabel("保存路径：");
 		localTextField = new JTextField(40);
-		localTextField.setText("C:\\performance");
+		String defaultPath = System.getProperty("user.home");
+		localTextField.setText(defaultPath+"\\performance");
 		jPanel.add(localNametitle);
 		jPanel.add(localTextField);
 
@@ -142,7 +144,6 @@ public class SaveTestDataSettingDialog extends JDialog implements ItemListener, 
 		String label = checkbox.getLabel();
 		switch (label) {
 		case "使用数据库":
-			System.out.println("数据");
 			if (dbCheckbox != null && !dbCheckbox.getState()) {
 				dbCheckbox.setState(true);
 				setdbSettingEnable(true);
@@ -153,7 +154,6 @@ public class SaveTestDataSettingDialog extends JDialog implements ItemListener, 
 			}
 			break;
 		case "保存到本地":
-			System.out.println("本地");
 			if (localCheckbox != null && !localCheckbox.getState()) {
 				localCheckbox.setState(true);
 				setdbSettingEnable(false);
@@ -178,6 +178,8 @@ public class SaveTestDataSettingDialog extends JDialog implements ItemListener, 
 			ipTextField.setEditable(enable);
 			portTextField.setEditable(enable);
 			dbNameTextField.setEditable(enable);
+			dbUserTextField.setEditable(enable);
+			dbPwdTextField.setEditable(enable);
 		}
 		if (localSettingPanel != null) {
 			localTextField.setEditable(!enable);
