@@ -42,8 +42,7 @@ public class PerformanceDB {
 				}
 			}
 		}
-
-		return mInstance;
+        return mInstance;
 	}
 
 	private String cpuTableName, cpuSlientTableName, memoryTableName, kpiTableName, fpsTableName, batteryTableName,
@@ -59,10 +58,9 @@ public class PerformanceDB {
 			String user = ProPertiesUtil.getInstance().getProperties(Constants.DBUSER_SETTING);
 			String pwd = ProPertiesUtil.getInstance().getProperties(Constants.DBPWD_SETTING);
 			if (CommonUtil.strIsNull(ip) || CommonUtil.strIsNull(port) || CommonUtil.strIsNull(mDBName)
-					|| CommonUtil.strIsNull(user) || CommonUtil.strIsNull(pwd)) {
+					|| CommonUtil.strIsNull(user)) {
 				throw new SettingException("数据库端口号或者ip或者数据库名称 设置不正确");
 			}
-			
 			mdbUrl = String.format("jdbc:mysql://%s:%s/", ip, port);
 			mtableUrl = String.format("jdbc:mysql://%s:%s/%s", ip, port, mDBName);
 			
