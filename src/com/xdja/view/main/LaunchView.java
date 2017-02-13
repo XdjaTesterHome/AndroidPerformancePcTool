@@ -138,13 +138,11 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				System.out.println("myIgnoreActionEvents ....." + myIgnoreActionEvents + " ActionEvent " + e.getActionCommand());
 				if (myIgnoreActionEvents) {
 					return;
 				}
 				// TODO Auto-generated method stub
 				String packageName = (String) comboProcess.getSelectedItem();
-				System.out.println("I am select, packageName = " + packageName);
 
 				if (!CommonUtil.strIsNull(packageName)) {
 					mCurTestPackageName = packageName;
@@ -721,7 +719,7 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 	/**
 	 * 根据Device来获取进程
 	 */
-	private void updateClientList() {
+	private synchronized void updateClientList() {
 		System.out.println("updateClientList .....");
 		myIgnoreActionEvents = true;
 		if (comboProcess != null && !comboProcess.isEnabled()) {
@@ -742,7 +740,6 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 				comboProcess.addItem(sn);
 			}
 
-			// 这个逻辑不正确，不应该显示上一次出现的packageName
 			String packageName = ProPertiesUtil.getInstance().getProperties(Constants.CHOOSE_PACKAGE);
 			if (!CommonUtil.strIsNull(packageName)) {
 				comboProcess.setSelectedItem(packageName);
