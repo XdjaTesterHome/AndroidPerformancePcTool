@@ -164,4 +164,9 @@ public class PerformanceSettingDialog extends JDialog implements ActionListener{
 		
 		SwingUiUtil.getInstance().showTipsDialog(this, "提示", "配置已经保存成功", "确定", null);
 	}
+	
+//	public static void main(String[] args) {
+//		PerformanceSettingDialog performanceSettingDialog  = new PerformanceSettingDialog(this, "设置性能指标阈值");
+//		performanceSettingDialog.setVisible(true);
+//	}
 }

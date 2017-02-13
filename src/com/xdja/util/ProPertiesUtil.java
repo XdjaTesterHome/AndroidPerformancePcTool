@@ -27,6 +27,7 @@ public class ProPertiesUtil {
 
 	public static ProPertiesUtil getInstance() {
 		if (mInstance == null) {
+//			synchronized (ProPertiesUtil.class) {
 			synchronized (ProPertiesUtil.class) {
 				if (mInstance == null) {
 					mInstance = new ProPertiesUtil();
