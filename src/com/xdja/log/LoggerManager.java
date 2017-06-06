@@ -7,6 +7,7 @@ import com.xdja.constant.Constants;
 
 public class LoggerManager {
 	private static boolean isInited = false;
+	private static final String LOGPROPERTIES = "log4j.properties";
 	
 	public static void initLogger() {
 		PropertyConfigurator.configure(Constants.LOG4J_PATH);

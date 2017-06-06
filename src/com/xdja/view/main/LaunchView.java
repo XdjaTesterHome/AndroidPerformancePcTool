@@ -92,7 +92,7 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 	/**
 	 * constructor to init a LaunchView instance create a JPanel instance to put
 	 * other controller parts
-	 * 
+	 *
 	 * @param name:
 	 *            author name
 	 */
@@ -237,52 +237,52 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 				// TODO Auto-generated method stub
 				String cmd = e.getActionCommand();
 				switch (cmd) {
-				case "开始静默测试":
-					Thread startThread = new Thread(new Runnable() {
+					case "开始静默测试":
+						Thread startThread = new Thread(new Runnable() {
 
-						@Override
-						public void run() {
-							// TODO Auto-generated method stub
-							jb1.setEnabled(false);
-							jb2.setEnabled(false);
-							comboDevices.setEnabled(false);
-							comboProcess.setEnabled(false);
-							slientBtn.setText("停止静默测试");
-							startSlientTest();
-							if (viewFps != null) {
-								viewFps.setBtnEnable(false);
+							@Override
+							public void run() {
+								// TODO Auto-generated method stub
+								jb1.setEnabled(false);
+								jb2.setEnabled(false);
+								comboDevices.setEnabled(false);
+								comboProcess.setEnabled(false);
+								slientBtn.setText("停止静默测试");
+								startSlientTest();
+								if (viewFps != null) {
+									viewFps.setBtnEnable(false);
+								}
+
+								SwingUiUtil.getInstance().showTipsDialog(LaunchView.this, "提示", "静默测试，5分钟后开始采集数据", "我知道了",
+										null);
 							}
+						});
 
-							SwingUiUtil.getInstance().showTipsDialog(LaunchView.this, "提示", "静默测试，5分钟后开始采集数据", "我知道了",
-									null);
-						}
-					});
+						startThread.start();
+						break;
+					case "停止静默测试":
+						Thread stopThread = new Thread(new Runnable() {
 
-					startThread.start();
-					break;
-				case "停止静默测试":
-					Thread stopThread = new Thread(new Runnable() {
-
-						@Override
-						public void run() {
-							// TODO Auto-generated method stub
-							jb1.setEnabled(true);
-							jb2.setEnabled(true);
-							comboDevices.setEnabled(true);
-							comboProcess.setEnabled(true);
-							slientBtn.setText("开始静默测试");
-							stopSlientTest();
-							if (viewFps != null) {
-								viewFps.setBtnEnable(true);
+							@Override
+							public void run() {
+								// TODO Auto-generated method stub
+								jb1.setEnabled(true);
+								jb2.setEnabled(true);
+								comboDevices.setEnabled(true);
+								comboProcess.setEnabled(true);
+								slientBtn.setText("开始静默测试");
+								stopSlientTest();
+								if (viewFps != null) {
+									viewFps.setBtnEnable(true);
+								}
+								HandleDataManager.getInstance().destoryData();
 							}
-							HandleDataManager.getInstance().destoryData();
-						}
-					});
+						});
 
-					stopThread.start();
-					break;
-				default:
-					break;
+						stopThread.start();
+						break;
+					default:
+						break;
 				}
 			}
 		});
@@ -462,7 +462,7 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 
 	/**
 	 * 获取选中的device
-	 * 
+	 *
 	 * @return
 	 */
 	public static String getdevice() {
@@ -580,7 +580,7 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 
 	/**
 	 * 将测试数据保存到本地
-	 * 
+	 *
 	 */
 	private void saveDataToLocal() {
 		SaveLocalManager.getInstance().setTestPackageAndVersion(GlobalConfig.TestPackageName,
@@ -614,7 +614,7 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 
 	/**
 	 * 将所有的测试数据保存到数据库中
-	 * 
+	 *
 	 */
 	private void saveDataToDB() {
 		saveCommonData(mCurTestPackageName);
@@ -870,7 +870,7 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 		if (kpiTestView != null) {
 			kpiTestView.destoryData();
 		}
-		
+
 		if (mSlientWaitTimer != null) {
 			mSlientWaitTimer.cancel();
 		}
@@ -884,7 +884,7 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 
 	/**
 	 * 判断是否有任务在进行
-	 * 
+	 *
 	 * @return
 	 */
 	private boolean isNormalTestNow() {
@@ -897,7 +897,7 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 
 	/**
 	 * 判断静态任务是否在进行
-	 * 
+	 *
 	 * @return
 	 */
 	private boolean isSlientTestNow() {
@@ -910,7 +910,7 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 
 	/**
 	 * 判断Fps是否在测试
-	 * 
+	 *
 	 * @return
 	 */
 	private boolean isFpsTestNow() {
@@ -937,7 +937,7 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 
 	/**
 	 * 设置设备和进程是否可以选择
-	 * 
+	 *
 	 * @param enable
 	 */
 	public static void setComboxEnable(boolean enable) {
@@ -952,7 +952,7 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 
 	/**
 	 * 设置开始、结束、静默开关是否可以点击
-	 * 
+	 *
 	 * @param enable
 	 */
 	public static void setBtnEnable(boolean enable) {

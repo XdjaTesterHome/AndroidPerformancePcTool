@@ -17,7 +17,7 @@ public class ShowMessageView extends TextArea{
 		// TODO Auto-generated constructor stub
 		setPreferredSize(new Dimension(50, 100));
 		setEditable(false);
-		setText("暂时无异常信息");
+		setText("no data now");
 		setForeground(Color.RED);
 	}
 

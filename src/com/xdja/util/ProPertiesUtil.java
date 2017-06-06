@@ -69,9 +69,9 @@ public class ProPertiesUtil {
 		try {
 			InputStream in = new BufferedInputStream(new FileInputStream(NAME));
 			mProperties.load(in); /// 加载属性列表
-			Iterator<String> it = mProperties.stringPropertyNames().iterator();
+			Iterator<Object> it = mProperties.keySet().iterator();
 			while (it.hasNext()) {
-				String ikey = it.next();
+				String ikey = (String) it.next();
 				if (ikey != null && ikey.equals(key)) {
 					return mProperties.getProperty(ikey);
 				}
