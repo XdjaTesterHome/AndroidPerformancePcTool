@@ -46,8 +46,8 @@ public class HandleDataManager {
 	// kpi数据超过多少判定有问题，单位是ms
 	private static int KPI_TIME = 2000;
 
-	// flow相关配置 单位是MB
-	private static int FLOW_VALUE = 1024;
+	// flow相关配置 单位是KB
+	private static float FLOW_VALUE = 512;
 	private static float FLOW_SLIENT_VALUE = 512;
 
 	// fps相关配置
@@ -255,7 +255,7 @@ public class HandleDataManager {
 		// 静默测试数据的判断//
 		CpuHandleResult upcpu = new CpuHandleResult(true);
 		upcpu.setTestValue(String.valueOf(value));
-
+		upcpu.setActivityName(CollectDataImpl.getCurActivity());
 		slientCount += 1;
 		if (slientCount == 5) {
 			slientCpuList.add(cpuData);
@@ -301,76 +301,50 @@ public class HandleDataManager {
 	}
 
 	/**
-	 * 处理流量数据
-	 * 
-	 * @param flowData
+	 *  对flowdata进行处理
+	 * @param flowData  流量值
+	 * @param type      静默流量 或者 正常流量采集  type = 0 正常流量    type = 1 静默流量
 	 * @return
 	 */
-	public FlowHandleResult handleFlowData(float flowData) {
-		mFlowHandleResult = new FlowHandleResult();
+	public FlowHandleResult handleFlowData(float flowData, int type){
+		FlowHandleResult flowDataResult = new FlowHandleResult();
 		// 设置公共的值
-		mFlowHandleResult.setActivityName(CollectDataImpl.getCurActivity());
-		mFlowHandleResult.setTestValue(String.valueOf(flowData));
-		if (flowData > FLOW_VALUE) {
+		flowDataResult.setActivityName(CollectDataImpl.getCurActivity());
+		flowDataResult.setTestValue(String.valueOf(flowData));
+		float flowMaxData = 0;
+		if (type == 0){
+			flowMaxData = FLOW_VALUE;
+		}else {
+			flowMaxData = FLOW_SLIENT_VALUE;
+		}
 
-			mFlowHandleResult.setResult(false);
-			if (flowErrorList.contains(mFlowHandleResult)) {
-				return mFlowHandleResult;
+		if (flowData > flowMaxData) {
+
+			flowDataResult.setResult(false);
+			if (flowErrorList.contains(flowDataResult)) {
+				return flowDataResult;
 			}
 
 			// 保存测试环境
 			String logPath = SaveEnvironmentManager.getInstance().saveCurrentLog(GlobalConfig.DeviceName,
 					mCurTestPackage, Constants.TYPE_FLOW);
-			mFlowHandleSlientResult.setLogPath(logPath);
+			flowDataResult.setLogPath(logPath);
 
 			// 设置显示错误信息
-			mFlowHandleResult.setShowErrorMsg(true);
-			flowErrorList.add(mFlowHandleResult);
+			flowDataResult.setShowErrorMsg(true);
+			flowErrorList.add(flowDataResult);
 
-			return mFlowHandleResult;
+			return flowDataResult;
 		}
 
-		mFlowHandleResult.setResult(true);
-		return mFlowHandleResult;
-	}
-
-	/**
-	 * 对于静默测试时，测试流量场景 和正常测试分开，考虑之后的扩展
-	 * 
-	 * @return
-	 */
-	public FlowHandleResult handleFlowSlientData(float flowData) {
-		mFlowHandleResult = new FlowHandleResult();
-		// 设置公共的值
-		mFlowHandleResult.setActivityName(CollectDataImpl.getCurActivity());
-		mFlowHandleResult.setTestValue(String.valueOf(flowData));
-		if (flowData > FLOW_SLIENT_VALUE) {
-
-			mFlowHandleResult.setResult(false);
-			if (flowErrorList.contains(mFlowHandleResult)) {
-				return mFlowHandleResult;
-			}
-
-			// 保存测试环境
-			String logPath = SaveEnvironmentManager.getInstance().saveCurrentLog(GlobalConfig.DeviceName,
-					mCurTestPackage, Constants.TYPE_FLOW);
-			mFlowHandleSlientResult.setLogPath(logPath);
-
-			// 设置显示错误信息
-			mFlowHandleResult.setShowErrorMsg(true);
-			flowErrorList.add(mFlowHandleResult);
-
-			return mFlowHandleResult;
-		}
-
-		mFlowHandleResult.setResult(true);
-		return mFlowHandleResult;
+		flowDataResult.setResult(true);
+		return flowDataResult;
 	}
 
 	/**
 	 * 对采集到的fps数据进行处理 问题判定标准： 当fps < 40
 	 * 
-	 * @param cpuData
+	 * @param fpsData
 	 * @return
 	 */
 	public FpsHandleResult handleFpsData(FpsData fpsData) {
@@ -399,7 +373,7 @@ public class HandleDataManager {
 	 * 处理kpi相关的数据 判断问题的标准： 页面加载时间大于2s，但是暂时还没有区分首次启动、冷启动
 	 * 这个方法按照目前的方法效率低。但貌似没好的解决方案了。
 	 * 
-	 * @param cpuData
+	 * @param KpiDatas
 	 * @return
 	 */
 	public List<KpiHandleResult> handleKpiData(List<KpiData> KpiDatas) {
@@ -514,8 +488,8 @@ public class HandleDataManager {
 	 * 
 	 * 修改，采集数据的时间间隔换成5s。内存泄露数据采集改为30s
 	 * 
-	 * @param cpuData
-	 * @return null 就跳过这个结果数据不处理
+	 * @param memoryData
+	 * @return MemoryHandleResult 就跳过这个结果数据不处理
 	 */
 	public MemoryHandleResult handleMemoryData(MemoryData memoryData, float value) {
 		if (memoryData == null) {
@@ -579,7 +553,7 @@ public class HandleDataManager {
 	/***
 	 * cpu测试保存测试环境
 	 * 
-	 * @param result
+	 * @param handleResult
 	 */
 	private CpuHandleResult saveCpuEnvironment(CpuHandleResult handleResult) {
 		// String screenshotsPath =
@@ -599,7 +573,7 @@ public class HandleDataManager {
 	/**
 	 * memory测试保存结果
 	 * 
-	 * @param result
+	 * @param memoryResult
 	 * @return
 	 */
 	private MemoryHandleResult saveMemoryEnvironment(MemoryHandleResult memoryResult) {

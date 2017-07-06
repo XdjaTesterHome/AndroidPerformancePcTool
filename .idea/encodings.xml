@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="Encoding">
+    <file url="file://$PROJECT_DIR$/src/com/xdja/adb" charset="GBK" />
+    <file url="file://$PROJECT_DIR$/src/com/xdja/collectdata" charset="GBK" />
+    <file url="file://$PROJECT_DIR$/src/com/xdja/collectdata/entity/BaseTestInfo.java" charset="GBK" />
+    <file url="file://$PROJECT_DIR$/src/com/xdja/collectdata/entity/BatteryData.java" charset="GBK" />
+    <file url="file://$PROJECT_DIR$/src/com/xdja/collectdata/handleData/entity/CpuHandleResult.java" charset="GBK" />
+    <file url="file://$PROJECT_DIR$/src/com/xdja/collectdata/handleData/entity/FlowHandleResult.java" charset="GBK" />
+    <file url="file://$PROJECT_DIR$/src/com/xdja/collectdata/handleData/entity/FpsHandleResult.java" charset="GBK" />
+    <file url="file://$PROJECT_DIR$/src/com/xdja/collectdata/handleData/entity/HandleDataResultBase.java" charset="GBK" />
+    <file url="file://$PROJECT_DIR$/src/com/xdja/collectdata/handleData/entity/KpiHandleResult.java" charset="GBK" />
+    <file url="file://$PROJECT_DIR$/src/com/xdja/collectdata/handleData/entity/MemoryHandleResult.java" charset="GBK" />
+    <file url="file://$PROJECT_DIR$/src/com/xdja/collectdata/thread/DumpMemoryThread.java" charset="GBK" />
+    <file url="file://$PROJECT_DIR$/src/com/xdja/collectdata/thread/SaveLogThread.java" charset="GBK" />
+    <file url="file://$PROJECT_DIR$/src/com/xdja/collectdata/thread/TraceMethodThread.java" charset="GBK" />
+    <file url="file://$PROJECT_DIR$/src/com/xdja/constant" charset="GBK" />
+    <file url="file://$PROJECT_DIR$/src/com/xdja/database" charset="GBK" />
+    <file url="file://$PROJECT_DIR$/src/com/xdja/exception" charset="GBK" />
+    <file url="file://$PROJECT_DIR$/src/com/xdja/exception/SettingException.java" charset="GBK" />
+    <file url="file://$PROJECT_DIR$/src/com/xdja/log" charset="GBK" />
+    <file url="file://$PROJECT_DIR$/src/com/xdja/util" charset="GBK" />
+    <file url="file://$PROJECT_DIR$/src/com/xdja/view" charset="GBK" />
+    <file url="file://$PROJECT_DIR$/src/com/xdja/view/chart/BaseChartView.java" charset="GBK" />
+    <file url="file://$PROJECT_DIR$/src/com/xdja/view/custom/MyJSlider.java" charset="GBK" />
+    <file url="file://$PROJECT_DIR$/src/com/xdja/view/main/LaunchView.java" charset="GBK" />
+    <file url="PROJECT" charset="UTF-8" />
+  </component>
+</project>

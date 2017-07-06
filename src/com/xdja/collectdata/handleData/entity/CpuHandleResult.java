@@ -28,4 +28,9 @@ public class CpuHandleResult extends HandleDataResultBase {
 		String[] dataArray = new String[]{activityName, testValue, logPath, methodTracePath, resulutStr};
 		return dataArray;
 	}
+
+	@Override
+	public boolean equals(Object obj) {
+		return super.equals(obj);
+	}
 }

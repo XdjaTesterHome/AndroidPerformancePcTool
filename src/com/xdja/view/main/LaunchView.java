@@ -237,7 +237,7 @@ public class LaunchView extends JFrame implements IDeviceChangeListener {
 				// TODO Auto-generated method stub
 				String cmd = e.getActionCommand();
 				switch (cmd) {
-					case "¿ªÊ¼¾²Ä¬²âÊÔ":
+					case "¾²Ä¬²âÊÔ":
 						Thread startThread = new Thread(new Runnable() {
 
 							@Override

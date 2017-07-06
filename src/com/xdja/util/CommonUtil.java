@@ -29,6 +29,18 @@ public class CommonUtil {
 	}
 
 	/**
+	 *  两数相除，保留两位小数，转成%形式
+	 * @param a
+	 * @param b
+	 * @return
+	 */
+	public static float twoIntDivision(int a, int b){
+		DecimalFormat df = new DecimalFormat("0.00");
+		return Float.valueOf(df.format((float)a/b * 100));
+	}
+
+
+	/**
 	 * 将字符串中的多个空格，替换成一个空格
 	 * 
 	 * @param contents
@@ -59,8 +71,8 @@ public class CommonUtil {
 	/**
 	 *  将指定的数据写入到本地
 	 * @param data
-	 * @param path
-	 * @param fileName
+	 * @param filePath
+	 *
 	 */
 	public static void writeDataToLocal(byte[] data, String filePath){
 		if (data == null) {
@@ -112,4 +124,17 @@ public class CommonUtil {
         }
 	}
 
+	public static void main(String[] args){
+		System.out.println(twoIntDivision(8, 2230));
+
+		// TODO 自动生成的方法存根
+		int a=9;
+		int b=7;
+		DecimalFormat df=new DecimalFormat("0.00");
+
+		System.out.println(df.format((float)a/b));
+		System.out.println(df.format(a/(float)b));
+		System.out.println(df.format((float)a/(float)b));
+		System.out.println(df.format((float)(a/b)));
+	}
 }

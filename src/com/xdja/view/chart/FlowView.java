@@ -114,7 +114,7 @@ public class FlowView extends BaseChartView {
 	 */
 	public void handleFlowData(float flowData) {
 
-		FlowHandleResult flowHandle = HandleDataManager.getInstance().handleFlowData(flowData);
+		FlowHandleResult flowHandle = HandleDataManager.getInstance().handleFlowData(flowData, 0);
 		if (flowHandle == null) {
 			return;
 		}
@@ -129,10 +129,10 @@ public class FlowView extends BaseChartView {
 	/**
 	 * 处理静默状态流量数据
 	 * 
-	 * @param flowData
+	 * @param flowTotal
 	 */
 	public void handleSlientData(float flowTotal) {
-		FlowHandleResult flowHandle = HandleDataManager.getInstance().handleFlowSlientData(flowTotal);
+		FlowHandleResult flowHandle = HandleDataManager.getInstance().handleFlowData(flowTotal, 1);
 		if (flowHandle == null) {
 			return;
 		}
@@ -159,56 +159,52 @@ public class FlowView extends BaseChartView {
 	 * @param packageName
 	 */
 	public void start(String packageName) {
-		flowThread = new Thread(new Runnable() {
+		flowThread = new Thread(() -> {
+            // TODO Auto-generated method stub
+            stopFlag = false;
+            mLastFlow = -1;
+            isRunning = true;
+            // 设置在错误信息展示什么提示
+            if (slient) {
+                String slientStr = "===========开始流量静默测试=============\n\n";
+                appendErrorInfo(slientStr);
+            } else {
+                String normalStr = "===========开始流量测试=============\n\n";
+                appendErrorInfo(normalStr);
+            }
 
-			@Override
-			public void run() {
-				// TODO Auto-generated method stub
-				stopFlag = false;
-				mLastFlow = -1;
-				isRunning = true;
-				// 设置在错误信息展示什么提示
-				if (slient) {
-					String slientStr = "===========开始流量静默测试=============\n\n";
-					appendErrorInfo(slientStr);
-				} else {
-					String normalStr = "===========开始流量测试=============\n\n";
-					appendErrorInfo(normalStr);
-				}
+            while (true) {
+                if (stopFlag) {
+                    isRunning = false;
+                    break;
+                }
 
-				while (true) {
-					if (stopFlag) {
-						isRunning = false;
-						break;
-					}
+                mFlowData = CollectDataImpl.getFlowData(packageName);
 
-					mFlowData = CollectDataImpl.getFlowData(packageName);
-					
-					if (mFlowData != null) {
-						if (mLastFlow == -1) {
-							addFlowObservation(0);
-							mLastFlow = mFlowData.flowTotal;
-							continue;
-						}
-						float value = mFlowData.flowTotal - mLastFlow;
-						addFlowObservation(value);
-						mLastFlow = mFlowData.flowTotal;
-						
-						if (slient) {
-							handleSlientData(value);
-						}else {
-							handleFlowData(value);
-						}
-						try {
-							Thread.sleep(GlobalConfig.collectInterval);
-						} catch (InterruptedException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
-					}
-				}
-			}
-		});
+                if (mFlowData != null && mFlowData.flowTotal > 0) {
+                    if (mLastFlow == -1) {
+                        addFlowObservation(0);
+                        mLastFlow = mFlowData.flowTotal;
+                        continue;
+                    }
+                    float value = mFlowData.flowTotal - mLastFlow;
+                    addFlowObservation(value);
+                    mLastFlow = mFlowData.flowTotal;
+
+                    if (slient) {
+                        handleSlientData(value);
+                    }else {
+                        handleFlowData(value);
+                    }
+                    try {
+                        Thread.sleep(GlobalConfig.collectInterval);
+                    } catch (InterruptedException e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    }
+                }
+            }
+        });
 
 		flowThread.start();
 	}

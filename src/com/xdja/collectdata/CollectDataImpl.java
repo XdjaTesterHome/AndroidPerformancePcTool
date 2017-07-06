@@ -2,6 +2,7 @@ package com.xdja.collectdata;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -115,7 +116,7 @@ public class CollectDataImpl {
 	/**
 	 * 设备ID编号处理，处理为进程保活方法所需参数，可以使用的设备号
 	 * 
-	 * @param devicedo
+	 * @param selected
 	 * @return lzz
 	 */
 	public static String devicesdo(Object selected) {
@@ -312,10 +313,10 @@ public class CollectDataImpl {
 		float cpuData = 0;
 		// 防止分母为0的情况存在
 		if (startProcTotal - lastProcTotal != 0) {
-			cpuData = (float) (startProcPid - lastProcPid) / (startProcTotal - lastProcTotal) * 100;
+			cpuData = CommonUtil.twoIntDivision(startProcPid - lastProcPid, startProcTotal - lastProcTotal);
 		}
 
-		return new CpuData(startProcTotal, startProcPid, CommonUtil.getTwoDots(cpuData));
+		return new CpuData(startProcTotal, startProcPid, cpuData);
 	}
 
 	/***
@@ -547,14 +548,17 @@ public class CollectDataImpl {
 			return 0;
 		}
 
-		if (commandPidResult.successMsg != null && commandPidResult.successMsg != "") {
+		if (commandPidResult.successMsg != null && !Objects.equals(commandPidResult.successMsg, "")) {
 			String[] lines = commandPidResult.successMsg.trim().split("\n");
-			String result = CommonUtil.formatBlanksToBlank(lines[0].trim());
-			String[] results = result.split(" ");
-			if (results.length > 1) {
-				return Integer.parseInt(results[1]);
+			for (String line : lines){
+				String result = CommonUtil.formatBlanksToBlank(line.trim());
+				String[] results = result.split(" ");
+				if (results.length > 1){
+					if (packageName.equals(results[results.length - 1])){
+						return Integer.parseInt(results[1]);
+					}
+				}
 			}
-
 		}
 		return 0;
 	}
@@ -637,7 +641,7 @@ public class CollectDataImpl {
 	}
 
 	public static void main(String[] args) {
-		CollectDataImpl.getCurActivity();
+		CollectDataImpl.getPid("com.xdja.eoa");
 	}
 
 }
